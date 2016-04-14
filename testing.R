@@ -1,6 +1,4 @@
-library(devtools)
-library( data.table )
-library( msmtools )
+library( devtools )
 
 data( hosp )
 prova = augment( data = hosp, data_key = subj, n_events = adm_number,
@@ -9,21 +7,14 @@ prova = augment( data = hosp, data_key = subj, n_events = adm_number,
 
 
 
-pippo = function( DF, pattern, value )
-{
-  if( 1 == 1 )
-  {
-    print( substitute( expression( DF[ get( pattern ) == value ] ) ) )
 
-    DF[ get( pattern ) == value  ]
-  }
-}
+setwd( '~/Dropbox/PhD/MoxOff/anonimi/WeWorld/' )
 
-assign( 'pippo', pippo, envir = parent.env( environment() ) )
+load( 'msm_1_adop_100_donors.RData' )
 
-pippo( hosp, 'label_3', 'alive' )
-
-
-
-
-match1 = data[ get( pattern, envir = as.environment( data ) ) == values[ 1 ], .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
+covariates = 'mean'
+ci = 'none'
+quartz()
+survplot( msm_100, km = T, from = 1, to = 3, print.res = F,
+          covariates = covariates, ci = ci, interp = 'start',
+          return.km = T)

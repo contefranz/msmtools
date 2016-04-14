@@ -8,4 +8,7 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 LazyData: TRUE
 RoxygenNote: 5.0.1
+Depends: data.table (>= 1.9.6),
+    msm,
+    survival
 Imports: data.table

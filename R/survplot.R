@@ -1,59 +1,140 @@
-survplot = function( x, km = FALSE, from = 1, to = NULL, range = NULL, covariates, 
-                     exact.times = TRUE, grid = 100L, return.km = FALSE, add = FALSE,
-                     ci = c( "none", "normal", "bootstrap" ), 
-                     interp = c( "start", "midpoint" ), B = 100L, legend.pos = 'topright', 
-                     xlab = "Time", ylab = "Survival Probability", 
-                     lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1, 
-                     col.ci.fit = col.fit, mark.time = FALSE, col.km = "darkblue", 
-                     lty.km = 5, lwd.km = 1 ) {
-  
-  message( '------------------------------------------------------------------' ) 
-  message( 'survplot requires \"data.table\", \"msm\", and \"survival\" to be loaded' )  
-  message( '------------------------------------------------------------------' ) 
-  
-  time.start = proc.time()
-  
-  if ( !inherits( x, "msm" ) ) 
+#' Plot empirical and fitted survival curve from a \code{msm} model.
+#'
+#' Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
+#' \code{\link[msm]{msm}} model. Fast returning of associated Kaplan-Meier and fitted survival
+#' datasets.
+#'
+#' @param x A \code{msm} object.
+#' @param from State from which to compute the estimated survival. Default to state 1.
+#' @param to The absorbing state to which compute the estimated survival. Default to the highest
+#' state found by \code{\link[msm]{absorbing.msm}}.
+#' @param range A numeric vector of two elements which gives the time range of the plot.
+#' @param covariates Covariate values for which to evaluate the expected probabilities.
+#' This can either be: the string \code{"mean"}, denoting the means of the covariates in the data
+#' (this is the default), the number 0, indicating that all the covariates should be set to zero,
+#' or a list of values, with optional names. For example:\cr
+#' \code{list (75, 1)}\cr
+#' where the order of the list follows the order of the covariates originally given in the
+#' model formula, or a named list:\cr
+#' \code{list (age = 75, gender = "M")}.
+#' @param exacttimes If \code{TRUE} (default) then transition times are known and exact. This
+#' is inherited from \code{msm} and should be set the same way.
+#' @param times An optional numeric vector giving the times at which to compute the fitted survival.
+#' @param grid An integer which roughly tells at how many points to compute the fitted survival.
+#' If \code{times} is passed, \code{grid} is ignored. It has a default of 100 points.
+#' @param km If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.
+#' @param return.km If \code{TRUE}, then a \code{data.table} named "survival_data" is returned to
+#' the global environment. Default is \code{FALSE}. "survival_data" contains up to 4 columns:\cr
+#' subject: the ordered subject ID as passed in the \code{msm} function.\cr
+#' mintime: the time at which to compute the fitted survival.\cr
+#' anystate: state of transition to compute the Kaplan-Meier.\cr
+#' mintime_exact: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
+#' @param return.p If \code{TRUE}, then a \code{data.table} named "probabilities" is returned to the
+#' global environment. Default is \code{FALSE}. "probabilities" contains 2 columns:\cr
+#' time: time at which to compute the fitted survival.\cr
+#' probability: the corresponding value of the fitted survival.\cr
+#' @param add If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.
+#' @param print.res If \code{TRUE}, then all printing information are suppressed.
+#' Default is \code{FALSE}.
+#' @param plot.do If \code{FALSE}, then no plot is shown at all. Default is \code{TRUE}.
+#' @param ci If \code{"none"} (the default), then no confidence intervals are plotted.
+#' If \code{"normal"} or \code{"bootstrap"}, confidence intervals are plotted based on the
+#' respective method in \code{\link[msm]{pmatrix.msm}}. This is very computationally-intensive,
+#' since intervals must be computed at a series of times.
+#' @param interp If \code{"start"} (the default), then the entry time into the absorbing state
+#' is assumed to be the time it is first observed in the data. If \code{"midpoint"}, then the
+#' entry time into the absorbing state is assumed to be halfway between the time it is first
+#' observed and the previous observation time. This is generally more reasonable for "progressive"
+#' models with observations at arbitrary times.
+#' @param B Number of bootstrap or normal replicates for the confidence interval. The default is
+#' 100 rather than the usual 1000, since these plots are for rough diagnostic purposes.
+#' @param legend.pos Where to position the legend. Default is \code{"topright"}, but \emph{x} and
+#' \emph{y} coordinate can be passed.
+#' @param xlab \emph{x} axis label.
+#' @param ylab \emph{y} axis label.
+#' @param lty.fit Line type for the fitted curve. See \code{\link[graphics]{par}}.
+#' @param lwd.fit Line width for the fitted curve. See \code{\link[graphics]{par}}.
+#' @param col.fit Line color for the fitted curve. See \code{\link[graphics]{par}}.
+#' @param lty.ci.fit Line type for the fitted curve confidence limits.
+#' See \code{\link[graphics]{par}}.
+#' @param lwd.ci.fit Line width for the fitted curve confidence limits.
+#' See \code{\link[graphics]{par}}.
+#' @param col.ci.fit Line color for the fitted curve confidence limits.
+#' See \code{\link[graphics]{par}}.
+#' @param mark.time Mark the empirical survival curve at each censoring point.
+#' See \code{\link[survival]{lines.survfit}}.
+#' @param lty.km Line type for the Kaplan-Meier passed to \code{\link[survival]{lines.survfit}}.
+#' See \code{\link[graphics]{par}}.
+#' @param lwd.km Line width for the Kaplan-Meier passed to \code{\link[survival]{lines.survfit}}.
+#' See \code{\link[graphics]{par}}.
+#' @param col.km Line color for the Kaplan-Meier passed to \code{\link[survival]{lines.survfit}}.
+#' See \code{\link[graphics]{par}}.
+#' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
+#' @import data.table
+#' @importFrom msm absorbing.msm
+#' @importFrom msm pmatrix.msm
+#' @importFrom survival Surv
+#' @importFrom survival survfit
+#' @export
+survplot = function( x, from = 1, to = NULL, range = NULL, covariates,
+                     exacttimes = TRUE, times, grid = 100L,
+                     km = FALSE, return.km = FALSE, return.p = FALSE, add = FALSE,
+                     print.res = FALSE, plot.do = TRUE, ci = c( "none", "normal", "bootstrap" ),
+                     interp = c( "start", "midpoint" ), B = 100L, legend.pos = 'topright',
+                     xlab = "Time", ylab = "Survival Probability",
+                     lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
+                     col.ci.fit = col.fit, mark.time = FALSE, lty.km = 5, lwd.km = 1,
+                     col.km = "darkblue" ) {
+
+  if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
   if ( !is.numeric( from ) )
     stop( 'from must be numeric' )
-  if ( is.null( to ) ) 
+  if ( is.null( to ) )
     to = max( absorbing.msm( x ) )
   else {
-    if ( !is.numeric( to ) ) 
+    if ( !is.numeric( to ) )
       stop( "to must be numeric" )
-    if ( !( to %in% absorbing.msm( x ) ) ) 
+    if ( !( to %in% absorbing.msm( x ) ) )
       stop( "to must be an absorbing state" )
   }
-  if ( is.null( range ) ) 
+  if ( is.null( range ) )
     rg = range( model.extract( x$data$mf, "time" ) )
   else {
-    if ( !is.numeric( range ) || length( range ) != 2 ) 
+    if ( !is.numeric( range ) || length( range ) != 2 )
       stop( "range must be a numeric vector of two elements" )
     rg = range
   }
 
   interp = match.arg( interp )
   ci = match.arg( ci )
-  timediff = ( rg[ 2 ] - rg[ 1 ] ) / grid
-  if ( exact.times == TRUE ) {
-    times = seq( 1, diff( rg ), timediff )
-  } else { 
-    times = seq( rg[ 1 ], rg[ 2 ], timediff )
+  if ( exacttimes == TRUE ) {
+    if ( missing( times ) ) {
+      timediff = ( rg[ 2 ] - rg[ 1 ] ) / grid
+      times = seq( 1, diff( rg ), timediff )
+    } else {
+      times = times
+    }
+  } else {
+    if ( missing( timediff ) ) {
+      timediff = ( rg[ 2 ] - rg[ 1 ] ) / grid
+      times = seq( rg[ 1 ], rg[ 2 ], timediff )
+    } else {
+      times = times
+    }
   }
-  
+
   pr = lower = upper = numeric()
   counter = 0L
   for ( t in times ) {
-    
-    counter = counter + 1
-    if ( counter %% 10 == 0 ) {
-      cat( '---\n' )
-      cat( 't =', round( t, 0 ), '\n' )
+    if ( print.res == TRUE ) {
+      counter = counter + 1
+      if ( counter %% 10 == 0 ) {
+        cat( '---\n' )
+        cat( 't =', round( t, 0 ), '\n' )
+      }
     }
-    
     P = pmatrix.msm( x, t, t1 = times[ 1 ], covariates = covariates, ci = ci, B = B )
-    
     if ( ci != "none" ) {
       pr = c( pr, P$estimates[ from, to ] )
       lower = c( lower, P$L[ from, to ] )
@@ -61,69 +142,67 @@ survplot = function( x, km = FALSE, from = 1, to = NULL, range = NULL, covariate
     }
     else pr = c( pr, P[ from, to ] )
   }
-  if ( add == FALSE ) {
-    plot( times, 1 - pr, type = "l", xlab = xlab, ylab = ylab, ylim = c( 0, 1 ),
-          lwd = lwd.fit, lty = lty.fit, col = col.fit )
-  } else {
-    lines( times, 1 - pr, lwd = lwd.fit, lty = lty.fit, col = col.fit )
-  }
-  if ( ci != "none" ) {
-    lines( times, 1 - lower, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
-    lines( times, 1 - upper, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
-  }
-  if ( km == TRUE ) {
-    # if ( franz == FALSE ) {
-    #   dat = x$data$mf[ , c("(subject)", "(time)", "(state)" ) ]
-    #   wide = as.data.table( do.call( "rbind",
-    #                                  by( dat, dat$"(subject)",
-    #                                      function( x ) {
-    #                                        dind = which( x[ , "(state)" ] == to )
-    #                                        if ( any( x[ , "(state)" ] == to ) )
-    #                                          mintime = if ( interp == "start" )
-    #                                            min( x[ dind, "(time)" ] )
-    #                                        else 0.5 * ( x[ dind, "time" ] + x[ dind - 1, "time" ] )
-    #                                        else mintime = max( x[ , "(time)" ] )
-    #                                        c( anystate = as.numeric( any( x[ , "(state)" ] == to ) ),
-    #                                           mintime = mintime )
-    #                                      } ) ) )
-    # }
-    dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
-    setnames( dat, c( 'subject', 'time', 'state' ) )
-    absind = which( dat$state == to ) 
-    if ( any( dat[ state == to ] ) ) {
-      if ( interp == 'start' ) {
-        mintime = dat[ absind, min( time ), by = subject ]
-      } else if ( interp == 'midpoint' ) { 
-        mintime = 0.5 * ( dat[ absind, .( time ), by = subject ] + 
-                            dat[ absind - 1, .( time ), by = subject ] ) 
-      } else { 
-        mintime = dat[ , max( time ), by = subject ]
-      }
-      wide = data.table( mintime = mintime, 
-                         anystate = as.numeric( any( dat[ state == to, .( state ) ] ) ) 
-      )
-      setnames( wide, c( 'subject', 'mintime', 'anystate' ) )
-    }
+  if ( plot.do == TRUE ) {
     if ( add == FALSE ) {
-      if ( exact.times == FALSE ) {
-        lines( survfit( Surv( wide$mintime, wide$anystate ) ~ 1 ), mark.time = mark.time, 
-               col = col.km, lty = lty.km, lwd = lwd.km )
-      } else {
-        wide[ , mintime_exact := mintime - min( mintime ) ]
-        lines( survfit( Surv( wide$mintime_exact, wide$anystate ) ~ 1 ), mark.time = mark.time, 
-               col = col.km, lty = lty.km, lwd = lwd.km )
+      plot( times, 1 - pr, type = "l", xlab = xlab, ylab = ylab, ylim = c( 0, 1 ),
+            lwd = lwd.fit, lty = lty.fit, col = col.fit )
+    } else {
+      lines( times, 1 - pr, lwd = lwd.fit, lty = lty.fit, col = col.fit )
+    }
+    if ( ci != "none" ) {
+      lines( times, 1 - lower, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
+      lines( times, 1 - upper, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
+    }
+
+    if ( km == TRUE ) {
+      dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
+      setnames( dat, c( 'subject', 'time', 'state' ) )
+      absind = which( dat$state == to )
+      if ( any( dat[ state == to ] ) ) {
+        if ( interp == 'start' ) {
+          mintime = dat[ absind, min( time ), by = subject ]
+        } else if ( interp == 'midpoint' ) {
+          mintime = 0.5 * ( dat[ absind, .( time ), by = subject ] +
+                              dat[ absind - 1, .( time ), by = subject ] )
+        } else {
+          mintime = dat[ , max( time ), by = subject ]
+        }
+        wide = data.table( mintime = mintime,
+                           anystate = as.numeric( any( dat[ state == to, .( state ) ] ) )
+        )
+        setnames( wide, c( 'subject', 'mintime', 'anystate' ) )
       }
-      legend( legend.pos, legend = c( "Fitted (solid)", 'Kaplan-Meier (dashed)' ), cex = 0.8 )
+      if ( add == FALSE ) {
+        if ( exacttimes == FALSE ) {
+          lines( survfit( Surv( wide$mintime, wide$anystate ) ~ 1 ), mark.time = mark.time,
+                 col = col.km, lty = lty.km, lwd = lwd.km )
+        } else {
+          wide[ , mintime_exact := mintime - min( mintime ) ]
+          setcolorder( wide, c( 'subject', 'mintime', 'mintime_exact', 'anystate' ) )
+          setkey( wide, subject )
+          lines( survfit( Surv( wide$mintime_exact, wide$anystate ) ~ 1 ), mark.time = mark.time,
+                 col = col.km, lty = lty.km, lwd = lwd.km )
+        }
+        legend( legend.pos, legend = c( "Fitted (solid)", 'Kaplan-Meier (dashed)' ), cex = 0.8 )
+      }
     }
   }
   if ( return.km == TRUE ) {
     assign( paste( 'survival_data' ), wide, envir = .GlobalEnv )
   }
-  time.end = proc.time()
-  time.total = time.end - time.start
-  cat( '---\n' )
-  cat( 'Function took:', time.total[ 3 ], '\n' )
-  cat( '---\n' )
+  if ( return.p == TRUE ) {
+    assign( paste( 'probabilities' ), data.table( time = times,
+                                                  probability = round( 1 - pr, 4 ) ),
+            envir = .GlobalEnv )
+  }
+
+  if ( print.res == TRUE ) {
+    time.end = proc.time()
+    time.total = time.end - time.start
+    cat( '---\n' )
+    cat( 'Function took:', time.total[ 3 ], '\n' )
+    cat( '---\n' )
+  }
 }
 
 
