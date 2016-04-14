@@ -1,4 +1,4 @@
-#' Plot empirical and fitted survival curve from a \code{msm} model.
+#' Plot empirical and fitted survival curve from a multi-state model.
 #'
 #' Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
 #' \code{\link[msm]{msm}} model. Fast returning of associated Kaplan-Meier and fitted survival
@@ -25,14 +25,14 @@
 #' @param km If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.
 #' @param return.km If \code{TRUE}, then a \code{data.table} named "survival_data" is returned to
 #' the global environment. Default is \code{FALSE}. "survival_data" contains up to 4 columns:\cr
-#' subject: the ordered subject ID as passed in the \code{msm} function.\cr
-#' mintime: the time at which to compute the fitted survival.\cr
-#' anystate: state of transition to compute the Kaplan-Meier.\cr
-#' mintime_exact: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
+#' \emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
+#' \emph{mintime}: the time at which to compute the fitted survival.\cr
+#' \emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
+#' \emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
 #' @param return.p If \code{TRUE}, then a \code{data.table} named "probabilities" is returned to the
 #' global environment. Default is \code{FALSE}. "probabilities" contains 2 columns:\cr
-#' time: time at which to compute the fitted survival.\cr
-#' probability: the corresponding value of the fitted survival.\cr
+#' \emph{time}: time at which to compute the fitted survival.\cr
+#' \emph{probability}: the corresponding value of the fitted survival.\cr
 #' @param add If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.
 #' @param print.res If \code{TRUE}, then all printing information are suppressed.
 #' Default is \code{FALSE}.
@@ -49,7 +49,7 @@
 #' @param B Number of bootstrap or normal replicates for the confidence interval. The default is
 #' 100 rather than the usual 1000, since these plots are for rough diagnostic purposes.
 #' @param legend.pos Where to position the legend. Default is \code{"topright"}, but \emph{x} and
-#' \emph{y} coordinate can be passed.
+#' \emph{y} coordinate can be passed. If \code{NULL}, then legend is not shown.
 #' @param xlab \emph{x} axis label.
 #' @param ylab \emph{y} axis label.
 #' @param lty.fit Line type for the fitted curve. See \code{\link[graphics]{par}}.
@@ -69,6 +69,16 @@
 #' See \code{\link[graphics]{par}}.
 #' @param col.km Line color for the Kaplan-Meier passed to \code{\link[survival]{lines.survfit}}.
 #' See \code{\link[graphics]{par}}.
+#' @param plot.width Width of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
+#' @param plot.height Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
+#' @details The function is a wrapper of \code{\link[msm]{plot.survfit.msm}} and does more things.
+#' \code{survplot} is capable of deal properly the plotting of a fitted survival when in
+#' an exact times framework by just resetting the time scale and looking at the follow-up time.
+#' It can fastly compute, build and return to the user the dataset on which the Kaplan-Meier has
+#' been computed. Similarly, it can return to the user the dataset on which the fitted survival has
+#' been computed, both with user defined times (through \code{times}) and self set times (through
+#' \code{grid}).
+#' @seealso \code{\link[msm]{plot.survfit.msm}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
 #' @importFrom msm absorbing.msm
@@ -76,7 +86,7 @@
 #' @importFrom survival Surv
 #' @importFrom survival survfit
 #' @export
-survplot = function( x, from = 1, to = NULL, range = NULL, covariates,
+survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      exacttimes = TRUE, times, grid = 100L,
                      km = FALSE, return.km = FALSE, return.p = FALSE, add = FALSE,
                      print.res = FALSE, plot.do = TRUE, ci = c( "none", "normal", "bootstrap" ),
@@ -84,7 +94,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates,
                      xlab = "Time", ylab = "Survival Probability",
                      lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
                      col.ci.fit = col.fit, mark.time = FALSE, lty.km = 5, lwd.km = 1,
-                     col.km = "darkblue" ) {
+                     col.km = "darkblue", plot.width = 7, plot.height = 7 ) {
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
@@ -144,6 +154,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates,
   }
   if ( plot.do == TRUE ) {
     if ( add == FALSE ) {
+      dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
       plot( times, 1 - pr, type = "l", xlab = xlab, ylab = ylab, ylim = c( 0, 1 ),
             lwd = lwd.fit, lty = lty.fit, col = col.fit )
     } else {
@@ -183,7 +194,9 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates,
           lines( survfit( Surv( wide$mintime_exact, wide$anystate ) ~ 1 ), mark.time = mark.time,
                  col = col.km, lty = lty.km, lwd = lwd.km )
         }
-        legend( legend.pos, legend = c( "Fitted (solid)", 'Kaplan-Meier (dashed)' ), cex = 0.8 )
+        if ( !is.null( legend.pos ) ) {
+          legend( legend.pos, legend = c( "Fitted (solid)", 'Kaplan-Meier (dashed)' ), cex = 0.8 )
+        }
       }
     }
   }
@@ -195,7 +208,6 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates,
                                                   probability = round( 1 - pr, 4 ) ),
             envir = .GlobalEnv )
   }
-
   if ( print.res == TRUE ) {
     time.end = proc.time()
     time.total = time.end - time.start

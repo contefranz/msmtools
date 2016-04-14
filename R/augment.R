@@ -38,7 +38,6 @@
 # @examples
 # augment( data = hosp, data_key = subj, pattern = label_3,
 # t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
-#' @import data.table
 #' @export
 augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT', 'DEAD' ),
                     t_start, t_end, t_cens, t_death, t_augmented = 'augmented',

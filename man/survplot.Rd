@@ -2,16 +2,17 @@
 % Please edit documentation in R/survplot.R
 \name{survplot}
 \alias{survplot}
-\title{Plot empirical and fitted survival curve from a \code{msm} model.}
+\title{Plot empirical and fitted survival curve from a multi-state model.}
 \usage{
-survplot(x, from = 1, to = NULL, range = NULL, covariates,
+survplot(x, from = 1, to = NULL, range = NULL, covariates = "mean",
   exacttimes = TRUE, times, grid = 100L, km = FALSE, return.km = FALSE,
   return.p = FALSE, add = FALSE, print.res = FALSE, plot.do = TRUE,
   ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
   B = 100L, legend.pos = "topright", xlab = "Time",
   ylab = "Survival Probability", lty.fit = 1, lwd.fit = 1,
   col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1, col.ci.fit = col.fit,
-  mark.time = FALSE, lty.km = 5, lwd.km = 1, col.km = "darkblue")
+  mark.time = FALSE, lty.km = 5, lwd.km = 1, col.km = "darkblue",
+  plot.width = 7, plot.height = 7)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -44,15 +45,15 @@ If \code{times} is passed, \code{grid} is ignored. It has a default of 100 point
 
 \item{return.km}{If \code{TRUE}, then a \code{data.table} named "survival_data" is returned to
 the global environment. Default is \code{FALSE}. "survival_data" contains up to 4 columns:\cr
-subject: the ordered subject ID as passed in the \code{msm} function.\cr
-mintime: the time at which to compute the fitted survival.\cr
-anystate: state of transition to compute the Kaplan-Meier.\cr
-mintime_exact: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr}
+\emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
+\emph{mintime}: the time at which to compute the fitted survival.\cr
+\emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
+\emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr}
 
 \item{return.p}{If \code{TRUE}, then a \code{data.table} named "probabilities" is returned to the
 global environment. Default is \code{FALSE}. "probabilities" contains 2 columns:\cr
-time: time at which to compute the fitted survival.\cr
-probability: the corresponding value of the fitted survival.\cr}
+\emph{time}: time at which to compute the fitted survival.\cr
+\emph{probability}: the corresponding value of the fitted survival.\cr}
 
 \item{add}{If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.}
 
@@ -76,7 +77,7 @@ models with observations at arbitrary times.}
 100 rather than the usual 1000, since these plots are for rough diagnostic purposes.}
 
 \item{legend.pos}{Where to position the legend. Default is \code{"topright"}, but \emph{x} and
-\emph{y} coordinate can be passed.}
+\emph{y} coordinate can be passed. If \code{NULL}, then legend is not shown.}
 
 \item{xlab}{\emph{x} axis label.}
 
@@ -108,13 +109,29 @@ See \code{\link[graphics]{par}}.}
 
 \item{col.km}{Line color for the Kaplan-Meier passed to \code{\link[survival]{lines.survfit}}.
 See \code{\link[graphics]{par}}.}
+
+\item{plot.width}{Width of new graphical device. Default is 7. See \code{\link[graphics]{par}}.}
+
+\item{plot.height}{Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.}
 }
 \description{
 Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
 \code{\link[msm]{msm}} model. Fast returning of associated Kaplan-Meier and fitted survival
 datasets.
 }
+\details{
+The function is a wrapper of \code{\link[msm]{plot.survfit.msm}} and does more things.
+\code{survplot} is capable of deal properly the plotting of a fitted survival when in
+an exact times framework by just resetting the time scale and looking at the follow-up time.
+It can fastly compute, build and return to the user the dataset on which the Kaplan-Meier has
+been computed. Similarly, it can return to the user the dataset on which the fitted survival has
+been computed, both with user defined times (through \code{times}) and self set times (through
+\code{grid}).
+}
 \author{
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.
+}
+\seealso{
+\code{\link[msm]{plot.survfit.msm}}
 }
 
