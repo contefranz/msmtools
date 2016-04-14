@@ -20,19 +20,15 @@
 #' @param exacttimes If \code{TRUE} (default) then transition times are known and exact. This
 #' is inherited from \code{msm} and should be set the same way.
 #' @param times An optional numeric vector giving the times at which to compute the fitted survival.
-#' @param grid An integer which roughly tells at how many points to compute the fitted survival.
+#' @param grid An integer which tells at how many points to compute the fitted survival.
 #' If \code{times} is passed, \code{grid} is ignored. It has a default of 100 points.
 #' @param km If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.
-#' @param return.km If \code{TRUE}, then a \code{data.table} named "survival_data" is returned to
-#' the global environment. Default is \code{FALSE}. "survival_data" contains up to 4 columns:\cr
-#' \emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
-#' \emph{mintime}: the time at which to compute the fitted survival.\cr
-#' \emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
-#' \emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
-#' @param return.p If \code{TRUE}, then a \code{data.table} named "probabilities" is returned to the
-#' global environment. Default is \code{FALSE}. "probabilities" contains 2 columns:\cr
-#' \emph{time}: time at which to compute the fitted survival.\cr
-#' \emph{probability}: the corresponding value of the fitted survival.\cr
+#' @param return.km If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+#' \code{survplot} must be assigned to an object in order to get the data in the environment
+#' (see 'Value').
+#' @param return.p If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+#' \code{survplot} must be assigned to an object in order to get the data in the environment
+#' (see 'Value').
 #' @param add If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.
 #' @param print.res If \code{TRUE}, then all printing information are suppressed.
 #' Default is \code{FALSE}.
@@ -78,9 +74,28 @@
 #' been computed. Similarly, it can return to the user the dataset on which the fitted survival has
 #' been computed, both with user defined times (through \code{times}) and self set times (through
 #' \code{grid}).
-#' @seealso \code{\link[msm]{plot.survfit.msm}}
+#' @return If both \code{return.km} and \code{return.p} are set to \code{TRUE}, then \code{survplot}
+#' returns a named list with \code{$km} and \code{$probs} as \code{data.table}. To save them in the
+#' current environment assign \code{survplot} to an object (see 'Examples')\cr
+#' ------\cr
+#' \code{$km} contains up to 4 columns:\cr
+#' \emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
+#' \emph{mintime}: the time at which to compute the fitted survival.\cr
+#' \emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
+#' \emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
+#' ------\cr
+#' \code{$probs} contains 2 columns:\cr
+#' \emph{time}: time at which to compute the fitted survival.\cr
+#' \emph{probs}: the corresponding value of the fitted survival.\cr
+#' @examples # Assigning survplot to an object:
+#' \dontrun{
+#' results = survplot( msm_model, from = 1, to = 3, return.km = TRUE, return.p = TRUE )
+#' kaplan_meier_data = results[ 1 ]
+#' fitted_data = results[ 2 ]
+#' }
 #' @references Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
 #' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195.
+#' @seealso \code{\link[msm]{plot.survfit.msm}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
 #' @importFrom msm absorbing.msm
@@ -97,6 +112,8 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
                      col.ci.fit = col.fit, mark.time = FALSE, lty.km = 5, lwd.km = 1,
                      col.km = "darkblue", plot.width = 7, plot.height = 7 ) {
+
+  time.start = proc.time()
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
@@ -202,20 +219,19 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       }
     }
   }
-  if ( return.km == TRUE ) {
-    assign( paste( 'survival_data' ), wide, envir = .GlobalEnv )
-  }
-  if ( return.p == TRUE ) {
-    assign( paste( 'probabilities' ), data.table( time = times,
-                                                  probability = round( 1 - pr, 4 ) ),
-            envir = .GlobalEnv )
-  }
   if ( print.res == TRUE ) {
     time.end = proc.time()
     time.total = time.end - time.start
     cat( '---\n' )
     cat( 'Function took:', time.total[ 3 ], '\n' )
     cat( '---\n' )
+  }
+  if ( return.km == TRUE && return.p == TRUE ) {
+    return( list( km = wide, fitted = data.table( time = times, probs = round( 1 - pr, 4 ) ) ) )
+  } else if ( return.km == TRUE && return.p == FALSE ) {
+    return( wide )
+  } else if ( return.km == FALSE && return.p == TRUE ) {
+    return( data.table( time = times, probs = round( 1 - pr, 4 ) ) )
   }
 }
 

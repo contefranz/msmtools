@@ -31,7 +31,7 @@
 #' represents a specific transition.
 #' @examples
 #' data( hosp )
-#' hosp_augmented = augment( data = hosp, data_key = subj, pattern = label_3,
+#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
 #' t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
 #' @references Jackson, C.H. (2011). Multi-State Models for Panel Data:
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.

@@ -51,7 +51,7 @@ using the \code{\link[msm]{msm}} package.
 }
 \examples{
 data( hosp )
-hosp_augmented = augment( data = hosp, data_key = subj, pattern = label_3,
+hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
 t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
 }
 \author{

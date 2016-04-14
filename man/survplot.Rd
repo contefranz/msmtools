@@ -38,22 +38,18 @@ is inherited from \code{msm} and should be set the same way.}
 
 \item{times}{An optional numeric vector giving the times at which to compute the fitted survival.}
 
-\item{grid}{An integer which roughly tells at how many points to compute the fitted survival.
+\item{grid}{An integer which tells at how many points to compute the fitted survival.
 If \code{times} is passed, \code{grid} is ignored. It has a default of 100 points.}
 
 \item{km}{If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.}
 
-\item{return.km}{If \code{TRUE}, then a \code{data.table} named "survival_data" is returned to
-the global environment. Default is \code{FALSE}. "survival_data" contains up to 4 columns:\cr
-\emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
-\emph{mintime}: the time at which to compute the fitted survival.\cr
-\emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
-\emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr}
+\item{return.km}{If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+\code{survplot} must be assigned to an object in order to get the data in the environment
+(see 'Value').}
 
-\item{return.p}{If \code{TRUE}, then a \code{data.table} named "probabilities" is returned to the
-global environment. Default is \code{FALSE}. "probabilities" contains 2 columns:\cr
-\emph{time}: time at which to compute the fitted survival.\cr
-\emph{probability}: the corresponding value of the fitted survival.\cr}
+\item{return.p}{If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+\code{survplot} must be assigned to an object in order to get the data in the environment
+(see 'Value').}
 
 \item{add}{If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.}
 
@@ -114,6 +110,21 @@ See \code{\link[graphics]{par}}.}
 
 \item{plot.height}{Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.}
 }
+\value{
+If both \code{return.km} and \code{return.p} are set to \code{TRUE}, then \code{survplot}
+returns a named list with \code{$km} and \code{$probs} as \code{data.table}. To save them in the
+current environment assign \code{survplot} to an object (see 'Examples')\cr
+------\cr
+\code{$km} contains up to 4 columns:\cr
+\emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
+\emph{mintime}: the time at which to compute the fitted survival.\cr
+\emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
+\emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
+------\cr
+\code{$probs} contains 2 columns:\cr
+\emph{time}: time at which to compute the fitted survival.\cr
+\emph{probs}: the corresponding value of the fitted survival.\cr
+}
 \description{
 Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
 \code{\link[msm]{msm}} model. Fast returning of associated Kaplan-Meier and fitted survival
@@ -127,6 +138,14 @@ It can fastly compute, build and return to the user the dataset on which the Kap
 been computed. Similarly, it can return to the user the dataset on which the fitted survival has
 been computed, both with user defined times (through \code{times}) and self set times (through
 \code{grid}).
+}
+\examples{
+# Assigning survplot to an object:
+\dontrun{
+results = survplot( msm_model, from = 1, to = 3, return.km = TRUE, return.p = TRUE )
+kaplan_meier_data = results[ 1 ]
+fitted_data = results[ 2 ]
+}
 }
 \author{
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.
