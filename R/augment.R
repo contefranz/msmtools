@@ -1,8 +1,8 @@
 #' Reshape a longitudinal dataset to data for multi-state analyses.
 #'
-#' Converts standard longitudinal data where each observation contains
-#' the exact starting and ending time of the process to data suitable for multi-state analyses using the
-#' \code{\link[msm]{msm}} package.
+#' A fast method which converts standard longitudinal data, where each observation contains
+#' the exact starting and ending time of the process, to data suitable for multi-state analyses
+#' using the \code{\link[msm]{msm}} package.
 #'
 #' @param data A data.table object where each row represents an observation.
 #' @param data_key A keying variable which \code{augment} uses to define a key for \code{data}.
@@ -26,18 +26,17 @@
 #' \code{t_start}.
 #' @param status_more A variable which marks further transitions beside the default given by
 #' \code{state}. If missing, \code{augment} ignores it.
-#'
+
 #' @return A restructured long format dataset of class \code{"data.table"} where each row
 #' represents a specific transition.
-#' @details For example, consider the following toy sample regarding hospital admissions.
-#' \tabular{rrrrrrrrrrrr}{
-#' subj \tab adm_number \tab gender \tab age \tab rehab \tab it \tab rehab_it
-#' \tab label_2 \tab label_3 \tab dateIN \tab dateOUT \tab dateCENS \cr
-#' }
+#' @examples
+#' data( hosp )
+#' hosp_augmented = augment( data = hosp, data_key = subj, pattern = label_3,
+#' t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+#' @references Jackson, C.H. (2011). Multi-State Models for Panel Data:
+#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+#' URL \url{http://www.jstatsoft.org/v38/i08/}.
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
-# @examples
-# augment( data = hosp, data_key = subj, pattern = label_3,
-# t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
 #' @export
 augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT', 'DEAD' ),
                     t_start, t_end, t_cens, t_death, t_augmented = 'augmented',
@@ -337,6 +336,6 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   cat( '---------------------------\n' )
   cat( 'Function took:', time[ 3 ], 'sec. \n', sep = ' ' )
   cat( '---------------------------\n' )
-  return( invisible( final ) )
+  return( final )
 }
 

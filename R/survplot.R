@@ -79,6 +79,8 @@
 #' been computed, both with user defined times (through \code{times}) and self set times (through
 #' \code{grid}).
 #' @seealso \code{\link[msm]{plot.survfit.msm}}
+#' @references Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
+#' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195.
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
 #' @importFrom msm absorbing.msm

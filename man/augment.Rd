@@ -45,18 +45,21 @@ A restructured long format dataset of class \code{"data.table"} where each row
 represents a specific transition.
 }
 \description{
-Converts standard longitudinal data where each observation contains
-the exact starting and ending time of the process to data suitable for multi-state analyses using the
-\code{\link[msm]{msm}} package.
+A fast method which converts standard longitudinal data, where each observation contains
+the exact starting and ending time of the process, to data suitable for multi-state analyses
+using the \code{\link[msm]{msm}} package.
 }
-\details{
-For example, consider the following toy sample regarding hospital admissions.
-\tabular{rrrrrrrrrrrr}{
-subj \tab adm_number \tab gender \tab age \tab rehab \tab it \tab rehab_it
-\tab label_2 \tab label_3 \tab dateIN \tab dateOUT \tab dateCENS \cr
-}
+\examples{
+data( hosp )
+hosp_augmented = augment( data = hosp, data_key = subj, pattern = label_3,
+t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
 }
 \author{
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.
+}
+\references{
+Jackson, C.H. (2011). Multi-State Models for Panel Data:
+The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+URL \url{http://www.jstatsoft.org/v38/i08/}.
 }
 
