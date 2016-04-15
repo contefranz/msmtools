@@ -88,8 +88,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     cols = as.character( substitute( list( data_key, n_events ) )[ -1L ] )
     if ( !length( cols ) )
       cols = colnames( data )
-    if ( !inherits( eval( substitute( data$n_events ) ), "integer" ) ||
-         !inherits( eval( substitute( data$n_events ) ), "numeric" )) {
+    if ( !inherits( eval( substitute( data$n_events ) ), "integer" ) ) {
       stop( 'n_events must be an integer or a numeric' )
     }
     setkeyv( data, cols )
