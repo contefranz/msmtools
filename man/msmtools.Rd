@@ -7,7 +7,7 @@
 \title{msmtools: a companion to msm package}
 \description{
 Make it easier to build longitudinal datasets feasible for the analyses in the
-context of multi-state models as computed by \code{msm} package.
+context of multi-state models as computed by \emph{msm} package.
 It also provides two graphical goodness-of-fit tools on estimated survival and prevalences
 to carry out model assessment under Markov assumption.
 }
