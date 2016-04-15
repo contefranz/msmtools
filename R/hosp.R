@@ -1,11 +1,13 @@
-#' Hospital admissions
+#' Synthetic Hospital Admissions
 #'
-#' A dataset containing the hospital admissions process for 10 patients.
+#' A dataset containing synthetic hospital admissions in the classic longitudinal format.
+#' The dataset counts imaginary 10 patients who undergo different (re)admission into a hospital.
+#' Some demographic and clinical variables are also included.
 #'
 #' @format A \code{data.table} with 53 rows and 12 variables:
 #' \describe{
 #'   \item{subj}{Subject ID (integer)}
-#'   \item{adm_number}{Hospital admission counter (integer)}
+#'   \item{adm_number}{Hospital admissions counter (integer)}
 #'   \item{gender}{Gender of patient (factor with 2 levels: "F" = females, "M" = males)}
 #'   \item{age}{Age of patient in years at the given observation (integer)}
 #'   \item{rehab}{Rehabilitation flag: if the admission has been in rehabilitation,

@@ -28,9 +28,9 @@
 #' The variable is added to \code{data} before
 #' \code{t_start}.
 #' @param more_status A variable which marks further transitions beside the default given by
-#' \code{state}. \code{more_status} can be an integer (numeric), a factor, or a character. Because
-#' \code{augment} will combine the standard information in \code{status} with what provided in
-#' \code{more_status}, it is recommended to pass a character or a factor (see 'Examples').
+#' \code{state}. \code{more_status} can be a factor or a character. In particular, if the
+#' corresponding observation is a standard admission (i.e. no other information available), then
+#' \code{more_status} must be set to 'df' which stands for 'Default' (see 'Examples' and ?hosp).
 #' If missing, \code{augment} ignores it.
 #' @return A restructured long format dataset of class \code{"data.table"} where each row
 #' represents a specific transition.
