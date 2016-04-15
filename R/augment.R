@@ -7,32 +7,46 @@
 #' @param data A data.table object where each row represents an observation.
 #' @param data_key A keying variable which \code{augment} uses to define a key for \code{data}.
 #' This represents the subject ID.
-#' @param n_events An integer indicating the progressive events number of a given ID. If missing,
-#' \code{augment} creates it and put it next to \code{data_key}.
+#' @param n_events An integer or a numeric variable indicating the progressive events number
+#' of a given ID. If missing, \code{augment} fastly creates a variable named \code{"n_events"}.
 #' @param pattern Either an integer, a factor or a characer with 2 or 3 unique values which
 #' provides the ID status at the end of the study. \code{pattern} has a predefined structure.
 #' When 2 values are detected, they must be in the format: 0 = "alive", 1 = "dead". When 3 values
 #' are detected, then the format must be: 0 = "alive", 1 = "dead during a transition",
 #' 2 = "dead after a transition has ended".
 #' @param state A list of 3 possible states which a subject can reach. \code{state} has a predefined
-#' structure given by 3 states: IN, OUT, DEAD.
-#' @param t_start,t_end The starting and ending time of the observation, respectively. They can be
-#' passed as date, integer, or numeric format.
+#' structure as follows: IN, OUT, DEAD.
+#' @param t_start The starting time of an observation. It can be passed as date, integer, or numeric
+#' format.
+#' @param t_end The ending time of an observation. It can be passed as date, integer, or numeric
+#' format.
 #' @param t_cens The censoring time of the study
 #' @param t_death The exact death time of a subject ID. If \code{t_death} is missing,
 #' \code{t_cens} is assumed to contain both censoring and death time.
-#' @param t_augmented The new time variable of the process. If \code{t_augmented} is missing, then
-#' the default name 'augmented' is assumed. The variable is added to \code{data} before
+#' @param t_augmented The new time variable of the process in the augmented format.
+#' If \code{t_augmented} is missing, then the default name 'augmented' is assumed.
+#' The variable is added to \code{data} before
 #' \code{t_start}.
-#' @param status_more A variable which marks further transitions beside the default given by
-#' \code{state}. If missing, \code{augment} ignores it.
-
+#' @param more_status A variable which marks further transitions beside the default given by
+#' \code{state}. \code{more_status} can be an integer (numeric), a factor, or a character. Because
+#' \code{augment} will combine the standard information in \code{status} with what provided in
+#' \code{more_status}, it is recommended to pass a character or a factor (see 'Examples').
+#' If missing, \code{augment} ignores it.
 #' @return A restructured long format dataset of class \code{"data.table"} where each row
 #' represents a specific transition.
 #' @examples
+#' # 1.
+#' # loading data
 #' data( hosp )
+#'
+#' # augmenting hosp
 #' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
 #' t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+#'
+#' # 2.
+#' # augmenting hosp by passing more information regarding transition with arg. more_status
+#' hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
+#' pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, more_status = rehab_it )
 #' @references Jackson, C.H. (2011). Multi-State Models for Panel Data:
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
 #' URL \url{http://www.jstatsoft.org/v38/i08/}.
@@ -40,7 +54,7 @@
 #' @export
 augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT', 'DEAD' ),
                     t_start, t_end, t_cens, t_death, t_augmented = 'augmented',
-                    status_more ) {
+                    more_status ) {
 
   tic = proc.time()
   if ( !inherits( data, "data.table" ) ) {
@@ -49,8 +63,8 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( missing( data ) ) {
     stop( 'data is missing. Nothing to do' )
   }
-  if ( missing( data_key ) || missing( n_events ) ) {
-    stop( 'a variable of keying and a sequential event counter must be provided' )
+  if ( missing( data_key ) ) {
+    stop( 'a variable of keying must be provided' )
   }
   if ( missing( pattern ) ) {
     stop( "a pattern must be provided" )
@@ -70,10 +84,24 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   cat( '---\n' )
 
   setkey( data, NULL )
-  cols = as.character( substitute( list( data_key, n_events ) )[ -1L ] )
-  if ( !length( cols ) )
-    cols = colnames( data )
-  setkeyv( data, cols )
+  if ( !missing( n_events ) ) {
+    cols = as.character( substitute( list( data_key, n_events ) )[ -1L ] )
+    if ( !length( cols ) )
+      cols = colnames( data )
+    if ( !inherits( eval( substitute( data$n_events ) ), "integer" ) ||
+         !inherits( eval( substitute( data$n_events ) ), "numeric" )) {
+      stop( 'n_events must be an integer or a numeric' )
+    }
+    setkeyv( data, cols )
+  } else {
+    cols = as.character( substitute( list( data_key ) )[ -1L ] )
+    if ( !length( cols ) )
+      cols = colnames( data )
+    setkeyv( data, cols )
+    data[ , n_events := seq( .N ), by = eval( cols ) ]
+    cols = c( cols, names( data )[ dim( data )[ 2 ] ] )
+    setkeyv( data, cols )
+  }
   pattern = as.character( substitute( list( pattern ) )[ -1L ] )
   t_start = as.character( substitute( list( t_start ) )[ -1L ] )
   t_end = as.character( substitute( list( t_end ) )[ -1L ] )
@@ -86,7 +114,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
   if ( any ( test ) ) {
     cat( '---\n' )
-    message( 'detected missing values in variables:' )
+    message( 'detected missing values in the following variables:' )
     invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
     stop( 'Please, fix the issues and relaunch augment()' )
   }
@@ -258,9 +286,15 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     stop( 'numeric status status has not been build correctly' )
   }
   message( 'adding sequential status flag...' )
-  final[ , n_status := ifelse( status != state[[ 3 ]],
-                               paste( eval( substitute( n_events ) ), ' ', status, sep = '' ),
-                               state[[ 3 ]] ) ]
+  if ( missing( n_events ) ) {
+    final[ , n_status := ifelse( status != state[[ 3 ]],
+                                 paste( n_events, ' ', status, sep = '' ),
+                                 state[[ 3 ]] ) ]
+  } else {
+    final[ , n_status := ifelse( status != state[[ 3 ]],
+                                 paste( eval( substitute( n_events ) ), ' ', status, sep = '' ),
+                                 state[[ 3 ]] ) ]
+  }
   if ( sum( is.na( final$n_status ) ) == 0 ) {
     cat( 'sequential status flag has been added successfully \n' )
     cat( '---\n' )
@@ -284,9 +318,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
        '\" successfully added and repositioned\n', sep = '' )
   cat( '---\n' )
 
-  if ( !missing( status_more ) ) {
-    status_more = as.character( substitute( list( status_more )  )[ -1L ] )
-    test = apply( data[ , status_more, with = FALSE ], 2,
+  if ( !missing( more_status ) ) {
+    more_status = as.character( substitute( list( more_status )  )[ -1L ] )
+    test = apply( data[ , more_status, with = FALSE ], 2,
                   function( x ) any( sum( is.na( x ) ) > 0 ) )
     if ( any ( test ) ) {
       cat( '---\n' )
@@ -295,11 +329,11 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       stop( 'Please, fix the issues and relaunch augment()' )
     }
 
-    values = eval( substitute( unique( data$status_more ) ) )
+    values = eval( substitute( unique( data$more_status ) ) )
     message( 'adding expanded status flag...' )
     final[ status == state[[ 3 ]], status_exp := state[[ 3 ]] ]
     for ( i in seq_along( values ) ) {
-      final[ status != state[[ 3 ]] & get( status_more ) == values[ i ],
+      final[ status != state[[ 3 ]] & get( more_status ) == values[ i ],
              status_exp := paste( values[ i ], '_', status, sep = '' ) ]
     }
     if ( sum( is.na( final$status_exp ) ) == 0 ) {

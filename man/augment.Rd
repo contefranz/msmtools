@@ -5,7 +5,7 @@
 \title{Reshape a longitudinal dataset to data for multi-state analyses.}
 \usage{
 augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
-  t_start, t_end, t_cens, t_death, t_augmented = "augmented", status_more)
+  t_start, t_end, t_cens, t_death, t_augmented = "augmented", more_status)
 }
 \arguments{
 \item{data}{A data.table object where each row represents an observation.}
@@ -13,8 +13,8 @@ augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
 \item{data_key}{A keying variable which \code{augment} uses to define a key for \code{data}.
 This represents the subject ID.}
 
-\item{n_events}{An integer indicating the progressive events number of a given ID. If missing,
-\code{augment} creates it and put it next to \code{data_key}.}
+\item{n_events}{An integer or a numeric variable indicating the progressive events number
+of a given ID. If missing, \code{augment} fastly creates a variable named \code{"n_events"}.}
 
 \item{pattern}{Either an integer, a factor or a characer with 2 or 3 unique values which
 provides the ID status at the end of the study. \code{pattern} has a predefined structure.
@@ -23,22 +23,29 @@ are detected, then the format must be: 0 = "alive", 1 = "dead during a transitio
 2 = "dead after a transition has ended".}
 
 \item{state}{A list of 3 possible states which a subject can reach. \code{state} has a predefined
-structure given by 3 states: IN, OUT, DEAD.}
+structure as follows: IN, OUT, DEAD.}
 
-\item{t_start, t_end}{The starting and ending time of the observation, respectively. They can be
-passed as date, integer, or numeric format.}
+\item{t_start}{The starting time of an observation. It can be passed as date, integer, or numeric
+format.}
+
+\item{t_end}{The ending time of an observation. It can be passed as date, integer, or numeric
+format.}
 
 \item{t_cens}{The censoring time of the study}
 
 \item{t_death}{The exact death time of a subject ID. If \code{t_death} is missing,
 \code{t_cens} is assumed to contain both censoring and death time.}
 
-\item{t_augmented}{The new time variable of the process. If \code{t_augmented} is missing, then
-the default name 'augmented' is assumed. The variable is added to \code{data} before
+\item{t_augmented}{The new time variable of the process in the augmented format.
+If \code{t_augmented} is missing, then the default name 'augmented' is assumed.
+The variable is added to \code{data} before
 \code{t_start}.}
 
-\item{status_more}{A variable which marks further transitions beside the default given by
-\code{state}. If missing, \code{augment} ignores it.}
+\item{more_status}{A variable which marks further transitions beside the default given by
+\code{state}. \code{more_status} can be an integer (numeric), a factor, or a character. Because
+\code{augment} will combine the standard information in \code{status} with what provided in
+\code{more_status}, it is recommended to pass a character or a factor (see 'Examples').
+If missing, \code{augment} ignores it.}
 }
 \value{
 A restructured long format dataset of class \code{"data.table"} where each row
@@ -50,9 +57,18 @@ the exact starting and ending time of the process, to data suitable for multi-st
 using the \code{\link[msm]{msm}} package.
 }
 \examples{
+# 1.
+# loading data
 data( hosp )
+
+# augmenting hosp
 hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
 t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+
+# 2.
+# augmenting hosp by passing more information regarding transition with arg. more_status
+hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
+pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, more_status = rehab_it )
 }
 \author{
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.
