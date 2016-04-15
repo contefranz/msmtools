@@ -13,7 +13,7 @@ augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
 \item{data_key}{A keying variable which \code{augment} uses to define a key for \code{data}.
 This represents the subject ID.}
 
-\item{n_events}{An integer or a numeric variable indicating the progressive events number
+\item{n_events}{An integer variable indicating the progressive events number
 of a given ID. If missing, \code{augment} fastly creates a variable named \code{"n_events"}.}
 
 \item{pattern}{Either an integer, a factor or a characer with 2 or 3 unique values which

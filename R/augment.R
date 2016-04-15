@@ -7,7 +7,7 @@
 #' @param data A data.table object where each row represents an observation.
 #' @param data_key A keying variable which \code{augment} uses to define a key for \code{data}.
 #' This represents the subject ID.
-#' @param n_events An integer or a numeric variable indicating the progressive events number
+#' @param n_events An integer variable indicating the progressive events number
 #' of a given ID. If missing, \code{augment} fastly creates a variable named \code{"n_events"}.
 #' @param pattern Either an integer, a factor or a characer with 2 or 3 unique values which
 #' provides the ID status at the end of the study. \code{pattern} has a predefined structure.
