@@ -1,0 +1,73 @@
+---
+title: "msmtools"
+author: "Francesco Grossetti"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{msmtools}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+Package **msmtools** is an `R` package whose main goal is to facilitate the workflow with
+longitudinal datasets which need to be analyzed in the context of multi-state models. In particular,
+`msmtools` acts as the `msm` package companion.
+
+## Longitudinal Dataset
+
+Everytime we observe a given subject multiple times, we come up with a longitudinal dataset. This
+means that measures are repeated $n$ times in a sequence which, in general, may not be equal
+for all the subjects. Moreover, a longitudinal dataset could be viewed as a multilevel dataset:
+a first level is given by the subject, and a second level is given by the single observation carried
+out on that subject. A very common case of longitudinal dataset deals with hospital admissions.
+A patient, our subject, can have a series of entries which correspond to hospital admissions. Each
+hospital admission is recorded in a single row of the dataset. Let's consider a simplified version
+ofthe `hosp` dataset which comes with `msmtools` package and represents synthetic
+hospital admissions for 10 patients. For a detailed explanation of the dataset, please run `?hosp`.
+
+```{r echo = FALSE}
+library( msmtools )
+data( hosp )
+test = hosp[ 1:17, .( subj, adm_number, gender, age, label_2, dateIN, dateOUT, dateCENS ) ]
+head( test, 17 )
+```
+
+As you can see, two patients are 'observed' 11 and 6 times through years, respectively.
+
+These data format are very common when dealing with observational studies, or with chronic disease
+monitoring. In general, they are a well stabilized system to collect information.
+
+
+## Enhancing the Longitudinal Format with `augment()`
+
+Why this structure is not enough if a multi-state model has to be run? A first observation could be
+that we are not able to infer anything about the state in which a given subject (i.e. patient) is
+at a particular point in time (i.e. hospital admission). The function `augment()` comes into play
+for this reason: to take advantage of the longitudinal structure in order to extract usable
+information to fuel a multi-state model. `augment()` takes a longitudinal dataset with exact
+starting and ending time and reshape that to produce an 'augmented' version. For instance, applying
+`augment()` to the dataset above produces the following dataset:
+
+
+```{r echo = FALSE}
+library( msmtools )
+data( hosp )
+hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
+t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, verbose = F )
+head( hosp_augmented[ , .( subj, adm_number, gender,
+age, label_2, augmented, status, n_status ) ], 35 )
+```
+
+
+
+
+
+
+
+
+
+
+
+

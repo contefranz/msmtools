@@ -15,4 +15,7 @@ Depends: R (>= 3.2.0)
 Imports: data.table (>= 1.9.6),
     msm (>= 1.6.0),
     survival (>= 2.38.0)
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

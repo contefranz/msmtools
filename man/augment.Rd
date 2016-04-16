@@ -5,7 +5,8 @@
 \title{Reshape a longitudinal dataset to data for multi-state analyses.}
 \usage{
 augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
-  t_start, t_end, t_cens, t_death, t_augmented = "augmented", more_status)
+  t_start, t_end, t_cens, t_death, t_augmented = "augmented", more_status,
+  verbose = TRUE)
 }
 \arguments{
 \item{data}{A data.table object where each row represents an observation.}
@@ -46,6 +47,11 @@ The variable is added to \code{data} before
 corresponding observation is a standard admission (i.e. no other information available), then
 \code{more_status} must be set to 'df' which stands for 'Default' (see 'Examples' and ?hosp).
 If missing, \code{augment} ignores it.}
+
+\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat},
+\code{message} and \code{warning} are suppressed. All is done internally so that no global
+options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
+(see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 }
 \value{
 A restructured long format dataset of class \code{"data.table"} where each row

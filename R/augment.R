@@ -32,6 +32,10 @@
 #' corresponding observation is a standard admission (i.e. no other information available), then
 #' \code{more_status} must be set to 'df' which stands for 'Default' (see 'Examples' and ?hosp).
 #' If missing, \code{augment} ignores it.
+#' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat},
+#' \code{message} and \code{warning} are suppressed. All is done internally so that no global
+#' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
+#' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
 #' @return A restructured long format dataset of class \code{"data.table"} where each row
 #' represents a specific transition.
 #' @examples
@@ -54,7 +58,7 @@
 #' @export
 augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT', 'DEAD' ),
                     t_start, t_end, t_cens, t_death, t_augmented = 'augmented',
-                    more_status ) {
+                    more_status, verbose = TRUE ) {
 
   tic = proc.time()
   if ( !inherits( data, "data.table" ) ) {
@@ -75,13 +79,28 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( missing( t_start ) || missing( t_end ) ) {
     stop( 'augmented need a starting and an ending event time to work. Nothing to do.' )
   }
+  oldw = getOption( "warn" )
+  if ( verbose == TRUE ) {
+    options( warn = 1 )
+  }
+  if ( verbose == FALSE ) {
+    options( warn = -1 )
+    if ( .Platform$OS.type == 'windows' ) {
+      sink( file = "NUL" )
+    } else {
+      sink( file = "/dev/null" )
+    }
+    cat( '---\n' )
+  }
   if ( missing( t_death ) ) {
     warning( 'no t_death has been passed. Assuming that ', substitute( t_cens ),
              ' contains both censoring and death time' )
+    cat( '---\n' )
   }
-
-  message( 'Setting up everything to augment the long format' )
-  cat( '---\n' )
+  if ( verbose == TRUE ) {
+    message( 'Setting up everything to augment the long format' )
+    cat( '---\n' )
+  }
 
   setkey( data, NULL )
   if ( !missing( n_events ) ) {
@@ -113,7 +132,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
   if ( any ( test ) ) {
     cat( '---\n' )
-    message( 'detected missing values in the following variables:' )
+    if ( verbose == TRUE ) {
+      message( 'detected missing values in the following variables:' )
+    }
     invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
     stop( 'Please, fix the issues and relaunch augment()' )
   }
@@ -127,7 +148,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     stop( 'unit identification label must be an integer, a factor or a character
             with at least 2 elements' )
   } else if ( length( values ) == 2 ) {
-    message( 'detected only 2 values in ', substitute( pattern ) )
+    if ( verbose == TRUE ) {
+      message( 'detected only 2 values in ', substitute( pattern ) )
+    }
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
          inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
@@ -161,7 +184,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       }
     }
   } else if ( length( values ) == 3 ) {
-    message( 'detected 3 values in ', substitute( pattern ) )
+    if ( verbose == TRUE ) {
+      message( 'detected 3 values in ', substitute( pattern ) )
+    }
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
          inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
@@ -206,8 +231,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     .i = dim( counter_events )[ 1 ]
     status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
   }
-
-  message( 'adding status flag...' )
+  if ( verbose == TRUE ) {
+    message( 'adding status flag...' )
+  }
   for ( i in seq_along( counter_events$N ) ) {
     if ( .i > 10000 ) {
       if ( i %% 5000 == 0 ) {
@@ -272,7 +298,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   } else {
     stop( 'status flag has not been build correctly' )
   }
-  message( 'adding numeric status flag...' )
+  if ( verbose == TRUE ) {
+    message( 'adding numeric status flag...' )
+  }
   k = length( unique( final$status ) )
   lev = unique( final$status )
   for ( i in 1:k ) {
@@ -284,7 +312,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   } else {
     stop( 'numeric status status has not been build correctly' )
   }
-  message( 'adding sequential status flag...' )
+  if ( verbose == TRUE ) {
+    message( 'adding sequential status flag...' )
+  }
   if ( missing( n_events ) ) {
     final[ , n_status := ifelse( status != state[[ 3 ]],
                                  paste( n_events, ' ', status, sep = '' ),
@@ -300,8 +330,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   } else {
     stop( 'sequential status flag has not been build correctly' )
   }
-
-  message( 'adding variable ', substitute( t_augmented ), ' as new time variable...' )
+  if ( verbose == TRUE ) {
+    message( 'adding variable ', substitute( t_augmented ), ' as new time variable...' )
+  }
   final[ status == state[[ 1 ]], substitute( t_augmented ) := get( t_start ) ]
   final[ status == state[[ 2 ]], substitute( t_augmented ) := get( t_end ) ]
   if ( missing( t_death ) ) {
@@ -329,7 +360,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     }
 
     values = eval( substitute( unique( data$more_status ) ) )
-    message( 'adding expanded status flag...' )
+    if ( verbose == TRUE ) {
+      message( 'adding expanded status flag...' )
+    }
     final[ status == state[[ 3 ]], status_exp := state[[ 3 ]] ]
     for ( i in seq_along( values ) ) {
       final[ status != state[[ 3 ]] & get( more_status ) == values[ i ],
@@ -341,7 +374,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     } else {
       stop( 'expanded status flag has not been build correctly' )
     }
-    message( 'adding numeric expanded status flag...' )
+    if ( verbose == TRUE ) {
+      message( 'adding numeric expanded status flag...' )
+    }
     k = length( unique( final$status_exp ) )
     lev = unique( final$status_exp )
     for ( i in 1:k ) {
@@ -353,7 +388,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     } else {
       stop( 'expanded numeric status has not been build correctly' )
     }
-    message( 'adding sequential expanded status flag...' )
+    if ( verbose == TRUE ) {
+      message( 'adding sequential expanded status flag...' )
+    }
     final[ , n_status_exp := ifelse( status_exp != state[[ 3 ]],
                                      paste( eval( substitute( n_events ) ), ' ',
                                             status_exp, sep = '' ), state[[ 3 ]] ) ]
@@ -369,6 +406,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   cat( '---------------------------\n' )
   cat( 'Function took:', time[ 3 ], 'sec. \n', sep = ' ' )
   cat( '---------------------------\n' )
+  if ( verbose == FALSE ) {
+    sink()
+  }
+  options( warn = oldw )
   return( final )
 }
 
