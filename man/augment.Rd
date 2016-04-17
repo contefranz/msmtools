@@ -14,8 +14,10 @@ augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
 \item{data_key}{A keying variable which \code{augment} uses to define a key for \code{data}.
 This represents the subject ID.}
 
-\item{n_events}{An integer variable indicating the progressive events number
-of a given ID. If missing, \code{augment} fastly creates a variable named \code{"n_events"}.}
+\item{n_events}{An integer variable indicating the progressive (monotonic) event number
+of a given ID. If missing, \code{augment} fastly creates a variable named \code{"n_events"}.
+\code{augment} always checks whether \code{n_events} is monotonic increasing within the
+provided \code{data_key} and stops the execution in case the check fails (see 'Details').}
 
 \item{pattern}{Either an integer, a factor or a characer with 2 or 3 unique values which
 provides the ID status at the end of the study. \code{pattern} has a predefined structure.
@@ -24,7 +26,8 @@ are detected, then the format must be: 0 = "alive", 1 = "dead during a transitio
 2 = "dead after a transition has ended".}
 
 \item{state}{A list of 3 possible states which a subject can reach. \code{state} has a predefined
-structure as follows: IN, OUT, DEAD.}
+structure as follows: IN, OUT, DEAD. If \code{augment} does not detect exactly 3 states, it
+stops with error.}
 
 \item{t_start}{The starting time of an observation. It can be passed as date, integer, or numeric
 format.}
@@ -62,6 +65,14 @@ A fast method which converts standard longitudinal data, where each observation 
 the exact starting and ending time of the process, to data suitable for multi-state analyses
 using the \code{\link[msm]{msm}} package.
 }
+\details{
+In order to get the data processed, a monotonic increasing process needs to be ensured.
+\code{augment} checks this both in case \code{n_events} is missing or not. The data are
+fastly ordered through \code{\link[data.table]{setkey}} function and using \code{data_key} as the primary key and \code{t_start} as secondary key. Then it checks \code{n_events} and if it fails,
+it returns the subjects gived by \code{data_key} where issues occurred before giving an
+error and stopping. If \code{n_events} is not passed, then the ordering procedure remains the
+same, but the progression number is created internally with the name \code{n_events}.
+}
 \examples{
 # 1.
 # loading data
@@ -75,6 +86,11 @@ t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
 # augmenting hosp by passing more information regarding transition with arg. more_status
 hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
 pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, more_status = rehab_it )
+
+\dontrun{
+augmented = augment( data = hosp, data_key = subj, n_events = dateIN,
+pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+}
 }
 \author{
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.

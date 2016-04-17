@@ -65,9 +65,9 @@
 <p>As you can see, two patients are ‘observed’ 11 and 6 times through years, respectively.</p>
 <p>These data format are very common when dealing with observational studies, or with chronic disease monitoring. In general, they are a well stabilized system to collect information.</p>
 </div>
-<div id="enriching-the-longitudinal-format-with-augment" class="section level2">
-<h2>Enriching the Longitudinal Format with <code>augment()</code></h2>
-<p>Why this structure is not enough if a multi-state model has to be run? A first observation could be that we are not able to infer nothing about the state in which a given subject (i.e. patient) is at a particular point in time (i.e. hospital admission). The function <code>augment()</code> comes into play for this reason: to take advantage of the longitudinal structure in order to extract usable information to fuel a multi-state model. <code>augment()</code> takes a longitudinal dataset with exact starting and ending time and reshape that to produce an ‘augmented’ version. For instance, applying <code>augment()</code> to the dataset above produces the following dataset:</p>
+<div id="enhancing-the-longitudinal-format-with-augment" class="section level2">
+<h2>Enhancing the Longitudinal Format with <code>augment()</code></h2>
+<p>Why this structure is not enough if a multi-state model has to be run? A first observation could be that we are not able to infer anything about the state in which a given subject (i.e. patient) is at a particular point in time (i.e. hospital admission). The function <code>augment()</code> comes into play for this reason: to take advantage of the longitudinal structure in order to extract usable information to fuel a multi-state model. <code>augment()</code> takes a longitudinal dataset with exact starting and ending time and reshape that to produce an ‘augmented’ version. For instance, applying <code>augment()</code> to the dataset above produces the following dataset:</p>
 <pre><code>##     subj adm_number gender age label_2  augmented status n_status
 ##  1:    1          1      F  83    dead 2008-11-30     IN     1 IN
 ##  2:    1          1      F  83    dead 2008-12-12    OUT    1 OUT

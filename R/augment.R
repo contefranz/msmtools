@@ -7,15 +7,18 @@
 #' @param data A data.table object where each row represents an observation.
 #' @param data_key A keying variable which \code{augment} uses to define a key for \code{data}.
 #' This represents the subject ID.
-#' @param n_events An integer variable indicating the progressive events number
+#' @param n_events An integer variable indicating the progressive (monotonic) event number
 #' of a given ID. If missing, \code{augment} fastly creates a variable named \code{"n_events"}.
+#' \code{augment} always checks whether \code{n_events} is monotonic increasing within the
+#' provided \code{data_key} and stops the execution in case the check fails (see 'Details').
 #' @param pattern Either an integer, a factor or a characer with 2 or 3 unique values which
 #' provides the ID status at the end of the study. \code{pattern} has a predefined structure.
 #' When 2 values are detected, they must be in the format: 0 = "alive", 1 = "dead". When 3 values
 #' are detected, then the format must be: 0 = "alive", 1 = "dead during a transition",
 #' 2 = "dead after a transition has ended".
 #' @param state A list of 3 possible states which a subject can reach. \code{state} has a predefined
-#' structure as follows: IN, OUT, DEAD.
+#' structure as follows: IN, OUT, DEAD. If \code{augment} does not detect exactly 3 states, it
+#' stops with error.
 #' @param t_start The starting time of an observation. It can be passed as date, integer, or numeric
 #' format.
 #' @param t_end The ending time of an observation. It can be passed as date, integer, or numeric
@@ -36,6 +39,12 @@
 #' \code{message} and \code{warning} are suppressed. All is done internally so that no global
 #' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 #' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
+#' @details In order to get the data processed, a monotonic increasing process needs to be ensured.
+#' \code{augment} checks this both in case \code{n_events} is missing or not. The data are
+#' fastly ordered through \code{\link[data.table]{setkey}} function and using \code{data_key} as the primary key and \code{t_start} as secondary key. Then it checks \code{n_events} and if it fails,
+#' it returns the subjects gived by \code{data_key} where issues occurred before giving an
+#' error and stopping. If \code{n_events} is not passed, then the ordering procedure remains the
+#' same, but the progression number is created internally with the name \code{n_events}.
 #' @return A restructured long format dataset of class \code{"data.table"} where each row
 #' represents a specific transition.
 #' @examples
@@ -51,6 +60,11 @@
 #' # augmenting hosp by passing more information regarding transition with arg. more_status
 #' hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
 #' pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, more_status = rehab_it )
+#'
+#' \dontrun{
+#' augmented = augment( data = hosp, data_key = subj, n_events = dateIN,
+#' pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+#' }
 #' @references Jackson, C.H. (2011). Multi-State Models for Panel Data:
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
 #' URL \url{http://www.jstatsoft.org/v38/i08/}.
@@ -61,11 +75,11 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
                     more_status, verbose = TRUE ) {
 
   tic = proc.time()
-  if ( !inherits( data, "data.table" ) ) {
-    stop( "data must be a data.table" )
-  }
   if ( missing( data ) ) {
-    stop( 'data is missing. Nothing to do' )
+    stop( 'a dataset of class data.table must be provided' )
+  }
+  if ( !inherits( data, "data.table" ) ) {
+    stop( "a dataset of class data.table must be provided" )
   }
   if ( missing( data_key ) ) {
     stop( 'a variable of keying must be provided' )
@@ -73,11 +87,11 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( missing( pattern ) ) {
     stop( "a pattern must be provided" )
   }
-  if ( !inherits( state, "list" ) ) {
-    stop( "state pattern must be a list" )
+  if ( !inherits( state, "list" ) || length( state ) != 3 ) {
+    stop( "state pattern must be a list of 3 elements" )
   }
   if ( missing( t_start ) || missing( t_end ) ) {
-    stop( 'augmented need a starting and an ending event time to work. Nothing to do.' )
+    stop( 'a starting and an ending event times must be provided' )
   }
   oldw = getOption( "warn" )
   if ( verbose == TRUE ) {
@@ -101,6 +115,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     message( 'Setting up everything to augment the long format' )
     cat( '---\n' )
   }
+  pattern = as.character( substitute( list( pattern ) )[ -1L ] )
+  t_start = as.character( substitute( list( t_start ) )[ -1L ] )
+  t_end = as.character( substitute( list( t_end ) )[ -1L ] )
+  t_cens = as.character( substitute( list( t_cens ) )[ -1L ] )
 
   setkey( data, NULL )
   if ( !missing( n_events ) ) {
@@ -108,22 +126,44 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     if ( !length( cols ) )
       cols = colnames( data )
     if ( !inherits( eval( substitute( data$n_events ) ), "integer" ) ) {
-      stop( 'n_events must be an integer or a numeric' )
+      stop( 'n_events must be an integer' )
+    }
+    if ( verbose == TRUE ) {
+      message( 'checking monotonicity of ', cols[[ 2 ]] )
+    }
+    ev = data[ , .( ev = all( get( cols[[ 2 ]] ) == cummax( get( cols[[ 2 ]] ) ) ) ),
+               by = eval( cols[[ 1 ]] ) ]
+    setkeyv( data, c( cols[[ 1 ]], t_start ) )
+    if ( all( ev$ev ) == FALSE ) {
+      message( substitute( n_events ), ' is not monotonic increasing within ',
+               substitute( data_key ) )
+      message( 'the corresponding subjects are:' )
+      message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
+      stop( 'Please, fix the issues and relaunch augment()' )
     }
     setkeyv( data, cols )
   } else {
     cols = as.character( substitute( list( data_key ) )[ -1L ] )
     if ( !length( cols ) )
       cols = colnames( data )
-    setkeyv( data, cols )
+    setkeyv( data, c( cols, t_start ) )
     data[ , n_events := seq( .N ), by = eval( cols ) ]
     cols = c( cols, names( data )[ dim( data )[ 2 ] ] )
+    if ( verbose == TRUE ) {
+      message( 'checking monotonicity of ', cols[[ 2 ]] )
+    }
+    ev = data[ , .( ev = all( get( cols[[ 2 ]] ) == cummax( get( cols[[ 2 ]] ) ) ) ),
+               by = eval( cols[[ 1 ]] ) ]
+    setkeyv( data, c( cols[[ 1 ]], t_start ) )
+    if ( all( ev$ev ) == FALSE ) {
+      message( substitute( n_events ), ' is not monotonic increasing within ',
+               substitute( data_key ) )
+      message( 'the corresponding subjects are:' )
+      message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
+      stop( 'Please, fix the issues and relaunch augment()' )
+    }
     setkeyv( data, cols )
   }
-  pattern = as.character( substitute( list( pattern ) )[ -1L ] )
-  t_start = as.character( substitute( list( t_start ) )[ -1L ] )
-  t_end = as.character( substitute( list( t_end ) )[ -1L ] )
-  t_cens = as.character( substitute( list( t_cens ) )[ -1L ] )
   checks = c( cols, pattern, t_start, t_end )
   if ( !missing( t_death ) ) {
     t_death = as.character( substitute( list( t_death ) )[ -1L ] )
@@ -146,10 +186,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
 
   if ( length( values ) < 2 ) {
     stop( 'unit identification label must be an integer, a factor or a character
-            with at least 2 elements' )
+          with at least 2 elements' )
   } else if ( length( values ) == 2 ) {
     if ( verbose == TRUE ) {
-      message( 'detected only 2 values in ', substitute( pattern ) )
+      message( 'checking ', substitute( pattern ), ': detected only 2 values' )
     }
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
@@ -185,7 +225,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     }
   } else if ( length( values ) == 3 ) {
     if ( verbose == TRUE ) {
-      message( 'detected 3 values in ', substitute( pattern ) )
+      message( 'checking ', substitute( pattern ), ': detected 3 values' )
     }
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
@@ -404,7 +444,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   toc = proc.time()
   time = toc - tic
   cat( '---------------------------\n' )
-  cat( 'Function took:', time[ 3 ], 'sec. \n', sep = ' ' )
+  cat( 'augment() took:', time[ 3 ], 'sec. \n', sep = ' ' )
   cat( '---------------------------\n' )
   if ( verbose == FALSE ) {
     sink()
