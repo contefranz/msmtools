@@ -2,7 +2,7 @@
 library( msmtools )
 data( hosp )
 test = hosp[ 1:17, .( subj, adm_number, gender, age, label_2, dateIN, dateOUT, dateCENS ) ]
-head( test, 17 )
+test
 
 ## ----echo = FALSE--------------------------------------------------------
 library( msmtools )

@@ -11,7 +11,7 @@
 
 <meta name="author" content="Francesco Grossetti" />
 
-<meta name="date" content="2016-04-16" />
+<meta name="date" content="2016-04-18" />
 
 <title>msmtools</title>
 
@@ -32,7 +32,7 @@
 
 <h1 class="title">msmtools</h1>
 <h4 class="author"><em>Francesco Grossetti</em></h4>
-<h4 class="date"><em>2016-04-16</em></h4>
+<h4 class="date"><em>2016-04-18</em></h4>
 
 </div>
 
@@ -43,7 +43,7 @@
 </div>
 <div id="longitudinal-dataset" class="section level2">
 <h2>Longitudinal Dataset</h2>
-<p>Everytime we observe a given subject multiple times, we come up with a longitudinal dataset. This means that measures are repeated <span class="math inline">\(n\)</span> times in a sequence which, in general, may not be equal for all the subjects. Moreover, a longitudinal dataset could be viewed as a multilevel dataset: a first level is given by the subject, and a second level is given by the single observation carried out on that subject. A very common case of longitudinal dataset deals with hospital admissions. A patient, our subject, can have a series of entries which correspond to hospital admissions. Each hospital admission is recorded in a single row of the dataset. Let’s consider a simplified version ofthe <code>hosp</code> dataset which comes with <code>msmtools</code> package and represents synthetic hospital admissions for 10 patients. For a detailed explanation of the dataset, please run <code>?hosp</code>.</p>
+<p>Everytime we observe a given subject multiple times, we come up with a longitudinal dataset. This means that measures are repeated <span class="math inline">\(n\)</span> times in a sequence which, in general, may not be equal for all the subjects. Moreover, a longitudinal dataset could be viewed as a multilevel dataset: a first level is given by the subject, and a second level is given by the single observation carried out on that subject. A very common case of longitudinal dataset deals with hospital admissions. A patient, our subject, can have a series of entries which correspond to hospital admissions. Each hospital admission is recorded in a single row of the dataset. Let’s consider a simplified version of the <code>hosp</code> dataset which comes with <code>msmtools</code> package and represents synthetic hospital admissions for 10 patients. For a detailed description of the dataset, please run <code>?hosp</code>. For demonstration purposes, we extract only the first 2 patients, reducing the <code>hosp</code> dataset to a test sample of 17 rows per 8 variables as you can see below.</p>
 <pre><code>##     subj adm_number gender age label_2     dateIN    dateOUT   dateCENS
 ##  1:    1          1      F  83    dead 2008-11-30 2008-12-12 2011-04-28
 ##  2:    1          2      F  83    dead 2009-01-26 2009-02-16 2011-04-28
@@ -62,12 +62,15 @@
 ## 15:    2          4      F 103   alive 2012-04-24 2012-05-19 2012-12-31
 ## 16:    2          5      F 103   alive 2012-05-20 2012-05-25 2012-12-31
 ## 17:    2          6      F 103   alive 2012-08-19 2012-08-21 2012-12-31</code></pre>
-<p>As you can see, two patients are ‘observed’ 11 and 6 times through years, respectively.</p>
-<p>These data format are very common when dealing with observational studies, or with chronic disease monitoring. In general, they are a well stabilized system to collect information.</p>
+<p>So, these two patients are ‘observed’ 11 and 6 times through years, respectively.</p>
+<p>These data format are very common when dealing with observational studies, or with chronic disease monitoring and with hospital admissions recording. In general, they are a well stabilized system to collect information.</p>
 </div>
-<div id="enhancing-the-longitudinal-format-with-augment" class="section level2">
-<h2>Enhancing the Longitudinal Format with <code>augment()</code></h2>
-<p>Why this structure is not enough if a multi-state model has to be run? A first observation could be that we are not able to infer anything about the state in which a given subject (i.e. patient) is at a particular point in time (i.e. hospital admission). The function <code>augment()</code> comes into play for this reason: to take advantage of the longitudinal structure in order to extract usable information to fuel a multi-state model. <code>augment()</code> takes a longitudinal dataset with exact starting and ending time and reshape that to produce an ‘augmented’ version. For instance, applying <code>augment()</code> to the dataset above produces the following dataset:</p>
+<div id="enhancing-the-longitudinal-structure-with-augment" class="section level2">
+<h2>Enhancing the Longitudinal Structure with <code>augment()</code></h2>
+<p>Why the standard longitudinal structure is not enough if a multi-state model has to be run? A first observation could be that we are not able to infer anything about the state in which a given subject (i.e. patient) is at a particular point in time (i.e. hospital admission). The function <code>augment()</code> comes into play for this reason: to take advantage of the longitudinal structure in order to extract usable information to fuel a multi-state model. <code>augment()</code> takes a longitudinal dataset with exact starting and ending times and reshape it to produce an <em>augmented</em> version. For instance, if you apply <code>augment()</code> to the dataset above, you get what follows:</p>
+<pre><code>## Warning in augment(data = hosp, data_key = subj, n_events = adm_number, :
+## no t_death has been passed. Assuming that dateCENS contains both censoring
+## and death time</code></pre>
 <pre><code>##     subj adm_number gender age label_2  augmented status n_status
 ##  1:    1          1      F  83    dead 2008-11-30     IN     1 IN
 ##  2:    1          1      F  83    dead 2008-12-12    OUT    1 OUT
@@ -105,6 +108,21 @@
 ## 34:    2          6      F 103   alive 2012-08-21    OUT    6 OUT
 ## 35:    2          6      F 103   alive 2012-08-21    OUT    6 OUT
 ##     subj adm_number gender age label_2  augmented status n_status</code></pre>
+<p>Despite the fact that not the same variables have been reported because of layout concerns, two things come up at first sight. In the first place, the number of rows is more than doubled. We now have 35 observations against the initial 17. In the second place, new variables have been created. We will describe them in a minute.</p>
+<p>Given the complexity of the data, which can be very high, building a subject specific status flag which marks a its condition at given time steps, could be tricky and computationally intensive. At the end of the study, so at the censoring time, a subject, in general, can be alive, dead inside a given transition if death occurs within <code>t_start</code> and <code>t_end</code>, or outside a given transition if death occurs otherwise. After <span class="math inline">\(n\)</span> events, the corresponding flag sequence is given by <span class="math inline">\(2n + 1\)</span> for subjects alive and dead outside the transition, while it is just <span class="math inline">\(2n\)</span> for subjects who died inside of it. Let us consider an individual with 3 events. His/her status combinations will be as follows:</p>
+<ul>
+<li><strong>ALIVE</strong>: IN-OUT | IN-OUT | IN-OUT | OUT</li>
+<li><strong>DEAD OUT</strong>: IN-OUT | IN-OUT | IN-OUT | DEAD</li>
+<li><strong>DEAD IN</strong>: IN-OUT | IN-OUT | IN-DEAD.</li>
+</ul>
+<p>This operation produces a dataset in the augmented long format which allows to neatly model transitions between the given states.</p>
+<p>From now on, we refer to each row as a transition for which we define a state in which the subject lies. <code>augment()</code> automatically creates 4 new variables (if argument <code>more_status</code> is missing):</p>
+<ul>
+<li><em>augmented</em>: the new timing variable for the process when looking at transitions. If <code>t_augmented</code> is missing, then <code>augment()</code> creates <em>augmented</em> by default. The function looks directly to <code>t_start</code> and <code>t_end</code> to build it and thus it inherits their class;</li>
+<li><em>status</em>: a status flag which looks at <code>state</code>. <code>augment()</code> automatically checks whether argument <code>pattern</code> has 2 or 3 unique values and computes the correct structure of a given subject. The variable is cast as character;</li>
+<li><em>status_num</em>: the corresponding integer version of <em>status</em>;</li>
+<li><em>n_status</em>: a mix of <em>status</em> and <em>status_num</em> cast as character. <em>status_num</em> comes into play when a model on the progression of the process is intended.</li>
+</ul>
 </div>
 
 

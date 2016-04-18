@@ -2,6 +2,7 @@
 title: "msmtools"
 author: "Francesco Grossetti"
 date: "`r Sys.Date()`"
+fontsize: 12pt
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{msmtools}
@@ -24,31 +25,34 @@ a first level is given by the subject, and a second level is given by the single
 out on that subject. A very common case of longitudinal dataset deals with hospital admissions.
 A patient, our subject, can have a series of entries which correspond to hospital admissions. Each
 hospital admission is recorded in a single row of the dataset. Let's consider a simplified version
-ofthe `hosp` dataset which comes with `msmtools` package and represents synthetic
-hospital admissions for 10 patients. For a detailed explanation of the dataset, please run `?hosp`.
+of the `hosp` dataset which comes with `msmtools` package and represents synthetic
+hospital admissions for 10 patients. For a detailed description of the dataset, please run `?hosp`.
+For demonstration purposes, we extract only the first 2 patients, reducing the `hosp` dataset
+to a test sample of 17 rows per 8 variables as you can see below.
 
 ```{r echo = FALSE}
 library( msmtools )
 data( hosp )
 test = hosp[ 1:17, .( subj, adm_number, gender, age, label_2, dateIN, dateOUT, dateCENS ) ]
-head( test, 17 )
+test
 ```
 
-As you can see, two patients are 'observed' 11 and 6 times through years, respectively.
+So, these two patients are 'observed' 11 and 6 times through years, respectively.
 
 These data format are very common when dealing with observational studies, or with chronic disease
-monitoring. In general, they are a well stabilized system to collect information.
+monitoring and with hospital admissions recording.
+In general, they are a well stabilized system to collect information.
 
 
-## Enhancing the Longitudinal Format with `augment()`
+## Enhancing the Longitudinal Structure with `augment()`
 
-Why this structure is not enough if a multi-state model has to be run? A first observation could be
-that we are not able to infer anything about the state in which a given subject (i.e. patient) is
-at a particular point in time (i.e. hospital admission). The function `augment()` comes into play
-for this reason: to take advantage of the longitudinal structure in order to extract usable
-information to fuel a multi-state model. `augment()` takes a longitudinal dataset with exact
-starting and ending time and reshape that to produce an 'augmented' version. For instance, applying
-`augment()` to the dataset above produces the following dataset:
+Why the standard longitudinal structure is not enough if a multi-state model has to be run?
+A first observation could be that we are not able to infer anything about the state in which a given
+subject (i.e. patient) is at a particular point in time (i.e. hospital admission).
+The function `augment()` comes into play for this reason: to take advantage of the longitudinal
+structure in order to extract usable information to fuel a multi-state model. `augment()` takes a
+longitudinal dataset with exact starting and ending times and reshape it to produce an *augmented*
+version. For instance, if you apply `augment()` to the dataset above, you get what follows:
 
 
 ```{r echo = FALSE}
@@ -59,6 +63,43 @@ t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, verbose = F )
 head( hosp_augmented[ , .( subj, adm_number, gender,
 age, label_2, augmented, status, n_status ) ], 35 )
 ```
+
+Despite the fact that not the same variables have been reported because of layout concerns, two
+things come up at first sight. In the first place, the number of rows is more than doubled. We now
+have 35 observations against the initial 17. In the second place, new variables have been created.
+We will describe them in a minute.
+
+Given the complexity of the data, which can be very high, building a subject specific status flag
+which marks a its condition at given time steps, could be tricky and computationally intensive.
+At the end of the study, so at the censoring time, a subject, in general, can be alive, dead inside
+a given transition if death occurs within `t_start` and `t_end`, or outside a given transition if
+death occurs otherwise. After $n$ events, the corresponding flag sequence is given by $2n + 1$ for
+subjects alive and dead outside the transition, while it is just $2n$ for subjects who died inside
+of it. Let us consider an individual with 3 events. His/her status combinations will be as follows:
+
+* **ALIVE**: IN-OUT | IN-OUT | IN-OUT | OUT
+* **DEAD OUT**: IN-OUT | IN-OUT | IN-OUT | DEAD
+* **DEAD IN**: IN-OUT | IN-OUT | IN-DEAD.
+
+This operation produces a dataset in the augmented long format which allows to neatly model
+transitions between the given states.
+
+From now on, we refer to each row as a transition for which we define a state in which the subject
+lies. `augment()` automatically creates 4 new variables (if argument `more_status` is
+missing):
+
+* *augmented*: the new timing variable for the process when looking at transitions. If
+`t_augmented` is missing, then `augment()` creates *augmented* by default.
+The function looks directly to `t_start` and `t_end` to build it and thus it inherits their class;
+* *status*: a status flag which looks at `state`. `augment()` automatically checks whether
+argument `pattern` has 2 or 3 unique values and computes the correct structure of a given subject.
+The variable is cast as character;
+* *status_num*: the corresponding integer version of *status*;
+* *n_status*: a mix of *status* and *status_num* cast as character. *status_num* comes into play
+when a model on the progression of the process is intended.
+
+
+
 
 
 
