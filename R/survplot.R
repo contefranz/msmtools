@@ -119,6 +119,10 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      do.plot = TRUE, plot.width = 7, plot.height = 7, verbose = TRUE ) {
 
   time.start = proc.time()
+  state         = NULL
+  subject       = NULL
+  mintime_exact = NULL
+  .             = NULL
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
   if ( !is.numeric( from ) )

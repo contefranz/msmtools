@@ -75,6 +75,13 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
                     more_status, verbose = TRUE ) {
 
   tic = proc.time()
+  status         = NULL
+  status_num     = NULL
+  n_status       = NULL
+  status_exp     = NULL
+  status_exp_num = NULL
+  n_status_exp   = NULL
+  .              = NULL
   oldw = getOption( "warn" )
   if ( verbose == TRUE ) {
     options( warn = 1 )
