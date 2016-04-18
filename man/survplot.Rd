@@ -6,13 +6,13 @@
 \usage{
 survplot(x, from = 1, to = NULL, range = NULL, covariates = "mean",
   exacttimes = TRUE, times, grid = 100L, km = FALSE, return.km = FALSE,
-  return.p = FALSE, add = FALSE, verbose = TRUE, plot.do = TRUE,
-  ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
-  B = 100L, legend.pos = "topright", xlab = "Time",
-  ylab = "Survival Probability", lty.fit = 1, lwd.fit = 1,
-  col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1, col.ci.fit = col.fit,
-  mark.time = FALSE, lty.km = 5, lwd.km = 1, col.km = "darkblue",
-  plot.width = 7, plot.height = 7)
+  return.p = FALSE, add = FALSE, ci = c("none", "normal", "bootstrap"),
+  interp = c("start", "midpoint"), B = 100L, legend.pos = "topright",
+  xlab = "Time", ylab = "Survival Probability", lty.fit = 1,
+  lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
+  col.ci.fit = col.fit, mark.time = FALSE, lty.km = 5, lwd.km = 1,
+  col.km = "darkblue", do.plot = TRUE, plot.width = 7, plot.height = 7,
+  verbose = TRUE)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -52,13 +52,6 @@ If \code{times} is passed, \code{grid} is ignored. It has a default of 100 point
 (see 'Value').}
 
 \item{add}{If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.}
-
-\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat},
-\code{message} and \code{warning} are suppressed. All is done internally so that no global
-options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
-(see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
-
-\item{plot.do}{If \code{FALSE}, then no plot is shown at all. Default is \code{TRUE}.}
 
 \item{ci}{If \code{"none"} (the default), then no confidence intervals are plotted.
 If \code{"normal"} or \code{"bootstrap"}, confidence intervals are plotted based on the
@@ -108,9 +101,16 @@ See \code{\link[graphics]{par}}.}
 \item{col.km}{Line color for the Kaplan-Meier passed to \code{\link[survival]{lines.survfit}}.
 See \code{\link[graphics]{par}}.}
 
+\item{do.plot}{If \code{FALSE}, then no plot is shown at all. Default is \code{TRUE}.}
+
 \item{plot.width}{Width of new graphical device. Default is 7. See \code{\link[graphics]{par}}.}
 
 \item{plot.height}{Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.}
+
+\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat},
+\code{message} and \code{warning} are suppressed. All is done internally so that no global
+options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
+(see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 }
 \value{
 If both \code{return.km} and \code{return.p} are set to \code{TRUE}, then \code{survplot}
@@ -129,13 +129,14 @@ current environment assign \code{survplot} to an object (see 'Examples')\cr
 }
 \description{
 Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
-\code{\link[msm]{msm}} model. Fast returning of associated Kaplan-Meier and fitted survival
-datasets.
+\code{\link[msm]{msm}} model. Fast build and return the associated datasets to the global
+environment.
 }
 \details{
 The function is a wrapper of \code{\link[msm]{plot.survfit.msm}} and does more things.
-\code{survplot} is capable of deal properly the plotting of a fitted survival when in
-an exact times framework by just resetting the time scale and looking at the follow-up time.
+\code{survplot} is deals correctly the plot of a fitted survival in
+an exact times framework (when \code{exacttimes = TRUE}) by just resetting the time scale
+and looking at the follow-up time.
 It can fastly compute, build and return to the user the dataset on which the Kaplan-Meier has
 been computed. Similarly, it can return to the user the dataset on which the fitted survival has
 been computed, both with user defined times (through \code{times}) and self set times (through
@@ -144,7 +145,8 @@ been computed, both with user defined times (through \code{times}) and self set 
 \examples{
 # Assigning survplot to an object:
 \dontrun{
-results = survplot( msm_model, from = 1, to = 3, return.km = TRUE, return.p = TRUE )
+
+results = survplot( msm_model, return.km = TRUE, return.p = TRUE )
 kaplan_meier_data = results[ 1 ]
 fitted_data = results[ 2 ]
 }
