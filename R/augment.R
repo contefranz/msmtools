@@ -75,19 +75,6 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
                     more_status, verbose = TRUE ) {
 
   tic = proc.time()
-  oldw = getOption( "warn" )
-  if ( verbose == TRUE ) {
-    options( warn = 1 )
-  }
-  if ( verbose == FALSE ) {
-    options( warn = 1 )
-    if ( .Platform$OS.type == 'windows' ) {
-      sink( file = "NUL" )
-    } else {
-      sink( file = "/dev/null" )
-    }
-    cat( '---\n' )
-  }
   if ( missing( data ) ) {
     stop( 'a dataset of class data.table must be provided' )
   }
@@ -105,6 +92,19 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   }
   if ( missing( t_start ) || missing( t_end ) ) {
     stop( 'a starting and an ending event times must be provided' )
+  }
+  oldw = getOption( "warn" )
+  if ( verbose == TRUE ) {
+    options( warn = 1 )
+  }
+  if ( verbose == FALSE ) {
+    options( warn = 1 )
+    if ( .Platform$OS.type == 'windows' ) {
+      sink( file = "NUL" )
+    } else {
+      sink( file = "/dev/null" )
+    }
+    cat( '---\n' )
   }
   if ( missing( t_death ) ) {
     warning( 'no t_death has been passed. Assuming that ', substitute( t_cens ),
