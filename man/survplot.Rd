@@ -6,7 +6,7 @@
 \usage{
 survplot(x, from = 1, to = NULL, range = NULL, covariates = "mean",
   exacttimes = TRUE, times, grid = 100L, km = FALSE, return.km = FALSE,
-  return.p = FALSE, add = FALSE, print.res = FALSE, plot.do = TRUE,
+  return.p = FALSE, add = FALSE, verbose = TRUE, plot.do = TRUE,
   ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
   B = 100L, legend.pos = "topright", xlab = "Time",
   ylab = "Survival Probability", lty.fit = 1, lwd.fit = 1,
@@ -53,8 +53,10 @@ If \code{times} is passed, \code{grid} is ignored. It has a default of 100 point
 
 \item{add}{If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.}
 
-\item{print.res}{If \code{TRUE}, then all printing information are suppressed.
-Default is \code{FALSE}.}
+\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat},
+\code{message} and \code{warning} are suppressed. All is done internally so that no global
+options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
+(see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 
 \item{plot.do}{If \code{FALSE}, then no plot is shown at all. Default is \code{TRUE}.}
 

@@ -30,8 +30,10 @@
 #' \code{survplot} must be assigned to an object in order to get the data in the environment
 #' (see 'Value').
 #' @param add If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.
-#' @param print.res If \code{TRUE}, then all printing information are suppressed.
-#' Default is \code{FALSE}.
+#' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat},
+#' \code{message} and \code{warning} are suppressed. All is done internally so that no global
+#' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
+#' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
 #' @param plot.do If \code{FALSE}, then no plot is shown at all. Default is \code{TRUE}.
 #' @param ci If \code{"none"} (the default), then no confidence intervals are plotted.
 #' If \code{"normal"} or \code{"bootstrap"}, confidence intervals are plotted based on the
@@ -106,7 +108,7 @@
 survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      exacttimes = TRUE, times, grid = 100L,
                      km = FALSE, return.km = FALSE, return.p = FALSE, add = FALSE,
-                     print.res = FALSE, plot.do = TRUE, ci = c( "none", "normal", "bootstrap" ),
+                     verbose = TRUE, plot.do = TRUE, ci = c( "none", "normal", "bootstrap" ),
                      interp = c( "start", "midpoint" ), B = 100L, legend.pos = 'topright',
                      xlab = "Time", ylab = "Survival Probability",
                      lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
@@ -114,7 +116,6 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      col.km = "darkblue", plot.width = 7, plot.height = 7 ) {
 
   time.start = proc.time()
-
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
   if ( !is.numeric( from ) )
@@ -134,7 +135,16 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       stop( "range must be a numeric vector of two elements" )
     rg = range
   }
-
+  oldw = getOption( "warn" )
+  if ( verbose == FALSE ) {
+    options( warn = -1 )
+    if ( .Platform$OS.type == 'windows' ) {
+      sink( file = "NUL" )
+    } else {
+      sink( file = "/dev/null" )
+    }
+    cat( '---\n' )
+  }
   interp = match.arg( interp )
   ci = match.arg( ci )
   if ( exacttimes == TRUE ) {
@@ -152,16 +162,13 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       times = times
     }
   }
-
   pr = lower = upper = numeric()
   counter = 0L
   for ( t in times ) {
-    if ( print.res == TRUE ) {
-      counter = counter + 1
-      if ( counter %% 10 == 0 ) {
-        cat( '---\n' )
-        cat( 't =', round( t, 0 ), '\n' )
-      }
+    counter = counter + 1
+    if ( counter %% 10 == 0 ) {
+      cat( '---\n' )
+      cat( 't =', round( t, 0 ), '\n' )
     }
     P = pmatrix.msm( x, t, t1 = times[ 1 ], covariates = covariates, ci = ci, B = B )
     if ( ci != "none" ) {
@@ -219,13 +226,15 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       }
     }
   }
-  if ( print.res == TRUE ) {
-    time.end = proc.time()
-    time.total = time.end - time.start
-    cat( '---\n' )
-    cat( 'Function took:', time.total[ 3 ], '\n' )
-    cat( '---\n' )
+  time.end = proc.time()
+  time.total = time.end - time.start
+  cat( '---\n' )
+  cat( 'Function took:', time.total[ 3 ], '\n' )
+  cat( '---\n' )
+  if ( verbose == FALSE ) {
+    sink()
   }
+  options( warn = oldw )
   if ( return.km == TRUE && return.p == TRUE ) {
     return( list( km = wide, fitted = data.table( time = times, probs = round( 1 - pr, 4 ) ) ) )
   } else if ( return.km == TRUE && return.p == FALSE ) {
