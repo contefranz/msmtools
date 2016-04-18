@@ -77,7 +77,7 @@ When \code{M = TRUE}, a rough indicator of the deviance from the Markov model is
 computed according to Titman and Sharples (2008). A comparison at a given time \eqn{t_i} of a
 patient \emph{k} in the state \emph{s} between observed counts \eqn{O_{is}}
 with expected ones \eqn{E_{is}} is build as follows:
-\deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}
+\deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is} }
 }
 \author{
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.

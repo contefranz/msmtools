@@ -9,7 +9,7 @@ augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
   verbose = TRUE)
 }
 \arguments{
-\item{data}{A data.table object where each row represents an observation.}
+\item{data}{A \code{data.table} object where each row represents an observation.}
 
 \item{data_key}{A keying variable which \code{augment} uses to define a key for \code{data}.
 This represents the subject ID.}

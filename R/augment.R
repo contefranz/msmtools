@@ -4,7 +4,7 @@
 #' the exact starting and ending time of the process, to data suitable for multi-state analyses
 #' using the \code{\link[msm]{msm}} package.
 #'
-#' @param data A data.table object where each row represents an observation.
+#' @param data A \code{data.table} object where each row represents an observation.
 #' @param data_key A keying variable which \code{augment} uses to define a key for \code{data}.
 #' This represents the subject ID.
 #' @param n_events An integer variable indicating the progressive (monotonic) event number
@@ -98,7 +98,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     options( warn = 1 )
   }
   if ( verbose == FALSE ) {
-    options( warn = -1 )
+    options( warn = 1 )
     if ( .Platform$OS.type == 'windows' ) {
       sink( file = "NUL" )
     } else {
@@ -120,6 +120,11 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   t_end = as.character( substitute( list( t_end ) )[ -1L ] )
   t_cens = as.character( substitute( list( t_cens ) )[ -1L ] )
 
+  if ( eval( substitute( class( data$t_start ) ) ) != eval( substitute( class( data$t_end ) ) ) ) {
+    stop( 'the starting and the ending event times must be of the same class' )
+  } else if ( eval( substitute( class( data$t_start ) ) ) != eval( substitute( class( data$t_cens ) ) ) ) {
+    stop( 'the starting and the censoring event times must be of the same class' )
+  }
   setkey( data, NULL )
   if ( !missing( n_events ) ) {
     cols = as.character( substitute( list( data_key, n_events ) )[ -1L ] )
@@ -167,8 +172,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   checks = c( cols, pattern, t_start, t_end )
   if ( !missing( t_death ) ) {
     t_death = as.character( substitute( list( t_death ) )[ -1L ] )
+    if ( eval( substitute( class( data$t_cens ) ) ) != eval( substitute( class( data$t_death ) ) ) ) {
+      stop( 'the censoring and the death event times must be of the same class' )
+    }
   }
-
   test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
   if ( any ( test ) ) {
     cat( '---\n' )
