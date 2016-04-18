@@ -106,6 +106,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( missing( t_start ) || missing( t_end ) ) {
     stop( 'a starting and an ending event times must be provided' )
   }
+  if ( missing( t_cens ) ) {
+    stop( 'a censoring time must be provided' )
+  }
   if ( missing( t_death ) ) {
     warning( 'no t_death has been passed. Assuming that ', substitute( t_cens ),
              ' contains both censoring and death time' )
