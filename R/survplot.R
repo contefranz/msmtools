@@ -65,6 +65,10 @@
 #' @param do.plot If \code{FALSE}, then no plot is shown at all. Default is \code{TRUE}.
 #' @param plot.width Width of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
 #' @param plot.height Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
+#' @param devnew Set the graphical device where to plot. By default, \code{survplot} plots on a new
+#' device by setting \code{dev.new}. If \code{FALSE}, then a plot is drawn onto the current device
+#' as specified by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
+#' a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.
 #' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat},
 #' \code{message} and \code{warning} are suppressed. All is done internally so that no global
 #' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
@@ -116,7 +120,8 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
                      col.ci.fit = col.fit, mark.time = FALSE,
                      lty.km = 5, lwd.km = 1, col.km = "darkblue",
-                     do.plot = TRUE, plot.width = 7, plot.height = 7, verbose = TRUE ) {
+                     do.plot = TRUE, plot.width = 7, plot.height = 7,
+                     devnew = TRUE, verbose = TRUE ) {
 
   time.start = proc.time()
   state         = NULL
@@ -187,7 +192,11 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   }
   if ( do.plot == TRUE ) {
     if ( add == FALSE ) {
-      dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
+      if ( devnew == TRUE ) {
+        dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
+      } else if ( devnew == FALSE ) {
+        dev.set( dev.cur() )
+      }
       plot( times, 1 - pr, type = "l", xlab = xlab, ylab = ylab, ylim = c( 0, 1 ),
             lwd = lwd.fit, lty = lty.fit, col = col.fit )
     } else {

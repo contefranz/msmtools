@@ -12,7 +12,7 @@ survplot(x, from = 1, to = NULL, range = NULL, covariates = "mean",
   lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
   col.ci.fit = col.fit, mark.time = FALSE, lty.km = 5, lwd.km = 1,
   col.km = "darkblue", do.plot = TRUE, plot.width = 7, plot.height = 7,
-  verbose = TRUE)
+  devnew = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -106,6 +106,11 @@ See \code{\link[graphics]{par}}.}
 \item{plot.width}{Width of new graphical device. Default is 7. See \code{\link[graphics]{par}}.}
 
 \item{plot.height}{Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.}
+
+\item{devnew}{Set the graphical device where to plot. By default, \code{survplot} plots on a new
+device by setting \code{dev.new}. If \code{FALSE}, then a plot is drawn onto the current device
+as specified by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
+a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.}
 
 \item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat},
 \code{message} and \code{warning} are suppressed. All is done internally so that no global
