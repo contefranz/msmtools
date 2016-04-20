@@ -222,15 +222,6 @@ survplot( msm_model, km = TRUE, from = 2, ci = 'none',
 ```
 
 If we do not want to show the Kaplan-Meier, we can pass `km = FALSE`, which is the default.
-It is possible to tell `survplot()` to return the associated Kaplan-Meier dataset by setting 
-`return.km = TRUE` by fastly computing the data using `data.table`. Passing only `km = TRUE` won't
-return any data, even if they must be computed anyway.
-
-```{r returnKM, collapse = TRUE}
-survplot( msm_model, ci = 'none', return.km = TRUE,
-          verbose = FALSE, do.plot = FALSE )
-```
-
 
 ## Setting a custom time sequence
 
@@ -238,8 +229,8 @@ By default `survplot()` computes the fitted survival on a given grid. The number
 given by `grid`. In some cases, one would like to pass a custom time sequence. This can be achieved
 by passing the argument `times` a numeric vector. Now `grid` is ignored. 
 
-Consider our dataset and suppose we want to compute a fitted survival at for the second year from 
-now. The following code addresses this request.
+Consider our dataset and suppose we want to compute a fitted survival only fo specific points in 
+time. The following code addresses this request.
 
 ```{r custom time seq, fig.align = 'center', fig.width = 5, fig.height = 4}
 time_seq = seq( 300, 800, by = 30 )
@@ -247,7 +238,118 @@ survplot( msm_model, times = time_seq, ci = 'none',
           verbose = FALSE, devnew = FALSE )
 ```
 
+## Obtaining the dataset for the Kaplan-Meier
 
+It is possible to tell `survplot()` to return the associated Kaplan-Meier dataset by setting 
+`return.km = TRUE`. This fastly computes the data through `data.table`. 
+Passing only `km = TRUE` won't return any data, even if they must be computed anyway to plot results.
+
+```{r returnKM, collapse = TRUE}
+survplot( msm_model, ci = 'none', return.km = TRUE,
+          verbose = FALSE, do.plot = FALSE )
+```
+
+A preview of the dataset is printed out only if no assignment is done. If you want to store 
+the information in the current environmen, you must assign `survplot()` to an object as follows:
+
+```{r returnKM2, collapse = TRUE}
+# running survplot() and assigning it to an object
+km_data = survplot( msm_model, ci = 'none', return.km = TRUE,
+                    verbose = FALSE, do.plot = FALSE )
+
+# let's see the dataset
+km_data
+```
+
+The structure of the data is consistent. `survplot()` always computes a dataset in wide format, as
+requested by `survfit` with 3 columns: 
+
+* *subject*: the ordered subject ID as passed to `msm` function;
+* *mintime*: the time at which the event occurred;
+* *anystate*: tansition indicator to compute the Kaplan-Meier.
+
+The only modification you might encounter really depends on argument `exacttimes`. 
+This is inherited from `msm` function whose aim was to tell the model 
+that transitions occurred at exact and known times, including deaths. This is the main reason why
+this argument should always be set the same way you set it in `msm`. In our case, we do have a 
+multi-state model in which transitions are well known and exact as you can see from the `msm` call
+above. `survplot()` puts `exacttimes = TRUE` by default so we don't have to worry about it. 
+As you can see from the results, `km_data` has another column named *mintime_exact*. This is the
+relative time for each subject.
+
+## Obtaining the dataset for the fitted survival
+
+Similarly to what done for the Kaplan-Meier, it is possible to obtain the data used to compute
+the fitted survival as well. This can be achieve by setting `return.p = TRUE`. If `times` is passed,
+then the resulting dataset will have as many rows as the elements in `times`. If `times` is missing, 
+then `survplot()` uses `grid` to know how many time points are requested. Below there is the 
+snippet that addresses what described.
+
+```{r returnP, collapse = TRUE}
+survplot( msm_model, ci = 'none', return.p = TRUE,
+          verbose = FALSE, do.plot = FALSE )
+```
+
+As before, only the first 6 rows are printed. Saving the data in the current environment follows
+the same procedure as seen before: 
+
+```{r returnP2, collapse = TRUE}
+# running survplot() and assigning it to an object
+fitted_data = survplot( msm_model, ci = 'none', return.p = TRUE,
+                        verbose = FALSE, do.plot = FALSE )
+
+# let's see the dataset
+fitted_data
+```
+
+The structure of the data is consistent here too. `survplot()` always computes a dataset 
+in wide format with 2 columns: 
+
+* *time*: time at which to compute the fitted survival. It can be obtained either by `grid` 
+or by `times` so that the cardinality of the data depends on them;
+* *probs*: the corresponding value of the fitted survival.
+
+Of course, you can request `survplot()` to return both the datasets by passing all the parameters.
+Below you can see the code and the output when no assignment is done and when you save the data
+into a new object.
+
+```{r return_all, collapse = TRUE}
+# just running survplot()
+survplot( msm_model, ci = 'none', 
+                     return.km = TRUE, return.p = TRUE,
+                     verbose = FALSE, do.plot = FALSE )
+
+# running survplot() and assigning it to an object
+all_data = survplot( msm_model, ci = 'none', 
+                     return.km = TRUE, return.p = TRUE,
+                     verbose = FALSE, do.plot = FALSE )
+
+# let's see the dataset
+all_data
+```
+
+`all_data` is a list of two elements. If you want to split up the datasets, just use common syntax:
+
+```{r splitting data, collapse = TRUE}
+# do not extract data using just one []. 
+# This keeps the class, so it returns a list
+km_data_wrong = all_data[ 1 ]        
+# extracting data using the list way so be careful to use double []
+km_data_1 = all_data[[ 1 ]]        
+# extracting data using the '$' access operator 
+km_data_2 = all_data$km 
+identical( km_data_wrong, km_data_1 )
+identical( km_data_1, km_data_2 )
+km_data_1
+
+fitted_data_1 = all_data[[ 2 ]]    
+fitted_data_2 = all_data$fitted    
+identical( fitted_data_1, fitted_data_2 )
+fitted_data_1
+```
+
+
+## Comparing expected and observed prevalences with `prevplot()`
 
 
 
