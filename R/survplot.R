@@ -207,7 +207,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       lines( times, 1 - upper, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
     }
 
-    if ( return.km == TRUE ) {
+    if ( km == TRUE || return.km == TRUE ) {
       dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
       setnames( dat, c( 'subject', 'time', 'state' ) )
       absind = which( dat$state == to )
@@ -254,11 +254,13 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   }
   options( warn = oldw )
   if ( return.km == TRUE && return.p == TRUE ) {
-    return( list( km = wide, fitted = data.table( time = times, probs = round( 1 - pr, 4 ) ) ) )
+    return( list( km = wide,
+                  fitted = head( data.table( time = times,
+                                                        probs = round( 1 - pr, 4 ) ), 6 ) ) )
   } else if ( return.km == TRUE && return.p == FALSE ) {
-    return( wide )
+    return( head( wide, 6 ) )
   } else if ( return.km == FALSE && return.p == TRUE ) {
-    return( data.table( time = times, probs = round( 1 - pr, 4 ) ) )
+    return( head( data.table( time = times, probs = round( 1 - pr, 4 ) ), 6 ) )
   }
 }
 
