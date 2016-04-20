@@ -167,7 +167,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       times = times
     }
   } else {
-    if ( missing( timediff ) ) {
+    if ( missing( times ) ) {
       timediff = ( rg[ 2 ] - rg[ 1 ] ) / grid
       times = seq( rg[ 1 ], rg[ 2 ], timediff )
     } else {
@@ -206,44 +206,46 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       lines( times, 1 - lower, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
       lines( times, 1 - upper, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
     }
-
-    if ( km == TRUE || return.km == TRUE ) {
-      dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
-      setnames( dat, c( 'subject', 'time', 'state' ) )
-      absind = which( dat$state == to )
-      if ( any( dat[ state == to ] ) ) {
-        if ( interp == 'start' ) {
-          mintime = dat[ absind, min( time ), by = subject ]
-        } else if ( interp == 'midpoint' ) {
-          mintime = 0.5 * ( dat[ absind, .( time ), by = subject ] +
-                              dat[ absind - 1, .( time ), by = subject ] )
-        } else {
-          mintime = dat[ , max( time ), by = subject ]
-        }
-        wide = data.table( mintime = mintime,
-                           anystate = as.numeric( any( dat[ state == to, .( state ) ] ) )
-        )
-        setnames( wide, c( 'subject', 'mintime', 'anystate' ) )
+  }
+  if ( km == TRUE || return.km == TRUE ) {
+    dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
+    setnames( dat, c( 'subject', 'time', 'state' ) )
+    absind = which( dat$state == to )
+    if ( any( dat[ state == to ] ) ) {
+      if ( interp == 'start' ) {
+        mintime = dat[ absind, min( time ), by = subject ]
+      } else if ( interp == 'midpoint' ) {
+        mintime = 0.5 * ( dat[ absind, .( time ), by = subject ] +
+                            dat[ absind - 1, .( time ), by = subject ] )
+      } else {
+        mintime = dat[ , max( time ), by = subject ]
       }
+      wide = data.table( mintime = mintime,
+                         anystate = as.numeric( any( dat[ state == to, .( state ) ] ) )
+      )
+      setnames( wide, c( 'subject', 'mintime', 'anystate' ) )
     }
-    if ( km == TRUE ) {
-      if ( add == FALSE ) {
-        if ( exacttimes == FALSE ) {
-          lines( survfit( Surv( wide$mintime, wide$anystate ) ~ 1 ), mark.time = mark.time,
-                 col = col.km, lty = lty.km, lwd = lwd.km )
-        } else {
-          wide[ , mintime_exact := mintime - min( mintime ) ]
-          setcolorder( wide, c( 'subject', 'mintime', 'mintime_exact', 'anystate' ) )
-          setkey( wide, subject )
-          lines( survfit( Surv( wide$mintime_exact, wide$anystate ) ~ 1 ), mark.time = mark.time,
-                 col = col.km, lty = lty.km, lwd = lwd.km )
-        }
-        if ( !is.null( legend.pos ) ) {
-          legend( legend.pos, legend = c( "Fitted (solid)", 'Kaplan-Meier (dashed)' ), cex = 0.8 )
-        }
+    if ( exacttimes == TRUE ) {
+      wide[ , mintime_exact := mintime - min( mintime ) ]
+      setcolorder( wide, c( 'subject', 'mintime', 'mintime_exact', 'anystate' ) )
+      setkey( wide, subject )
+    }
+  }
+  if ( do.plot == TRUE && km == TRUE ) {
+    if ( add == FALSE ) {
+      if ( exacttimes == FALSE ) {
+        lines( survfit( Surv( wide$mintime, wide$anystate ) ~ 1 ), mark.time = mark.time,
+               col = col.km, lty = lty.km, lwd = lwd.km )
+      } else {
+        lines( survfit( Surv( wide$mintime_exact, wide$anystate ) ~ 1 ), mark.time = mark.time,
+               col = col.km, lty = lty.km, lwd = lwd.km )
+      }
+      if ( !is.null( legend.pos ) ) {
+        legend( legend.pos, legend = c( "Fitted (solid)", 'Kaplan-Meier (dashed)' ), cex = 0.8 )
       }
     }
   }
+
   time.end = proc.time()
   time.total = time.end - time.start
   cat( '---\n' )
@@ -256,7 +258,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   if ( return.km == TRUE && return.p == TRUE ) {
     return( list( km = wide,
                   fitted = head( data.table( time = times,
-                                                        probs = round( 1 - pr, 4 ) ), 6 ) ) )
+                                             probs = round( 1 - pr, 4 ) ), 6 ) ) )
   } else if ( return.km == TRUE && return.p == FALSE ) {
     return( head( wide, 6 ) )
   } else if ( return.km == FALSE && return.p == TRUE ) {
