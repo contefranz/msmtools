@@ -36,7 +36,10 @@
 #' @param plot.width Width of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
 #' @param plot.height Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
 #' @param max.m If \code{M = TRUE}, it adjusts the upper \emph{y} limit when plotting M.
-#'
+#' @param devnew Set the graphical device where to plot. By default, \code{prevplot} plots on a new
+#' device by setting \code{dev.new}. If \code{FALSE}, then a plot is drawn onto the current device
+#' as specified by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
+#' a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.
 #' @details When \code{M = TRUE}, a rough indicator of the deviance from the Markov model is
 #' computed according to Titman and Sharples (2008). A comparison at a given time \eqn{t_i} of a
 #' patient \emph{k} in the state \emph{s} between observed counts \eqn{O_{is}}
@@ -54,7 +57,7 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
                      lty.ci.fit = 2, lwd.ci.fit = 1, col.ci.fit = col.fit,
                      lwd.obs = 1, lty.obs = 1, col.obs = 'darkblue',
                      legend.pos = 'topright', par.col = 3, plot.width = 10, plot.height = 5,
-                     max.m = 0.1 ) {
+                     max.m = 0.1, devnew = TRUE ) {
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
@@ -68,7 +71,11 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
   abs_state = as.integer( absorbing.msm( x ) )
   status_names = colnames( x$qmodel$imatrix )
 
-  dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
+  if ( devnew == TRUE ) {
+    dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
+  } else if ( devnew == FALSE ) {
+    dev.set( dev.cur() )
+  }
   if ( abs_state <= par.col ) {
     n_row = 1
   } else {
