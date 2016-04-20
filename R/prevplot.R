@@ -178,7 +178,11 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
     temp = sort( c( M.obj ) )
     y.max.M = temp[ length( temp ) - 1 ] + max.m * temp[ length( temp ) - 1 ]
 
-    dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
+    if ( devnew == TRUE ) {
+      dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
+    } else if ( devnew == FALSE ) {
+      dev.set( dev.cur() )
+    }
     par( mfrow = c( n_row, par.col ) )
     if ( exacttimes == FALSE ) {
       for ( i in 1:abs_state ) {
