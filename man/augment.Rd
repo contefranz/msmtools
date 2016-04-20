@@ -42,8 +42,11 @@ format.}
 
 \item{t_augmented}{The new time variable of the process in the augmented format.
 If \code{t_augmented} is missing, then the default name 'augmented' is assumed.
-The variable is added to \code{data} before
-\code{t_start}.}
+The variable is added to \code{data}. If \code{augment} detects a date or a difftime
+format in \code{t_start}, then \code{t_augmented} is cast to integer too and the suffix '_int'
+will be added to \code{t_augmented}. This is done because \code{\link[msm]{msm}} can't deal
+correclty if time variable is a date or a difftime.
+Both variables are positioned before \code{t_start}.}
 
 \item{more_status}{A variable which marks further transitions beside the default given by
 \code{state}. \code{more_status} can be a factor or a character. In particular, if the
