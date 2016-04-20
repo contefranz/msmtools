@@ -29,10 +29,10 @@
 #' @param t_augmented The new time variable of the process in the augmented format.
 #' If \code{t_augmented} is missing, then the default name 'augmented' is assumed.
 #' The variable is added to \code{data}. If \code{augment} detects a date or a difftime
-#' format in \code{t_start}, then \code{t_augmented} is cast to integer too and the suffix '_int'
-#' will be added to \code{t_augmented}. This is done because \code{\link[msm]{msm}} can't deal
-#' correclty if time variable is a date or a difftime.
-#' Both variables are positioned before \code{t_start}.
+#' format in \code{t_start}, then \code{t_augmented} is cast to integer or to numeric, respectively,
+#' into a new variable with the suffix '_int' or '_num' added to \code{t_augmented}
+#' This is done because \code{\link[msm]{msm}} can't deal correclty if time variable is a date
+#' or a difftime. Both variables are positioned before \code{t_start}.
 #' @param more_status A variable which marks further transitions beside the default given by
 #' \code{state}. \code{more_status} can be a factor or a character. In particular, if the
 #' corresponding observation is a standard admission (i.e. no other information available), then
@@ -400,8 +400,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   } else {
     final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_death ) ]
   }
-  if ( inherits( eval( substitute( data$t_start ) ), 'Date' ) ||
-       inherits( eval( substitute( data$t_start ) ), 'difftime' ) ) {
+  if ( inherits( eval( substitute( data$t_start ) ), 'Date' ) ) {
     final[ , paste( substitute( t_augmented ), '_int', sep = '' ) := as.integer( get( t_augmented ) ) ]
     id_col = which( names( data ) == substitute( t_start ) )
     setcolorder( final, c( 1:( id_col - 1 ), ( dim( final )[ 2 ] - 1 ), dim( final )[ 2 ],
@@ -410,7 +409,15 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
          paste( substitute( t_augmented ), '_int', sep = '' ),
          '\" successfully added and repositioned\n', sep = '' )
     cat( '---\n' )
-
+  } else if ( inherits( eval( substitute( data$t_start ) ), 'difftime' ) ) {
+    final[ , paste( substitute( t_augmented ), '_num', sep = '' ) := as.numeric( get( t_augmented ) ) ]
+    id_col = which( names( data ) == substitute( t_start ) )
+    setcolorder( final, c( 1:( id_col - 1 ), ( dim( final )[ 2 ] - 1 ), dim( final )[ 2 ],
+                           id_col:( dim( final )[ 2 ] - 2 ) ) )
+    cat( 'variables \"', substitute( t_augmented ), '\" and \"',
+         paste( substitute( t_augmented ), '_num', sep = '' ),
+         '\" successfully added and repositioned\n', sep = '' )
+    cat( '---\n' )
   }
 
   id_col = which( names( data ) == substitute( t_start ) )
