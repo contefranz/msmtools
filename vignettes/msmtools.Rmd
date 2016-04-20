@@ -3,14 +3,22 @@ title: "msmtools"
 author: "Francesco Grossetti"
 date: "`r Sys.Date()`"
 fontsize: 12pt
-output: rmarkdown::html_vignette
+# output: rmarkdown::html_vignette
+output:
+  pdf_document:
+    number_sections: yes
+    toc: yes
 vignette: >
   %\VignetteIndexEntry{msmtools}
-  %\VignetteEngine{knitr::rmarkdown_notangle}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
 ---
 
-## Introduction
+```{r ninja, echo = FALSE }
+library( msmtools )
+```
+
+# Introduction
 
 Package **msmtools** is an `R` package whose main goal is to facilitate the workflow with
 longitudinal datasets which need to be analyzed in the context of multi-state models. In particular,
@@ -30,11 +38,10 @@ hospital admissions for 10 patients. For a detailed description of the dataset, 
 For demonstration purposes, we extract only the first 2 patients, reducing the `hosp` dataset
 to a test sample of 17 rows per 8 variables as you can see below.
 
-```{r echo = FALSE}
-library( msmtools )
+```{r long example, collapse = TRUE}
 data( hosp )
-test = hosp[ 1:17, .( subj, adm_number, gender, age, label_2, dateIN, dateOUT, dateCENS ) ]
-test
+hosp[ 1:17, .( subj, adm_number, gender, age, label_2, 
+               dateIN, dateOUT, dateCENS ) ]
 ```
 
 So, these two patients are 'observed' 11 and 6 times through years, respectively.
@@ -55,13 +62,14 @@ longitudinal dataset with exact starting and ending times and reshape it to prod
 version. For instance, if you apply `augment()` to the dataset above, you get what follows:
 
 
-```{r echo = FALSE}
-library( msmtools )
-data( hosp )
-hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
-t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, verbose = F )
-head( hosp_augmented[ , .( subj, adm_number, gender,
-age, label_2, augmented, status, n_status ) ], 35 )
+```{r running augment, collapse = TRUE}
+hosp_augmented = augment( data = hosp, data_key = subj, 
+                          n_events = adm_number, pattern = label_3,
+                          t_start = dateIN, t_end = dateOUT, 
+                          t_cens = dateCENS, verbose = FALSE )
+
+hosp_augmented[ 1:35, .( subj, adm_number, gender, age, label_2, 
+                         augmented, status, n_status ) ]
 ```
 
 Despite the fact that not the same variables have been reported because of layout concerns, two
@@ -99,13 +107,123 @@ The variable is cast as character;
 when a model on the progression of the process is intended.
 
 
+## What if a more complex status structure is needed?
 
+`augment()` by default takes a very simple status structure given by 3 different values. In general, this is enough to define a multi-state model. But what if we need a more complex
+structure. Let’s consider again the dataset `hosp` for the 3rd, 4th, 5th, and 6th patient with the 
+following variables:
 
+```{r subsetting, collapse = TRUE }
+hosp[ 18:28, .( subj, adm_number, rehab, it, rehab_it,
+                dateIN, dateOUT, dateCENS ) ]
+```
 
+As you can see, we have two variables which take into account the type of hospital admission. 
+*rehab* marks a rehabilitation admission while *it* marks an intensive therapy one. 
+They are both binary and integer variables, so one can compose them to get something which is 
+informative and, at the same time, usable in the context of ‘making a status’. We then created 
+the variable *rehab_it* which marks all the information in one place and it is a character. 
+You can pass *rehab_it* to the argument `more_status` to tell `augment()` to add these information into 
+a new structure. Now, it is important to remember that `augment()` introduces some rules when you 
+require to compute a more complex status structure. As you can see from the dataset, many values 
+of *rehab_it* are set to `df`. This stands for ‘default’ and when `augment()` finds it, it just compute 
+the default status you already passed to argument state (i.e. in this case, it can be ‘IN’, ‘OUT’, 
+or ‘DEAD’). The argument `more_status` always looks for the value `df`, hence whenever you need to 
+specify a default transition make sure to label it with this value. So, if we run `augment()` on 
+this sample, we obtain the following:
 
+```{r complex status, collapse = TRUE }
+hosp_augmented = augment( data = hosp, data_key = subj,
+                          n_events = adm_number, pattern = label_2,
+                          t_start = dateIN, t_end = dateOUT,
+                          t_cens = dateCENS, more_status = rehab_it,
+                          verbose = FALSE )
 
+hosp_augmented[ 36:60, .( subj, adm_number, rehab_it,
+                          augmented, status, status_exp, n_status_exp ) ]
+```
 
+Beside the usual status variables, of which we reported only status, `augment()` computed two more:
 
+* *status_exp*: is the direct expansion of status and the variable you passed to `more_status`, 
+which in this case is *rehab_it*. The function composes them by pasting a ’_’ in between. 
+This is the main reason why it is worth to build a character variable if you know you need to fuel 
+it in as an indicator of a more complex status structure;
+* *n_status_exp*: similar to what has been done before, `augment()` mixes information coming from 
+the current expandend status and the number of admission to give you the time evolution of the 
+process.
+
+# Graphical Assessment of a Multi-state Model 
+
+**msmtools** has been mainly developed to easily manage and work with longitudinal datasets
+which need to be restructured in order to get msm to work properly.
+
+However, **msmtools** comes with two more functions which try to address graphically and in a very 
+efficient way the problem of the Goodness-of-Fit (Gof) for a multi-state model. When dealing 
+with this type of models, GoF is always a tough quest. Furthermore, up to now, no formal 
+statistical tests are defined when a multi-state model is computed within an exact time framework.
+
+## Comparing fitted and empirical survival with `survplot()`
+
+One of the most common graphical method to assess whether a multi-state model is behaving 
+the way we expect, is to compare the empirical survival with the fitted one. `survplot()` 
+helps out doing this and few more things. The function is a wrapper of the already known 
+`plot.survfit.msm()` from the package **msm**.
+
+Suppose we ran a multi-state model on dataset hosp with the following code:
+
+```{r multistate model, collapse = TRUE }
+hosp_augmented = augment( data = hosp, data_key = subj,
+                          n_events = adm_number, pattern = label_2,
+                          t_start = dateIN, t_end = dateOUT,
+                          t_cens = dateCENS, verbose = FALSE )
+
+# let's define the initial transition matrix for our model
+Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE ) 
+Qmat[ 1, 1:3 ] = 1
+Qmat[ 2, 1:3 ] = 1
+colnames( Qmat ) = c( 'IN', 'OUT', 'D' )
+rownames( Qmat ) = c( 'IN', 'OUT', 'D' ) 
+Qmat
+
+# attaching the msm package and running the model using 
+# gender and age as covariates
+library( msm )
+msm_model = msm( status_num ~ augmented_int,
+                 subject = subj, data = hosp_augmented,
+                 covariates = ~ gender + age,
+                 exacttimes = TRUE, gen.inits = TRUE,
+                 qmatrix = Qmat, method = 'BFGS',
+                 control = list( fnscale = 6e+05, trace = 0, 
+                                 REPORT = 1, maxit = 10000 ) )
+```
+
+We now have a multi-state model for which we can carry out some graphical inspections. 
+So, we want a simple comparison between the fitted survival curve and the empirical one, 
+computed using the Kaplan-Meier estimator. The code is as follows:
+
+```{r survplot 1, fig.align = 'center', fig.width = 5, fig.height = 4}
+survplot( msm_model, km = TRUE, ci = 'none', 
+          verbose = FALSE, devnew = FALSE )
+```
+
+With no surprises, the plot is not so satistying due to the really small dataset we provided. 
+
+Now, `survplot()` takes several parameters, many of them come with a default value. For instance, the 
+figureabove has been computed for a transition (IN - DEAD). We can pass to argument `from` any 
+starting state we want. If `to` is missing, `survplot()` will check what is the higher value in the 
+corresponding `msm` object and grabs it. Of course, you are free to compute any survival you want, 
+given the transition is allowed in the initial transition matrix `Qmat`. Let's plot the survival
+comparison for the transition (OUT - DEAD): 
+
+```{r survplot 2, fig.align = 'center', fig.width = 5, fig.height = 4}
+survplot( msm_model, km = TRUE, from = 2, ci = 'none', 
+          verbose = FALSE, devnew = FALSE )
+```
+
+If we do not want to show the Kaplan-Meier, we can pass `km = FALSE`, which is the default.
+When `km` is set to `TRUE`, `survplot()` computes the associated dataset real fast using `data.table`.
+It is possible to tell `survplot()` to return this by setting `return.km = TRUE`. 
 
 
 
