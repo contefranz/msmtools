@@ -222,8 +222,32 @@ survplot( msm_model, km = TRUE, from = 2, ci = 'none',
 ```
 
 If we do not want to show the Kaplan-Meier, we can pass `km = FALSE`, which is the default.
-When `km` is set to `TRUE`, `survplot()` computes the associated dataset real fast using `data.table`.
-It is possible to tell `survplot()` to return this by setting `return.km = TRUE`. 
+It is possible to tell `survplot()` to return the associated Kaplan-Meier dataset by setting 
+`return.km = TRUE` by fastly computing the data using `data.table`. Passing only `km = TRUE` won't
+return any data, even if they must be computed anyway.
+
+```{r returnKM, collapse = TRUE}
+survplot( msm_model, ci = 'none', return.km = TRUE,
+          verbose = FALSE, do.plot = FALSE )
+```
+
+
+## Setting a custom time sequence
+
+By default `survplot()` computes the fitted survival on a given grid. The number of grid points is
+given by `grid`. In some cases, one would like to pass a custom time sequence. This can be achieved
+by passing the argument `times` a numeric vector. Now `grid` is ignored. 
+
+Consider our dataset and suppose we want to compute a fitted survival at for the second year from 
+now. The following code addresses this request.
+
+```{r custom time seq, fig.align = 'center', fig.width = 5, fig.height = 4}
+time_seq = seq( 300, 800, by = 30 )
+survplot( msm_model, times = time_seq, ci = 'none', 
+          verbose = FALSE, devnew = FALSE )
+```
+
+
 
 
 
