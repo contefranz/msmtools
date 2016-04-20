@@ -207,7 +207,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       lines( times, 1 - upper, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
     }
 
-    if ( km == TRUE ) {
+    if ( return.km == TRUE ) {
       dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
       setnames( dat, c( 'subject', 'time', 'state' ) )
       absind = which( dat$state == to )
@@ -225,6 +225,8 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
         )
         setnames( wide, c( 'subject', 'mintime', 'anystate' ) )
       }
+    }
+    if ( km == TRUE ) {
       if ( add == FALSE ) {
         if ( exacttimes == FALSE ) {
           lines( survfit( Surv( wide$mintime, wide$anystate ) ~ 1 ), mark.time = mark.time,
