@@ -90,6 +90,44 @@ patient \emph{k} in the state \emph{s} between observed counts \eqn{O_{is}}
 with expected ones \eqn{E_{is}} is build as follows:
 \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is} }
 }
+\examples{
+\dontrun{
+data( hosp )
+
+# augmenting the data
+hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
+                          t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+
+# let's define the initial transition matrix for our model
+Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
+Qmat[ 1, 1:3 ] = 1
+Qmat[ 2, 1:3 ] = 1
+colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+
+# attaching the msm package and running the model using
+# gender and age as covariates
+library( msm )
+msm_model = msm( status_num ~ augmented_int,
+                 subject = subj, data = hosp_augmented, covariates = ~ gender + age,
+                 exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat, method = 'BFGS',
+                 control = list( fnscale = 6e+05, trace = 0,
+                 REPORT = 1, maxit = 10000 ) )
+
+# defining the times at which compute the prevalences
+t_min = min( hosp_augmented$augmented_int )
+t_max = max( hosp_augmented$augmented_int )
+steps = 100L
+
+# computing prevalences
+prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
+                       times = seq( t_min, t_max, steps ) )
+
+# and plotting them using prevplot()
+prevplot( msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
+}
+
+}
 \author{
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.
 }
@@ -105,6 +143,7 @@ The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
 URL \url{http://www.jstatsoft.org/v38/i08/}.
 }
 \seealso{
-\code{\link[msm]{plot.prevalence.msm}}
+\code{\link[msm]{plot.prevalence.msm}}, \code{\link[msm]{msm}},
+\code{\link[msm]{prevalence.msm}}
 }
 

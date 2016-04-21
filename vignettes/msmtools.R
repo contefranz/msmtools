@@ -77,7 +77,7 @@ km_data = survplot( msm_model, ci = 'none', return.km = TRUE,
                     verbose = FALSE, do.plot = FALSE )
 
 # let's see the dataset
-km_data
+head( km_data )
 
 ## ----returnP, collapse = TRUE--------------------------------------------
 survplot( msm_model, ci = 'none', grid = 10, return.p = TRUE,

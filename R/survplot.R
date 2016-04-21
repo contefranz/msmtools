@@ -94,13 +94,39 @@
 #' \code{$probs} contains 2 columns:\cr
 #' \emph{time}: time at which to compute the fitted survival.\cr
 #' \emph{probs}: the corresponding value of the fitted survival.\cr
-#' @examples # Assigning survplot to an object:
+#' @examples
 #' \dontrun{
+#' data( hosp )
 #'
-#' results = survplot( msm_model, return.km = TRUE, return.p = TRUE )
-#' kaplan_meier_data = results[ 1 ]
-#' fitted_data = results[ 2 ]
+#' # augmenting the data
+#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
+#'                           t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+#'
+#' # let's define the initial transition matrix for our model
+#' Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
+#' Qmat[ 1, 1:3 ] = 1
+#' Qmat[ 2, 1:3 ] = 1
+#' colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+#' rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+#'
+#' # attaching the msm package and running the model using
+#' # gender and age as covariates
+#' library( msm )
+#' msm_model = msm( status_num ~ augmented_int,
+#'                  subject = subj, data = hosp_augmented, covariates = ~ gender + age,
+#'                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat, method = 'BFGS',
+#'                  control = list( fnscale = 6e+05, trace = 0,
+#'                  REPORT = 1, maxit = 10000 ) )
+#'
+#' # plotting the fitted and empirical survival
+#' survplot( msm_model, km = TRUE, ci = 'none', verbose = FALSE, devnew = FALSE )
+#'
+#' # returning fitted and empirical data
+#' all_data = survplot( msm_model, ci = 'none',
+#'                      return.km = TRUE, return.p = TRUE,
+#'                      verbose = FALSE, do.plot = FALSE )
 #' }
+#'
 #' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
 #' \emph{Statistical Methods in Medical Research}, 19, 621-651.\cr
 #'
@@ -110,7 +136,8 @@
 #' Jackson, C.H. (2011). Multi-State Models for Panel Data:
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
 #' URL \url{http://www.jstatsoft.org/v38/i08/}.
-#' @seealso \code{\link[msm]{plot.survfit.msm}}
+#' @seealso \code{\link[msm]{plot.survfit.msm}}, \code{\link[msm]{msm}},
+#' \code{\link[msm]{pmatrix.msm}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
 #' @importFrom msm absorbing.msm
