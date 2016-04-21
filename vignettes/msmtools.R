@@ -80,12 +80,12 @@ km_data = survplot( msm_model, ci = 'none', return.km = TRUE,
 km_data
 
 ## ----returnP, collapse = TRUE--------------------------------------------
-survplot( msm_model, ci = 'none', return.p = TRUE,
+survplot( msm_model, ci = 'none', grid = 10, return.p = TRUE,
           verbose = FALSE, do.plot = FALSE )
 
 ## ----returnP2, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4----
 # running survplot() and assigning it to an object
-fitted_data = survplot( msm_model, ci = 'none', return.p = TRUE,
+fitted_data = survplot( msm_model, ci = 'none', grid = 10, return.p = TRUE,
                         verbose = FALSE, do.plot = FALSE )
 
 # let's see the dataset
@@ -93,12 +93,12 @@ fitted_data
 
 ## ----return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4----
 # just running survplot()
-survplot( msm_model, ci = 'none',
+survplot( msm_model, ci = 'none', grid = 10,
                      return.km = TRUE, return.p = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
 # running survplot() and assigning it to an object
-all_data = survplot( msm_model, ci = 'none',
+all_data = survplot( msm_model, ci = 'none', grid = 10,
                      return.km = TRUE, return.p = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 

@@ -263,13 +263,13 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   }
   options( warn = oldw )
   if ( return.km == TRUE && return.p == TRUE ) {
-    return( list( km = wide,
-                  fitted = head( data.table( time = times,
-                                             probs = round( 1 - pr, 4 ) ), 6 ) ) )
+    return( invisible( list( km = wide,
+                  fitted = data.table( time = times,
+                                             probs = round( 1 - pr, 4 ) ) ) ) )
   } else if ( return.km == TRUE && return.p == FALSE ) {
-    return( head( wide, 6 ) )
+    return( invisible( wide ) )
   } else if ( return.km == FALSE && return.p == TRUE ) {
-    return( head( data.table( time = times, probs = round( 1 - pr, 4 ) ), 6 ) )
+    return( invisible( data.table( time = times, probs = round( 1 - pr, 4 ) ) ) )
   }
 }
 

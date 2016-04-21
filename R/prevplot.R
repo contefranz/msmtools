@@ -85,10 +85,6 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
     }
   }
 
-  if ( M == TRUE && devnew == FALSE ) {
-    warning( 'devnew is considered only for prevalence plot. M will be plotted into a new device' )
-  }
-
   t_min = range( model.extract( x$data$mf, "time" ) )[ 1 ]
   t_max = range( model.extract( x$data$mf, "time" ) )[ 2 ]
   x_axis = seq( t_min, t_max, grid )
