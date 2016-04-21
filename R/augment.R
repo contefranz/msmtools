@@ -38,8 +38,8 @@
 #' corresponding observation is a standard admission (i.e. no other information available), then
 #' \code{more_status} must be set to 'df' which stands for 'Default' (see 'Examples' and ?hosp).
 #' If missing, \code{augment} ignores it.
-#' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat},
-#' \code{message} and \code{warning} are suppressed. All is done internally so that no global
+#' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat} and
+#' \code{message} are suppressed. All is done internally so that no global
 #' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 #' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
 #' @details In order to get the data processed, a monotonic increasing process needs to be ensured.

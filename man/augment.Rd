@@ -54,8 +54,8 @@ corresponding observation is a standard admission (i.e. no other information ava
 \code{more_status} must be set to 'df' which stands for 'Default' (see 'Examples' and ?hosp).
 If missing, \code{augment} ignores it.}
 
-\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat},
-\code{message} and \code{warning} are suppressed. All is done internally so that no global
+\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat} and
+\code{message} are suppressed. All is done internally so that no global
 options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 }

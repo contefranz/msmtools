@@ -112,8 +112,8 @@ device by setting \code{dev.new}. If \code{FALSE}, then a plot is drawn onto the
 as specified by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
 a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.}
 
-\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat},
-\code{message} and \code{warning} are suppressed. All is done internally so that no global
+\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat} and
+\code{message} are suppressed. All is done internally so that no global
 options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 }

@@ -207,6 +207,7 @@ it in as an indicator of a more complex status structure;
 the current expandend status and the number of admission to give you the time evolution of the
 process.
 
+
 # Graphical Assessment of a Multi-state Model
 
 **msmtools** has been mainly developed to easily manage and work with longitudinal datasets
@@ -328,8 +329,9 @@ that transitions occurred at exact and known times, including deaths. This is th
 this argument should always be set the same way you set it in `msm`. In our case, we do have a
 multi-state model in which transitions are well known and exact as you can see from the `msm` call
 above. `survplot()` puts `exacttimes = TRUE` by default so we don't have to worry about it.
-As you can see from the results, `km_data` has another column named *mintime_exact*. This is the
-relative time for each subject.
+So, when `exacttimes = TRUE`, `survplot()` adds a new time variable which provides the relative
+time for each transition within a given subject. For instance, `km_data` has another column 
+named *mintime_exact* which is cast the same way of *augmented*.
 
 ### Obtaining the dataset for the fitted survival
 
@@ -442,5 +444,24 @@ Sharples (2008). The following code addresses this request.
 ```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3}
 prevplot( msm_model, prev, M = TRUE, ci = TRUE, devnew = F )
 ```
+
+
+## Arguments Miscellanea
+
+We are not going to discuss every arguments inside every function. This paragraph serves as a 
+guideline to better exploit `msmtools`. We have developed the package by paying lot of attention to
+the consistency of the code throughout the functions. 
+
+For example, you can find the argument `verbose` anywhere in the package. This is useful when you 
+do not want to be informed about nothing that is happening internally with the only exception for 
+warnings and of course errors. If quiet is your mood, you can set `verbose = FALSE`.
+
+
+
+
+
+
+
+
 
 

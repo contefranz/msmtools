@@ -10,7 +10,7 @@ prevplot(x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE,
   lty.ci.fit = 2, lwd.ci.fit = 1, col.ci.fit = col.fit, lwd.obs = 1,
   lty.obs = 1, col.obs = "darkblue", legend.pos = "topright",
   par.col = 3, plot.width = 10, plot.height = 5, max.m = 0.1,
-  devnew = TRUE)
+  devnew = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -72,6 +72,11 @@ See \code{\link[graphics]{par}}.}
 device by setting \code{dev.new}. If \code{FALSE}, then a plot is drawn onto the current device
 as specified by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
 a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.}
+
+\item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat} and
+\code{message} are suppressed. All is done internally so that no global
+options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
+(see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 }
 \description{
 Provides a graphical indication of goodness of fit of a multi-state model computed by
