@@ -477,7 +477,7 @@ the consistency of the code throughout the functions.
 
 For example, you can find the argument `verbose` anywhere in the package. This is useful when you 
 do not want to be informed about anything that is happening internally with the only exception for 
-warnings and of course errors. If quiet is your mood, you can set `verbose = FALSE`.
+warnings and of course errors. If quiet is your mood, then you may want to set `verbose = FALSE`.
 
 A second argument which is shared between `survplot()` and `prevplot()` is `devnew`. This is a 
 purely graphical parameter which is set to `TRUE` by default. It allows you to decide whether 
@@ -485,19 +485,9 @@ to plot on a new graphical device called with `dev.new()` by default. If you set
 then the plot is overwritten according to `dev.cur()`. There exist two caveat: the former is that
 `devnew` is bypassed if the argument `add = TRUE` is passed to `survplot()`. This means that, when
 you want to add a new layer to an existing plot (with `add`), it does not make any sense to let 
-the function using a new device. Hence, `devnew` is simply ignored. The latter is that when you set
-`M = TRUE` in `prevplot()`, then by default the plot of $M$ is returned on a new device. This means
-that if you set `M = TRUE` together with `devnew = FALSE`, `prevplot()` will overwrite the current
-device with the prevalence plot, but will call anyway a new device for the $M$ plot.
-
-
-
-
-
-
-
-
-
+the function using a new device. Hence, `devnew` is simply ignored. The latter is that, even you 
+can set `devnew = FALSE` in `prevplot()`, one should keep it as the default. If you set it to `FALSE`
+and you want a plot of $M$ by setting $M = TRUE$, then this plot overwrites the prevalence one.
 
 
 

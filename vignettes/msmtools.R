@@ -122,6 +122,14 @@ fitted_data_2 = all_data$fitted
 identical( fitted_data_1, fitted_data_2 )
 fitted_data_1
 
+## ----layering, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4----
+# plotting the first survival from state 'IN'
+survplot( msm_model, from = 1, devnew = FALSE, verbose = FALSE )
+
+# plotting the first survival from state 'OUT'
+survplot( msm_model, from = 2, add = TRUE, col.fit = 'darkblue',
+          devnew = FALSE, verbose = FALSE )
+
 ## ----prev, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3----
 # defining the times at which compute the prevalences
 t_min = min( hosp_augmented$augmented_int )
@@ -133,8 +141,9 @@ prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
                             times = seq( t_min, t_max, steps ) )
 
 # and plotting them using prevplot()
-prevplot( msm_model, prev, ci = TRUE, devnew = F )
+prevplot( msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
 
-## ----plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3----
-prevplot( msm_model, prev, M = TRUE, ci = TRUE, devnew = F )
+## ----plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3, warning = F----
+prevplot( msm_model, prev, M = TRUE, ci = TRUE, 
+          devnew = FALSE, verbose = FALSE )
 

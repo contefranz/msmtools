@@ -222,10 +222,15 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
     temp = sort( c( M.obj ) )
     y.max.M = temp[ length( temp ) - 1 ] + max.m * temp[ length( temp ) - 1 ]
 
-    if ( devnew == FALSE ) {
-      cat( 'devnew = FALSE! Plotting M on a new device anyway\n' )
+    if ( devnew == TRUE ) {
+      cat( '---\n' )
+      cat( 'setting new graphical device\n')
+      dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
+    } else if ( devnew == FALSE ) {
+      cat( '---\n' )
+      cat( 'plotting on device', dev.cur(), '\n' )
+      dev.set( dev.cur() )
     }
-    dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
     par( mfrow = c( n_row, par.col ) )
     if ( exacttimes == FALSE ) {
       for ( i in 1:abs_state ) {
