@@ -1,8 +1,8 @@
-#' Reshape a longitudinal dataset to data for multi-state analyses.
+#' A fast and general method for building augmented data.
 #'
-#' A fast method which converts standard longitudinal data, where each observation contains
-#' the exact starting and ending time of the process, to data suitable for multi-state analyses
-#' using the \code{\link[msm]{msm}} package.
+#' A fast and general method for reshaping standard longitudinal data, where each observation contains
+#' the exact starting and ending time of the process, into a new structure called 'augmented'
+#' which is suitable for multi-state analyses using the \code{\link[msm]{msm}} package.
 #'
 #' @param data A \code{data.table} object where each row represents an observation.
 #' @param data_key A keying variable which \code{augment} uses to define a key for \code{data}.
@@ -44,12 +44,30 @@
 #' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
 #' @details In order to get the data processed, a monotonic increasing process needs to be ensured.
 #' \code{augment} checks this both in case \code{n_events} is missing or not. The data are
-#' fastly ordered through \code{\link[data.table]{setkey}} function and using \code{data_key} as the primary key and \code{t_start} as secondary key. Then it checks \code{n_events} and if it fails,
+#' fastly ordered through \code{\link[data.table]{setkey}} function and using \code{data_key} as
+#' the primary key and \code{t_start} as secondary key. Then it checks \code{n_events} and if it fails,
 #' it returns the subjects gived by \code{data_key} where issues occurred before giving an
 #' error and stopping. If \code{n_events} is not passed, then the ordering procedure remains the
 #' same, but the progression number is created internally with the name \code{n_events}.
 #' @return A restructured long format dataset of class \code{"data.table"} where each row
-#' represents a specific transition.
+#' represents a specific transition for a given subject. Moreover, \code{augment} adds some
+#' important variables:\cr
+#' -----\cr
+#' \emph{augmented}: the new timing variable for the process when looking at transitions. If
+#' \code{t_augmented} is missing, then \code{augment} creates \emph{augmented} by default.
+#' \emph{augmented}. The function looks directly to \code{t_start} and \code{t_end} to build
+#' it and thus it inherits their class.
+#' In particular, if \code{t_start} is a date format, then \code{augment} computes a new variable
+#' cast as integer and names it \emph{augmented_int}. If \code{t_start} is a difftime format,
+#' then \code{augment} computes a new variable cast as a numeric and names it \emph{augmented_num};\cr
+#' \emph{status}: a status flag which looks at \code{state}. \code{augment} automatically checks
+#' whether argument \code{pattern} has 2 or 3 unique values and computes the correct structure of
+#' a given subject. The variable is cast as character;\cr
+#' \emph{status_num}: the corresponding integer version of \emph{status};\cr
+#' \emph{n_status}: a mix of \emph{status} and \emph{status_num} cast as character.
+#' \emph{status_num} comes into play when a model on the progression of the process is intended.\cr
+#' -----\cr
+#'
 #' @examples
 #' # 1.
 #' # loading data
@@ -57,17 +75,17 @@
 #'
 #' # augmenting hosp
 #' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
-#' t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+#'                           t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
 #'
 #' # 2.
 #' # augmenting hosp by passing more information regarding transition with arg. more_status
 #' hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
-#' pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, more_status = rehab_it )
+#'                                pattern = label_3, t_start = dateIN, t_end = dateOUT,
+#'                                t_cens = dateCENS, more_status = rehab_it )
 #'
 #' \dontrun{
 #' augmented = augment( data = hosp, data_key = subj, n_events = dateIN,
-#' pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
-#' }
+#'                      pattern = label_3, t_start = dateIN, t_end = dateOUT, t_cens = dateCENS ) }
 #' @references Jackson, C.H. (2011). Multi-State Models for Panel Data:
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
 #' URL \url{http://www.jstatsoft.org/v38/i08/}.

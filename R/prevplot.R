@@ -46,8 +46,15 @@
 #' with expected ones \eqn{E_{is}} is build as follows:
 #' \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is} }
 #' @seealso \code{\link[msm]{plot.prevalence.msm}}
-#' @references Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
-#' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195.
+#' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
+#' \emph{Statistical Methods in Medical Research}, 19, 621-651.\cr
+#'
+#' Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
+#' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
+#'
+#' Jackson, C.H. (2011). Multi-State Models for Panel Data:
+#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+#' URL \url{http://www.jstatsoft.org/v38/i08/}.
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
 #' @export

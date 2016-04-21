@@ -162,7 +162,8 @@ discussed in the next section where `state` acts as the main indicator of states
 
 ## What if a more complex status structure is needed?
 
-`augment()` by default takes a very simple status structure given by 3 different values. In general, this is enough to define a multi-state model. But what if we need a more complex
+`augment()` by default takes a very simple status structure given by 3 different values. 
+In general, this is enough to define a multi-state model. But what if we need a more complex
 structure. Let’s consider again the dataset `hosp` for the 3rd, 4th, 5th, and 6th patient with the
 following variables:
 

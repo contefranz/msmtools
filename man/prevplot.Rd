@@ -89,8 +89,15 @@ with expected ones \eqn{E_{is}} is build as follows:
 Francesco Grossetti \email{francesco.grossetti@polimi.it}.
 }
 \references{
+Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
+\emph{Statistical Methods in Medical Research}, 19, 621-651.\cr
+
 Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
-hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195.
+hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
+
+Jackson, C.H. (2011). Multi-State Models for Panel Data:
+The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+URL \url{http://www.jstatsoft.org/v38/i08/}.
 }
 \seealso{
 \code{\link[msm]{plot.prevalence.msm}}

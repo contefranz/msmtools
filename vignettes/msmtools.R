@@ -36,14 +36,14 @@ hosp_augmented = augment( data = hosp, data_key = subj,
                           t_cens = dateCENS, verbose = FALSE )
 
 # let's define the initial transition matrix for our model
-Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE ) 
+Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
 Qmat[ 1, 1:3 ] = 1
 Qmat[ 2, 1:3 ] = 1
 colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' ) 
+rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
 Qmat
 
-# attaching the msm package and running the model using 
+# attaching the msm package and running the model using
 # gender and age as covariates
 library( msm )
 msm_model = msm( status_num ~ augmented_int,
@@ -51,20 +51,20 @@ msm_model = msm( status_num ~ augmented_int,
                  covariates = ~ gender + age,
                  exacttimes = TRUE, gen.inits = TRUE,
                  qmatrix = Qmat, method = 'BFGS',
-                 control = list( fnscale = 6e+05, trace = 0, 
+                 control = list( fnscale = 6e+05, trace = 0,
                                  REPORT = 1, maxit = 10000 ) )
 
 ## ----survplot 1, fig.align = 'center', fig.width = 5, fig.height = 4-----
-survplot( msm_model, km = TRUE, ci = 'none', 
+survplot( msm_model, km = TRUE, ci = 'none',
           verbose = FALSE, devnew = FALSE )
 
 ## ----survplot 2, fig.align = 'center', fig.width = 5, fig.height = 4-----
-survplot( msm_model, km = TRUE, from = 2, ci = 'none', 
+survplot( msm_model, km = TRUE, from = 2, ci = 'none',
           verbose = FALSE, devnew = FALSE )
 
 ## ----custom time seq, fig.align = 'center', fig.width = 5, fig.height = 4----
 time_seq = seq( 300, 800, by = 30 )
-survplot( msm_model, times = time_seq, ci = 'none', 
+survplot( msm_model, times = time_seq, ci = 'none',
           verbose = FALSE, devnew = FALSE )
 
 ## ----returnKM, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4----
@@ -93,12 +93,12 @@ fitted_data
 
 ## ----return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4----
 # just running survplot()
-survplot( msm_model, ci = 'none', 
+survplot( msm_model, ci = 'none',
                      return.km = TRUE, return.p = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
 # running survplot() and assigning it to an object
-all_data = survplot( msm_model, ci = 'none', 
+all_data = survplot( msm_model, ci = 'none',
                      return.km = TRUE, return.p = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
@@ -106,19 +106,19 @@ all_data = survplot( msm_model, ci = 'none',
 all_data
 
 ## ----splitting data, collapse = TRUE-------------------------------------
-# do not extract data using just one []. 
+# do not extract data using just one [].
 # This keeps the class, so it returns a list
-km_data_wrong = all_data[ 1 ]        
+km_data_wrong = all_data[ 1 ]
 # extracting data using the list way so be careful to use double []
-km_data_1 = all_data[[ 1 ]]        
-# extracting data using the '$' access operator 
-km_data_2 = all_data$km 
+km_data_1 = all_data[[ 1 ]]
+# extracting data using the '$' access operator
+km_data_2 = all_data$km
 identical( km_data_wrong, km_data_1 )
 identical( km_data_1, km_data_2 )
 km_data_1
 
-fitted_data_1 = all_data[[ 2 ]]    
-fitted_data_2 = all_data$fitted    
+fitted_data_1 = all_data[[ 2 ]]
+fitted_data_2 = all_data$fitted
 identical( fitted_data_1, fitted_data_2 )
 fitted_data_1
 
@@ -135,6 +135,6 @@ prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
 # and plotting them using prevplot()
 prevplot( msm_model, prev, ci = TRUE, devnew = F )
 
-## ----plot_M, collapse = TRUE---------------------------------------------
+## ----plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3----
 prevplot( msm_model, prev, M = TRUE, ci = TRUE, devnew = F )
 

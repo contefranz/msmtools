@@ -1,8 +1,7 @@
-#' Plot empirical and fitted survival curve from a multi-state model.
+#' Plot and get survival data from a multi-state model.
 #'
 #' Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
-#' \code{\link[msm]{msm}} model. Fast build and return the associated datasets to the global
-#' environment.
+#' \code{\link[msm]{msm}} model. Fast build and return the associated datasets.
 #'
 #' @param x A \code{msm} object.
 #' @param from State from which to compute the estimated survival. Default to state 1.
@@ -74,13 +73,14 @@
 #' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 #' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
 #' @details The function is a wrapper of \code{\link[msm]{plot.survfit.msm}} and does more things.
-#' \code{survplot} is deals correctly the plot of a fitted survival in
+#' \code{survplot} manages correctly the plot of a fitted survival in
 #' an exact times framework (when \code{exacttimes = TRUE}) by just resetting the time scale
 #' and looking at the follow-up time.
 #' It can fastly compute, build and return to the user the dataset on which the Kaplan-Meier has
 #' been computed. Similarly, it can return to the user the dataset on which the fitted survival has
 #' been computed, both with user defined times (through \code{times}) and self set times (through
-#' \code{grid}).
+#' \code{grid}). For more details about how \code{survplot} returns objects, please refer to the
+#' vignette with \code{vignette("msmtools")}.
 #' @return If both \code{return.km} and \code{return.p} are set to \code{TRUE}, then \code{survplot}
 #' returns a named list with \code{$km} and \code{$probs} as \code{data.table}. To save them in the
 #' current environment assign \code{survplot} to an object (see 'Examples')\cr
@@ -101,8 +101,15 @@
 #' kaplan_meier_data = results[ 1 ]
 #' fitted_data = results[ 2 ]
 #' }
-#' @references Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
-#' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195.
+#' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
+#' \emph{Statistical Methods in Medical Research}, 19, 621-651.\cr
+#'
+#' Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
+#' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
+#'
+#' Jackson, C.H. (2011). Multi-State Models for Panel Data:
+#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+#' URL \url{http://www.jstatsoft.org/v38/i08/}.
 #' @seealso \code{\link[msm]{plot.survfit.msm}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
