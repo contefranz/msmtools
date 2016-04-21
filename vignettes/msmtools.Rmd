@@ -1,15 +1,17 @@
 ---
-title: "msmtools"
+title: "Building augmented data for multi-state models: the `msmtools` package"
 author: "Francesco Grossetti"
 date: "`r Sys.Date()`"
 fontsize: 12pt
 # output: rmarkdown::html_vignette
 output:
   pdf_document:
+    highlight: default
     number_sections: yes
     toc: yes
+    toc_depth: 4
 vignette: >
-  %\VignetteIndexEntry{msmtools}
+  %\VignetteIndexEntry{msmtools-manual}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown_notangle}
 ---
@@ -85,8 +87,10 @@ death occurs otherwise. After $n$ events, the corresponding flag sequence is giv
 subjects alive and dead outside the transition, while it is just $2n$ for subjects who died inside
 of it. Let us consider an individual with 3 events. His/her status combinations will be as follows:
 
-* **ALIVE**: IN-OUT | IN-OUT | IN-OUT | OUT
+* **ALIVE**: IN-OUT | IN-OUT | IN-OUT | OUT 
+
 * **DEAD OUT**: IN-OUT | IN-OUT | IN-OUT | DEAD
+
 * **DEAD IN**: IN-OUT | IN-OUT | IN-DEAD.
 
 This operation produces a dataset in the augmented long format which allows to neatly model
@@ -111,7 +115,7 @@ when a model on the progression of the process is intended.
 
 ### Working correctly with `augment()`
 
-The main and only aim of `augment()` is data wrangling. When dealing with complex structure as
+The main and only aim of `augment()` is data wrangling. When dealing with complex structures as
 longitudinal data are, it is really important to introduce some rules which help the user to not fail
 when using the function. Here we discuss some of these rules which are mandatory in order to get
 a correct workflow with `augment()`.
@@ -138,7 +142,7 @@ follows:
     + `pattern = 'dead out'`: this is the third level of the factor and corresponds to `pattern = 2` 
     when integer;
 1. Case 3. *character*:
-    + the unique values must be in alphabetial order to resemble the pattern of the integer and 
+    + the unique values must be in alphabetical order to resemble the pattern of the integer and 
     factor case.
     
 Everything else to what described above will inevitably produce wrong behaviour of `augment()` with 
@@ -147,7 +151,7 @@ and uncorrect results.
 The second important argument is `state`. This is passed as a list and contains the status flags 
 which will be used to compute all the status variables for the process. The length of `state` is
 3, no less, no more and comes with a default given by: `state = list( 'IN', 'OUT', 'DEAD' )`. 
-The order is important here too. The status flags must be passed such that the first one (`'IN`)
+The order is important here too. The status flags must be passed such that the first one (`'IN'`)
 represents the first state (in `hosp`, being inside a hospital), the second one represents the 
 second state (in `hosp`, being outside a hospital), and the third one represents the absorbing
 state (in `hosp`, being dead inside or outside a hospital). As you can tell, this peculiar 
@@ -404,6 +408,24 @@ identical( fitted_data_1, fitted_data_2 )
 fitted_data_1
 ```
 
+### The plot layering 
+
+Multi-state models, as their name suggests, are specifically designed to work when more than one 
+status exists. Infact, they tipically work when more than 2 status are present. In our example, 
+we have 3 states: `'IN`, `'OUT'`, `'DEAD`. Now, what if we want to plot on the same device more
+than just one fitted survival curve? Suppose we want to plot the expected survival computed from
+state 1 and 2. That means, from `'IN` and `'OUT'` to `'DEAD'`. The plot layering addresses exactly
+this problem and `survplot()` supports this with the argument `add`. Let's see this in the following
+example: 
+
+```{r layering, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
+# plotting the first survival from state 'IN'
+survplot( msm_model, from = 1, devnew = FALSE, verbose = FALSE )
+
+# plotting the first survival from state 'OUT'
+survplot( msm_model, from = 2, add = TRUE, col.fit = 'darkblue',
+          devnew = FALSE, verbose = FALSE )
+```
 
 ## Comparing expected and observed prevalences with `prevplot()`
 
@@ -427,34 +449,50 @@ prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
                             times = seq( t_min, t_max, steps ) )
 
 # and plotting them using prevplot()
-prevplot( msm_model, prev, ci = TRUE, devnew = F )
+prevplot( msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
 ```
 
-It is mandatory for `prevplot()` to work that a `msm` object and a list compute by `prevalence.msm`
+It is mandatory for `prevplot()` to work with a `msm` object and a list compute by `prevalence.msm`
 are passed.
 
 It is also possibile to plot the following statistic:
 
 $$
-M^2 = \frac{(O_{is} - E_{is})^2} {E_{is}}
+M = \frac{(O_{is} - E_{is})^2} {E_{is}}
 $$
 which gives an idea of the deviance from the Markov model. This is computed according to Titman and
 Sharples (2008). The following code addresses this request.
 
-```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3}
-prevplot( msm_model, prev, M = TRUE, ci = TRUE, devnew = F )
+```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3, warning = F}
+prevplot( msm_model, prev, M = TRUE, ci = TRUE, 
+          devnew = FALSE, verbose = FALSE )
 ```
 
 
-## Arguments Miscellanea
+## A note on `verbose` and `devnew`
 
 We are not going to discuss every arguments inside every function. This paragraph serves as a 
 guideline to better exploit `msmtools`. We have developed the package by paying lot of attention to
 the consistency of the code throughout the functions. 
 
 For example, you can find the argument `verbose` anywhere in the package. This is useful when you 
-do not want to be informed about nothing that is happening internally with the only exception for 
+do not want to be informed about anything that is happening internally with the only exception for 
 warnings and of course errors. If quiet is your mood, you can set `verbose = FALSE`.
+
+A second argument which is shared between `survplot()` and `prevplot()` is `devnew`. This is a 
+purely graphical parameter which is set to `TRUE` by default. It allows you to decide whether 
+to plot on a new graphical device called with `dev.new()` by default. If you set `devnew = FALSE`, 
+then the plot is overwritten according to `dev.cur()`. There exist two caveat: the former is that
+`devnew` is bypassed if the argument `add = TRUE` is passed to `survplot()`. This means that, when
+you want to add a new layer to an existing plot (with `add`), it does not make any sense to let 
+the function using a new device. Hence, `devnew` is simply ignored. The latter is that when you set
+`M = TRUE` in `prevplot()`, then by default the plot of $M$ is returned on a new device. This means
+that if you set `M = TRUE` together with `devnew = FALSE`, `prevplot()` will overwrite the current
+device with the prevalence plot, but will call anyway a new device for the $M$ plot.
+
+
+
+
 
 
 
