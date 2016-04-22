@@ -1,19 +1,20 @@
 Package: msmtools
 Type: Package
-Title: Reshape a Longitudinal Dataset to Run Multi-State Models with Msm Package
+Title: Building Augmented Data to Run Multi-State Models with Msm Package
 Version: 1.0
 Date: 2016-04-14
 Authors@R: person("Francesco", "Grossetti",
     email = "francesco.grossetti@polimi.it",
     role = c("aut", "cre"))
-Description: Converts standard longitudinal data where each observation contains the exact starting
-    and ending time of the process to data suitable for multi-state analyses using the msm package.
+Description: The package msmtools introduces a fast and general method for restructuring classical
+    longitudinal datasets into augmented ones. The reason for this is to facilitate the modeling
+    of longitudinal data under a multi-state framework using the msm package.
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1
 Depends: R (>= 3.2.0)
 Imports: data.table (>= 1.9.6),
-    msm (>= 1.6.0),
+    msm (>= 1.6),
     survival (>= 2.38.0)
 Suggests: testthat,
     knitr,

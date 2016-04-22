@@ -177,7 +177,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
       stop( 'Please, fix the issues and relaunch augment()' )
     } else {
-      cat( 'Ok,', cols[[ 2 ]], 'is monotonic\n' )
+      cat( 'Ok, ', cols[[ 2 ]], ' is monotonic\n', sep = '' )
       cat( '---\n' )
     }
     setkeyv( data, cols )
@@ -201,7 +201,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
       stop( 'Please, fix the issues and relaunch augment()' )
     } else {
-      cat( 'Ok,', substitute( n_events ), 'is monotonic\n' )
+      cat( 'Ok, n_events is monotonic\n' )
       cat( '---\n' )
     }
     setkeyv( data, cols )
@@ -300,7 +300,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   l = list( expand, match1, match3 )
   final = rbindlist( l )
   setkeyv( final, cols )
-  cat( substitute( data ), 'have been augmented!\n' )
+  cat( 'data have been augmented!\n' )
   cat( '---\n' )
 
   if ( length( values ) == 2 ) {

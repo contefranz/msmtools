@@ -10,11 +10,11 @@ hosp_aug_3 = augment( hosp, subj, adm_number, label_3,
 
 test_that( "passing to pattern a var with 2 or 3 values is identical",
            expect_identical( hosp_aug_2, hosp_aug_3 ) )
-
-
-
-# TESTING IF N_EVENTS IS MISSING --------------------------------------------------------------
-
+#
+#
+#
+# # TESTING IF N_EVENTS IS MISSING --------------------------------------------------------------
+#
 data( hosp )
 hosp_aug = augment( hosp, subj, adm_number, label_3,
                     t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, verbose = F )
