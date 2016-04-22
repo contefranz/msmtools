@@ -6,9 +6,9 @@ Date: 2016-04-14
 Authors@R: person("Francesco", "Grossetti",
     email = "francesco.grossetti@polimi.it",
     role = c("aut", "cre"))
-Description: The package msmtools introduces a fast and general method for restructuring classical
-    longitudinal datasets into augmented ones. The reason for this is to facilitate the modeling
-    of longitudinal data under a multi-state framework using the msm package.
+Description: A fast and general method for restructuring classical longitudinal datasets into
+    augmented ones. The reason for this is to facilitate the modeling of longitudinal data under
+    a multi-state framework using the msm package.
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1
