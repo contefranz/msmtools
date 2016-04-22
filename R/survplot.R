@@ -82,7 +82,7 @@
 #' \code{grid}). For more details about how \code{survplot} returns objects, please refer to the
 #' vignette with \code{vignette("msmtools")}.
 #' @return If both \code{return.km} and \code{return.p} are set to \code{TRUE}, then \code{survplot}
-#' returns a named list with \code{$km} and \code{$probs} as \code{data.table}. To save them in the
+#' returns a named list with \code{$km} and \code{$fitted} as \code{data.table}. To save them in the
 #' current environment assign \code{survplot} to an object (see 'Examples')\cr
 #' ------\cr
 #' \code{$km} contains up to 4 columns:\cr
@@ -91,7 +91,7 @@
 #' \emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
 #' \emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
 #' ------\cr
-#' \code{$probs} contains 2 columns:\cr
+#' \code{$fitted} contains 2 columns:\cr
 #' \emph{time}: time at which to compute the fitted survival.\cr
 #' \emph{probs}: the corresponding value of the fitted survival.\cr
 #' @examples
