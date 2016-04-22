@@ -11,7 +11,7 @@ output:
     toc: yes
     toc_depth: 4
 vignette: >
-  %\VignetteIndexEntry{msmtools-manual}
+  %\VignetteIndexEntry{Using msmtools with longitudinal data}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown_notangle}
 ---
