@@ -1,10 +1,4 @@
----
-output: html_document
----
-# Building augmented data for multi-state models: 
-# the `msmtools` package
-
-
+# Building augmented data for multi-state models: the `msmtools` package
 
 `msmtools` introduces a fast and general method for restructuring classical longidutinal datasets
 into *augmented* ones. The reason for this is to facilitate the modelling of longitudinal data 
