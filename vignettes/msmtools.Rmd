@@ -8,6 +8,7 @@ output:
     number_sections: yes
     toc: yes
     toc_depth: 4
+bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Using msmtools with longitudinal data}
   %\VignetteEncoding{UTF-8}
@@ -20,9 +21,10 @@ library( msmtools )
 
 # Introduction
 
-Package **msmtools** is an `R` package whose main goal is to facilitate the workflow with
+Package `msmtools` is an `R` package whose main goal is to facilitate the workflow with
 longitudinal datasets which need to be analyzed in the context of multi-state models. In particular,
-`msmtools` acts as the `msm` package companion.
+`msmtools` acts as the `msm` package companion [@jackson2011multi]. Moreover, `msmtools` is 
+focused on efficiency and speed, also thanks to package `data.table` [@data.table].
 
 ## Longitudinal Dataset
 
@@ -218,7 +220,8 @@ which need to be restructured in order to get msm to work properly.
 However, **msmtools** comes with two more functions which try to address graphically and in a very
 efficient way the problem of the Goodness-of-Fit (Gof) for a multi-state model. When dealing
 with this type of models, GoF is always a tough quest. Furthermore, up to now, no formal
-statistical tests are defined when a multi-state model is computed within an exact time framework.
+statistical tests are defined when a multi-state model is computed within an exact time framework
+[@titman2009model] [@titman2008general].
 
 ## Comparing fitted and empirical survival with `survplot()`
 
@@ -484,7 +487,7 @@ then the plot is overwritten according to `dev.cur()`. There exist two caveat: t
 you want to add a new layer to an existing plot (with `add`), it does not make any sense to let 
 the function using a new device. Hence, `devnew` is simply ignored. The latter is that, even you 
 can set `devnew = FALSE` in `prevplot()`, one should keep it as the default. If you set it to `FALSE`
-and you want a plot of $M$ by setting $M = TRUE$, then this plot overwrites the prevalence one.
+and you want a plot of `M` by setting `M = TRUE`, then this plot overwrites the prevalence one.
 
 
 
