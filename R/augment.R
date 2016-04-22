@@ -140,10 +140,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( missing( t_death ) ) {
     warning( 'no t_death has been passed. Assuming that ', substitute( t_cens ),
              ' contains both censoring and death time' )
-    cat( '---\n' )
   }
   if ( verbose == TRUE ) {
-    message( 'Setting up everything to augment the long format' )
+    cat( '---\n' )
+    cat( '# # # # setting everything up # # # #\n' )
     cat( '---\n' )
   }
   pattern = as.character( substitute( list( pattern ) )[ -1L ] )
@@ -176,6 +176,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       message( 'the corresponding subjects are:' )
       message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
       stop( 'Please, fix the issues and relaunch augment()' )
+    } else {
+      cat( 'Ok,', cols[[ 2 ]], 'is monotonic\n' )
+      cat( '---\n' )
     }
     setkeyv( data, cols )
   } else {
@@ -197,6 +200,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       message( 'the corresponding subjects are:' )
       message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
       stop( 'Please, fix the issues and relaunch augment()' )
+    } else {
+      cat( 'Ok,', substitute( n_events ), 'is monotonic\n' )
+      cat( '---\n' )
     }
     setkeyv( data, cols )
   }
@@ -207,6 +213,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       stop( 'the censoring and the death event times must be of the same class' )
     }
   }
+  if ( verbose == TRUE ) {
+    message( 'checking for any missing data in function arguments' )
+  }
   test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
   if ( any ( test ) ) {
     cat( '---\n' )
@@ -215,6 +224,9 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     }
     invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
     stop( 'Please, fix the issues and relaunch augment()' )
+  } else {
+    cat( 'Ok, no missing data detected\n')
+    cat( '---\n' )
   }
 
   l = lapply( 1:2, function( x ) data )
@@ -222,13 +234,14 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   setkeyv( expand, cols )
   values = sort( eval( substitute( unique( data$pattern ) ) ) )
 
+  if ( verbose == TRUE ) {
+    message( 'checking ', substitute( pattern ), ' and defining patterns' )
+  }
   if ( length( values ) < 2 ) {
     stop( 'unit identification label must be an integer, a factor or a character
           with at least 2 elements' )
   } else if ( length( values ) == 2 ) {
-    if ( verbose == TRUE ) {
-      message( 'checking ', substitute( pattern ), ': detected only 2 values' )
-    }
+    cat( 'detected only 2 values\n' )
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
          inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
@@ -262,9 +275,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       }
     }
   } else if ( length( values ) == 3 ) {
-    if ( verbose == TRUE ) {
-      message( 'checking ', substitute( pattern ), ': detected 3 values' )
-    }
+    cat( 'Ok, detected 3 values\n' )
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
          inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
@@ -283,9 +294,14 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       match3 = data[ get( pattern ) == values[ 3 ], .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
     }
   }
+  if ( verbose == TRUE ) {
+    message( 'augmenting data' )
+  }
   l = list( expand, match1, match3 )
   final = rbindlist( l )
   setkeyv( final, cols )
+  cat( substitute( data ), 'have been augmented!\n' )
+  cat( '---\n' )
 
   if ( length( values ) == 2 ) {
     if ( missing( t_death ) ) {
@@ -310,7 +326,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
   }
   if ( verbose == TRUE ) {
-    message( 'adding status flag...' )
+    message( 'adding status flag' )
   }
   for ( i in seq_along( counter_events$N ) ) {
     if ( .i > 10000 ) {
@@ -377,7 +393,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     stop( 'status flag has not been build correctly' )
   }
   if ( verbose == TRUE ) {
-    message( 'adding numeric status flag...' )
+    message( 'adding numeric status flag' )
   }
   k = length( unique( final$status ) )
   lev = unique( final$status )
@@ -391,7 +407,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     stop( 'numeric status status has not been build correctly' )
   }
   if ( verbose == TRUE ) {
-    message( 'adding sequential status flag...' )
+    message( 'adding sequential status flag' )
   }
   if ( missing( n_events ) ) {
     final[ , n_status := ifelse( status != state[[ 3 ]],
@@ -409,7 +425,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     stop( 'sequential status flag has not been build correctly' )
   }
   if ( verbose == TRUE ) {
-    message( 'adding variable ', substitute( t_augmented ), ' as new time variable...' )
+    message( 'adding variable ', substitute( t_augmented ), ' as new time variable' )
   }
   final[ status == state[[ 1 ]], substitute( t_augmented ) := get( t_start ) ]
   final[ status == state[[ 2 ]], substitute( t_augmented ) := get( t_end ) ]
@@ -437,13 +453,15 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
          '\" successfully added and repositioned\n', sep = '' )
     cat( '---\n' )
   }
-
   id_col = which( names( data ) == substitute( t_start ) )
   setcolorder( final, c( 1:( id_col - 1 ), dim( final )[ 2 ],
                          id_col:( dim( final )[ 2 ] - 1 ) ) )
-  cat( 'variable \"', substitute( t_augmented ),
-       '\" successfully added and repositioned\n', sep = '' )
-  cat( '---\n' )
+  if ( inherits( eval( substitute( data$t_start ) ), 'integer' ) ||
+       inherits( eval( substitute( data$t_start ) ), 'numeric' ) ) {
+    cat( 'variable \"', substitute( t_augmented ),
+         '\" successfully added and repositioned\n', sep = '' )
+    cat( '---\n' )
+  }
 
   if ( !missing( more_status ) ) {
     more_status = as.character( substitute( list( more_status )  )[ -1L ] )
@@ -458,7 +476,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
 
     values = eval( substitute( unique( data$more_status ) ) )
     if ( verbose == TRUE ) {
-      message( 'adding expanded status flag...' )
+      message( 'adding expanded status flag' )
     }
     final[ status == state[[ 3 ]], status_exp := state[[ 3 ]] ]
     for ( i in seq_along( values ) ) {
@@ -472,7 +490,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       stop( 'expanded status flag has not been build correctly' )
     }
     if ( verbose == TRUE ) {
-      message( 'adding numeric expanded status flag...' )
+      message( 'adding numeric expanded status flag' )
     }
     k = length( unique( final$status_exp ) )
     lev = unique( final$status_exp )
@@ -486,7 +504,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       stop( 'expanded numeric status has not been build correctly' )
     }
     if ( verbose == TRUE ) {
-      message( 'adding sequential expanded status flag...' )
+      message( 'adding sequential expanded status flag' )
     }
     final[ , n_status_exp := ifelse( status_exp != state[[ 3 ]],
                                      paste( eval( substitute( n_events ) ), ' ',
