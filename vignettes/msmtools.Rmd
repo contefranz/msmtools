@@ -3,10 +3,8 @@ title: "Building augmented data for multi-state models: the `msmtools` package"
 author: "Francesco Grossetti"
 date: "`r Sys.Date()`"
 fontsize: 12pt
-# output: rmarkdown::html_vignette
-output:
-  pdf_document:
-    highlight: default
+output: 
+  rmarkdown::html_vignette:
     number_sections: yes
     toc: yes
     toc_depth: 4

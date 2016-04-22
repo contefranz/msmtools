@@ -99,6 +99,9 @@
 #' }
 #'
 #' @import data.table
+#' @importFrom grDevices dev.cur dev.new dev.set
+#' @importFrom graphics axis legend lines par plot
+#' @importFrom stats model.extract time
 #' @export
 prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid = 100L,
                      x.lab.grid = 500L, xlab = 'Time', ylab = 'Prevalence (%)',
