@@ -4,10 +4,11 @@
 \name{msmtools}
 \alias{msmtools}
 \alias{msmtools-package}
-\title{msmtools: a companion to msm package}
+\title{Building augmented data for multi-state models: the \code{msmtools} package}
 \description{
-Make it easier to build longitudinal datasets feasible for the analyses in the
-context of multi-state models as computed by \code{msm} package.
+\code{msmtools} introduces a fast and general method for restructuring classical longitudinal datasets
+into \emph{augmented} ones. The reason for this is to facilitate the modeling of longitudinal data
+under a multi-state framework using the \code{msm} package.
 It also provides two graphical goodness-of-fit tools on estimated survival and prevalences
 to carry out model assessment under Markov assumption.
 }
