@@ -64,8 +64,8 @@
 #' whether argument \code{pattern} has 2 or 3 unique values and computes the correct structure of
 #' a given subject. The variable is cast as character;\cr
 #' \emph{status_num}: the corresponding integer version of \emph{status};\cr
-#' \emph{n_status}: a mix of \emph{status} and \emph{status_num} cast as character.
-#' \emph{status_num} comes into play when a model on the progression of the process is intended.\cr
+#' \emph{n_status}: a mix of \emph{status} and \code{n_events} cast as character.
+#' \emph{n_status} comes into play when a model on the progression of the process is intended.\cr
 #' -----\cr
 #'
 #' @examples
@@ -452,12 +452,12 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
          paste( substitute( t_augmented ), '_num', sep = '' ),
          '\" successfully added and repositioned\n', sep = '' )
     cat( '---\n' )
-  }
-  id_col = which( names( data ) == substitute( t_start ) )
-  setcolorder( final, c( 1:( id_col - 1 ), dim( final )[ 2 ],
-                         id_col:( dim( final )[ 2 ] - 1 ) ) )
-  if ( inherits( eval( substitute( data$t_start ) ), 'integer' ) ||
-       inherits( eval( substitute( data$t_start ) ), 'numeric' ) ) {
+  } else if ( inherits( eval( substitute( data$t_start ) ), 'integer' ) ||
+              inherits( eval( substitute( data$t_start ) ), 'numeric' ) ) {
+
+    id_col = which( names( data ) == substitute( t_start ) )
+    setcolorder( final, c( 1:( id_col - 1 ), dim( final )[ 2 ],
+                           id_col:( dim( final )[ 2 ] - 1 ) ) )
     cat( 'variable \"', substitute( t_augmented ),
          '\" successfully added and repositioned\n', sep = '' )
     cat( '---\n' )
