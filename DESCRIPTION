@@ -1,14 +1,14 @@
 Package: msmtools
 Type: Package
-Title: Building Augmented Data to Run Multi-State Models with Msm Package
+Title: Building Augmented Data to Run Multi-State Models with 'msm' Package
 Version: 1.0
-Date: 2016-04-22
+Date: 2016-04-26
 Authors@R: person("Francesco", "Grossetti",
     email = "francesco.grossetti@polimi.it",
     role = c("aut", "cre"))
-Description: A fast and general method for restructuring classical longitudinal datasets into
+Description: A fast and general method for restructuring classical longitudinal data into
     augmented ones. The reason for this is to facilitate the modeling of longitudinal data under
-    a multi-state framework using the msm package.
+    a multi-state framework using the 'msm' package.
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1

@@ -1,7 +1,7 @@
 ---
 title: "Building augmented data for multi-state models: the `msmtools` package"
 author: "Francesco Grossetti"
-date: "`r Sys.Date()`"
+date: "2016-04-26"
 fontsize: 12pt
 output: 
   rmarkdown::html_vignette:
