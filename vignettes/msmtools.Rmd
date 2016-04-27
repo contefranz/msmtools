@@ -110,7 +110,7 @@ a new variable cast as a numeric and names it *augmented_num*;
 argument `pattern` has 2 or 3 unique values and computes the correct structure of a given subject.
 The variable is cast as character;
 * *status_num*: the corresponding integer version of *status*;
-* *n_status*: a mix of *status* and *status_num* cast as character. *status_num* comes into play
+* *n_status*: a mix of *status* and `n_events` cast as character. *n_status* comes into play
 when a model on the progression of the process is intended.
 
 ### Working correctly with `augment()`
@@ -207,6 +207,7 @@ Beside the usual status variables, of which we reported only status, `augment()`
 which in this case is *rehab_it*. The function composes them by pasting a ’_’ in between.
 This is the main reason why it is worth to build a character variable if you know you need to fuel
 it in as an indicator of a more complex status structure;
+* *status_exp_num*: the corresponding integer version of *status_exp*;
 * *n_status_exp*: similar to what has been done before, `augment()` mixes information coming from
 the current expandend status and the number of admission to give you the time evolution of the
 process.

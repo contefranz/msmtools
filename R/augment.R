@@ -68,6 +68,10 @@
 #' \emph{n_status} comes into play when a model on the progression of the process is intended.\cr
 #' -----\cr
 #'
+#' If \code{more_status} is passed, then \code{augment} computes some more variables. They mimic the
+#' meaning of \emph{status}, \emph{status_num}, and \emph{n_status} but they account for the more
+#' complex structure defined. They are: \code{status_exp}, \code{status_exp_num}, and
+#' \code{n_status_exp}.
 #' @examples
 #' # 1.
 #' # loading data
