@@ -245,33 +245,32 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
          inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
-      match1 = data[ get( pattern ) == 0, .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
+      match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
-        match3 = data[ get( pattern ) == 1,
-                       .SD[ .N ], by = eval( cols[[ 1 ]] ) ][ get( t_end ) != get( t_cens ) ]
+        match3 = data[ data[ get( pattern ) == 1,
+                             .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_cens ) ]
       } else {
-        match3 = data[ get( pattern ) == 1,
-                       .SD[ .N ], by = eval( cols[[ 1 ]] ) ][ get( t_end ) != get( t_death ) ]
+        match3 = data[ data[ get( pattern ) == 1,
+                             .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_death ) ]
       }
     } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'factor' ) ) {
-      match1 = data[ as.integer( get( pattern ) ) - 1 == 0,
-                     .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
+      match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
+                           .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
-        match3 = data[ as.integer( get( pattern ) ) - 1 == 1,
-                       .SD[ .N ], by = eval( cols[[ 1 ]] ) ][ get( t_end ) != get( t_cens ) ]
+        match3 = data[ data[ as.integer( get( pattern ) ) - 1 == 1,
+                             .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_cens ) ]
       } else {
-        match3 = data[ as.integer( get( pattern ) ) - 1 == 1,
-                       .SD[ .N ], by = eval( cols[[ 1 ]] ) ][ get( t_end ) != get( t_death ) ]
+        match3 = data[ data[ as.integer( get( pattern ) ) - 1 == 1,
+                             .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_death ) ]
       }
     } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'character' ) ) {
-      match1 = data[ get( pattern ) == values[ 1 ],
-                     .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
+      match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
-        match3 = data[ get( pattern ) == values[ 2 ],
-                       .SD[ .N ], by = eval( cols[[ 1 ]] ) ][ get( t_end ) != get( t_cens ) ]
+        match3 = data[ data[ get( pattern ) == values[ 2 ],
+                             .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_cens ) ]
       } else {
-        match3 = data[ get( pattern ) == values[ 2 ],
-                       .SD[ .N ], by = eval( cols[[ 1 ]] ) ][ get( t_end ) != get( t_death ) ]
+        match3 = data[ data[ get( pattern ) == values[ 2 ],
+                             .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_death ) ]
       }
     }
   } else if ( length( values ) == 3 ) {
@@ -279,19 +278,16 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     cat( '---\n' )
     if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
          inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
-      match1 = data[ get( pattern ) == 0,
-                     .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
-      match3 = data[ get( pattern ) == 2,
-                     .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
+      match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
+      match3 = data[ data[ get( pattern ) == 2, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
     } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'factor' ) ) {
-      match1 = data[ as.integer( get( pattern ) ) - 1 == 0,
-                     .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
-      match3 = data[ as.integer( get( pattern ) ) - 1 == 2,
-                     .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
+      match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
+                           .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
+      match3 = data[ data[ as.integer( get( pattern ) ) - 1 == 2,
+                           .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
     } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'character' ) ) {
-
-      match1 = data[ get( pattern ) == values[ 1 ], .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
-      match3 = data[ get( pattern ) == values[ 3 ], .SD[ .N ], by = eval( cols[[ 1 ]] ) ]
+      match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
+      match3 = data[ data[ get( pattern ) == values[ 3 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
     }
   }
   if ( verbose == TRUE ) {
@@ -309,33 +305,33 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
                                    j = unique( get( pattern ) ),
                                    t_end = max( get( t_end ) ),
                                    t_cens = max( get( t_cens ) ) ), by = eval( cols[[ 1 ]] ) ]
-      .i = dim( counter_events )[ 1 ]
+      s = dim( counter_events )[ 1 ]
       status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
     } else {
       counter_events = final[ , .( N = .N,
                                    j = unique( get( pattern ) ),
                                    t_end = max( get( t_end ) ),
                                    t_death = max( get( t_death ) ) ), by = eval( cols[[ 1 ]] ) ]
-      .i = dim( counter_events )[ 1 ]
+      s = dim( counter_events )[ 1 ]
       status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
     }
   } else if ( length( values ) == 3 ) {
     counter_events = data[ , .( N = .N,
                                 j = unique( get( pattern ) ) ), by = eval( cols[[ 1 ]] ) ]
-    .i = dim( counter_events )[ 1 ]
+    s = dim( counter_events )[ 1 ]
     status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
   }
   if ( verbose == TRUE ) {
     message( 'adding status flag' )
   }
   for ( i in seq_along( counter_events$N ) ) {
-    if ( .i > 10000 ) {
+    if ( s > 10000 ) {
       if ( i %% 5000 == 0 ) {
-        cat( '* * * iteration', i, 'of', .i, '\n' )
+        cat( '* * * iteration', i, 'of', s, '\n' )
       }
     } else {
       if ( i %% 1000 == 0 ) {
-        cat( '* * * iteration', i, 'of', .i, '\n' )
+        cat( '* * * iteration', i, 'of', s, '\n' )
       }
     }
     if ( length( values ) == 2 ) {
@@ -395,7 +391,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( verbose == TRUE ) {
     message( 'adding numeric status flag' )
   }
-  k = length( unique( final$status ) )
+  k = uniqueN( final$status )
   lev = unique( final$status )
   for ( i in 1:k ) {
     final[ status == lev[ i ], status_num := i ]
@@ -492,7 +488,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     if ( verbose == TRUE ) {
       message( 'adding numeric expanded status flag' )
     }
-    k = length( unique( final$status_exp ) )
+    k = uniqueN( final$status_exp )
     lev = unique( final$status_exp )
     for ( i in 1:k ) {
       final[ status_exp == lev[ i ], status_exp_num := i ]
