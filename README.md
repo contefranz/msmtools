@@ -1,6 +1,8 @@
 # Building augmented data for multi-state models: the `msmtools` package
 
-[![Build Status](https://travis-ci.org/contefranz/msmtools.svg?branch=dev)](https://travis-ci.org/contefranz/msmtools) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/msmtools)](http://cran.r-project.org/package=msmtools)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/msmtools)](http://cran.r-project.org/package=msmtools)
+[![codecov](https://codecov.io/gh/contefranz/msmtools/branch/master/graph/badge.svg)](https://codecov.io/gh/contefranz/msmtools)
+[![Build Status](https://travis-ci.org/contefranz/msmtools.svg?branch=dev)](https://travis-ci.org/contefranz/msmtools) 
 
 `msmtools` introduces a fast and general method for restructuring classical longitudinal datasets
 into *augmented* ones. The reason for this is to facilitate the modeling of longitudinal data 
