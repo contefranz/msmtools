@@ -9,6 +9,8 @@ Authors@R: person("Francesco", "Grossetti",
 Description: A fast and general method for restructuring classical longitudinal data into
     augmented ones. The reason for this is to facilitate the modeling of longitudinal data under
     a multi-state framework using the 'msm' package.
+URL: https://github.com/contefranz/msmtools
+BugReports: https://github.com/contefranz/msmtools/issues
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1
