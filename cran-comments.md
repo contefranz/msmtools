@@ -1,6 +1,6 @@
 ## Release summary
 
-This is the first release of `msmtools` with version 1.0
+This is version 1.2 of `msmtools`
 
 ## Package development
 

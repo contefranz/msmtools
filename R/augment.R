@@ -38,6 +38,11 @@
 #' corresponding observation is a standard admission (i.e. no other information available), then
 #' \code{more_status} must be set to 'df' which stands for 'Default' (see 'Examples' and ?hosp).
 #' If missing, \code{augment} ignores it.
+#' @param check_NA If \code{TRUE}, then arguments \code{data_key}, \code{n_events}, \code{pattern},
+#' \code{t_start} and \code{t_end} are looked up for any missing data and if the function finds
+#' some it stops with error. Default is \code{FALSE} because \code{augment} is not intended for
+#' running consistency checks, beside what is mandatory, and because the procedure is
+#' computationally onerous and could cause memory overhead for very highly dimensional datasets.
 #' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat} and
 #' \code{message} are suppressed. All is done internally so that no global
 #' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
@@ -97,7 +102,7 @@
 #' @export
 augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT', 'DEAD' ),
                     t_start, t_end, t_cens, t_death, t_augmented = 'augmented',
-                    more_status, verbose = TRUE ) {
+                    more_status, check_NA = FALSE, verbose = TRUE ) {
 
   tic = proc.time()
   status         = NULL
@@ -210,27 +215,29 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     }
     setkeyv( data, cols )
   }
-  checks = c( cols, pattern, t_start, t_end )
   if ( !missing( t_death ) ) {
     t_death = as.character( substitute( list( t_death ) )[ -1L ] )
     if ( eval( substitute( class( data$t_cens ) ) ) != eval( substitute( class( data$t_death ) ) ) ) {
       stop( 'the censoring and the death event times must be of the same class' )
     }
   }
-  if ( verbose == TRUE ) {
-    message( 'checking for any missing data in function arguments' )
-  }
-  test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
-  if ( any ( test ) ) {
-    cat( '---\n' )
+  if ( check_NA == TRUE ) {
     if ( verbose == TRUE ) {
-      message( 'detected missing values in the following variables:' )
+      message( 'checking for any missing data in function arguments' )
     }
-    invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
-    stop( 'Please, fix the issues and relaunch augment()' )
-  } else {
-    cat( 'Ok, no missing data detected\n')
-    cat( '---\n' )
+    checks = c( cols, pattern, t_start, t_end )
+    test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
+    if ( any ( test ) ) {
+      cat( '---\n' )
+      if ( verbose == TRUE ) {
+        message( 'detected missing values in the following variables:' )
+      }
+      invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
+      stop( 'Please, fix the issues and relaunch augment()' )
+    } else {
+      cat( 'Ok, no missing data detected\n')
+      cat( '---\n' )
+    }
   }
 
   l = lapply( 1:2, function( x ) data )
@@ -304,87 +311,105 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   cat( '---\n' )
 
   if ( length( values ) == 2 ) {
+    if ( verbose == TRUE ) {
+      message( 'defining dimesions' )
+    }
     if ( missing( t_death ) ) {
-      counter_events = final[ , .( N = .N,
-                                   j = unique( get( pattern ) ),
-                                   t_end = max( get( t_end ) ),
-                                   t_cens = max( get( t_cens ) ) ), by = eval( cols[[ 1 ]] ) ]
+      t1 = data[ , .( .N,
+                      t_end = max( get( t_end ) ),
+                      t_cens = max( get( t_cens ) ) ), by = eval( cols[[ 1 ]] ) ]
+      setkeyv( data, c( cols[[ 1 ]], pattern ) )
+      t2 = unique( data[ , .( get( cols[[ 1 ]]), get( pattern ) ) ] )
+      setkeyv( data, c( cols[[ 1 ]] ) )
+      counter_events = t1[ t2 ]
       s = dim( counter_events )[ 1 ]
       status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
     } else {
-      counter_events = final[ , .( N = .N,
-                                   j = unique( get( pattern ) ),
-                                   t_end = max( get( t_end ) ),
-                                   t_death = max( get( t_death ) ) ), by = eval( cols[[ 1 ]] ) ]
+      t1 = data[ , .( .N,
+                      t_end = max( get( t_end ) ),
+                      t_death = max( get( t_death ) ) ), by = eval( cols[[ 1 ]] ) ]
+      setkeyv( data, c( cols[[ 1 ]], pattern ) )
+      t2 = unique( data[ , .( get( cols[[ 1 ]]), get( pattern ) ) ] )
+      setkeyv( data, c( cols[[ 1 ]] ) )
+      counter_events = t1[ t2 ]
       s = dim( counter_events )[ 1 ]
       status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
     }
+    cat( 'dimensions computed!\n' )
+    cat( '---\n' )
   } else if ( length( values ) == 3 ) {
-    counter_events = data[ , .( N = .N,
-                                j = unique( get( pattern ) ) ), by = eval( cols[[ 1 ]] ) ]
+    if ( verbose == TRUE ) {
+      message( 'defining dimesions' )
+    }
+    t1 = data[ , .N, by = eval( cols[[ 1 ]] ) ]
+    setkeyv( data, c( cols[[ 1 ]], pattern ) )
+    t2 = unique( data[ , .( get( cols[[ 1 ]]), get( pattern ) ) ] )
+    setkeyv( data, c( cols[[ 1 ]] ) )
+    counter_events = t1[ t2 ]
     s = dim( counter_events )[ 1 ]
     status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
+    cat( 'dimensions computed!\n' )
+    cat( '---\n' )
   }
   if ( verbose == TRUE ) {
     message( 'adding status flag' )
   }
   for ( i in seq_along( counter_events$N ) ) {
-    if ( s > 10000 ) {
-      if ( i %% 5000 == 0 ) {
+    if ( s >= 1e6 ) {
+      if ( i %% 5e5 == 0 ) {
         cat( '* * * iteration', i, 'of', s, '\n' )
       }
-    } else {
-      if ( i %% 1000 == 0 ) {
+    } else  {
+      if ( i %% 1e5 == 0 ) {
         cat( '* * * iteration', i, 'of', s, '\n' )
       }
     }
     if ( length( values ) == 2 ) {
       if ( missing( t_death ) ) {
-        if ( counter_events$j[ i ] == values[ 1 ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( floor( counter_events$N[ i ] / 2 ) ) ),
+        if ( counter_events$V2[ i ] == values[ 1 ] ) {
+          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
                                        state [[ 2 ]] )
-        } else if ( counter_events$j[ i ] == values[ 2 ] &
+        } else if ( counter_events$V2[ i ] == values[ 2 ] &
                     counter_events$t_end[ i ] == counter_events$t_cens[ i ] ) {
           status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( floor( counter_events$N[ i ] / 2 ) - 1 ) ),
+                                            ( counter_events$N[ i ] - 1 ) ),
                                        state[[ 1 ]], state[[ 3 ]] )
-        } else if ( counter_events$j[ i ] == values[ 2 ] &
+        } else if ( counter_events$V2[ i ] == values[ 2 ] &
                     counter_events$t_end[ i ] != counter_events$t_cens[ i ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( floor( counter_events$N[ i ] / 2 ) ) ), state[[ 3 ]] )
+          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
+                                       state[[ 3 ]] )
         }
       } else {
-        if ( counter_events$j[ i ] == values[ 1 ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( floor( counter_events$N[ i ] / 2 ) ) ),
+        if ( counter_events$V2[ i ] == values[ 1 ] ) {
+          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
                                        state [[ 2 ]] )
-        } else if ( counter_events$j[ i ] == values[ 2 ] &
+        } else if ( counter_events$V2[ i ] == values[ 2 ] &
                     counter_events$t_end[ i ] == counter_events$t_death[ i ] ) {
           status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( floor( counter_events$N[ i ] / 2 ) - 1 ) ),
+                                            ( counter_events$N[ i ] - 1 ) ),
                                        state[[ 1 ]], state[[ 3 ]] )
-        } else if ( counter_events$j[ i ] == values[ 2 ] &
+        } else if ( counter_events$V2[ i ] == values[ 2 ] &
                     counter_events$t_end[ i ] != counter_events$t_death[ i ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( floor( counter_events$N[ i ] / 2 ) ) ), state[[ 3 ]] )
+          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
+                                       state[[ 3 ]] )
         }
       }
     } else if ( length( values ) == 3 ) {
-      if ( counter_events$j[ i ] == values[ 1 ] ) {
+      if ( counter_events$V2[ i ] == values[ 1 ] ) {
         status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
                                           counter_events$N[ i ] ), state [[ 2 ]] )
-      } else if ( counter_events$j[ i ] == values[ 2 ] ) {
+      } else if ( counter_events$V2[ i ] == values[ 2 ] ) {
         status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
                                           ( counter_events$N[ i ] - 1 ) ), state[[ 1 ]],
                                      state[[ 3 ]] )
-      } else if ( counter_events$j[ i ] == values[ 3 ] ) {
+      } else if ( counter_events$V2[ i ] == values[ 3 ] ) {
         status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
                                      state[[ 3 ]] )
       }
     }
   }
   status_flag = unlist( status_flag_temp, recursive = FALSE )
+
   final[ , status := status_flag ]
   if ( sum( is.na( final$status ) ) == 0 ) {
     cat( 'status flag has been added successfully \n' )
@@ -515,7 +540,6 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       stop( 'expanded sequential status flag has not been build correctly' )
     }
   }
-
   toc = proc.time()
   time = toc - tic
   cat( '---------------------------\n' )

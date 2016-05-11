@@ -6,7 +6,7 @@
 \usage{
 augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
   t_start, t_end, t_cens, t_death, t_augmented = "augmented", more_status,
-  verbose = TRUE)
+  check_NA = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{data}{A \code{data.table} object where each row represents an observation.}
@@ -53,6 +53,12 @@ or a difftime. Both variables are positioned before \code{t_start}.}
 corresponding observation is a standard admission (i.e. no other information available), then
 \code{more_status} must be set to 'df' which stands for 'Default' (see 'Examples' and ?hosp).
 If missing, \code{augment} ignores it.}
+
+\item{check_NA}{If \code{TRUE}, then arguments \code{data_key}, \code{n_events}, \code{pattern},
+\code{t_start} and \code{t_end} are looked up for any missing data and if the function finds
+some it stops with error. Default is \code{FALSE} because \code{augment} is not intended for
+running consistency checks, beside what is mandatory, and because the procedure is
+computationally onerous and could cause memory overhead for very highly dimensional datasets.}
 
 \item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat} and
 \code{message} are suppressed. All is done internally so that no global
