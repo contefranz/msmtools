@@ -2,10 +2,6 @@
 # # TESTING 2 OR 3 VALUES FOR PATTERN -----------------------------------------------------------
 #
 data( hosp )
-# hosp_aug_2 = augment( hosp, subj, adm_number, label_2,
-#                       t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, verbose = F )
-# hosp_aug_3 = augment( hosp, subj, adm_number, label_3,
-#                       t_start = dateIN, t_end = dateOUT, t_cens = dateCENS, verbose = F )
 hosp_aug_2 = augment( data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_2, t_start = dateIN, t_end = dateOUT,
                           t_cens = dateCENS, verbose = F )

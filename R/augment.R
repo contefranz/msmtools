@@ -356,7 +356,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   }
   for ( i in seq_along( counter_events$N ) ) {
     if ( s >= 1e6 ) {
-      if ( i %% 5e5 == 0 ) {
+      if ( i %% 1e6 == 0 ) {
         cat( '* * * iteration', i, 'of', s, '\n' )
       }
     } else  {
