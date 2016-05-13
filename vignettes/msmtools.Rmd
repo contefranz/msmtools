@@ -134,17 +134,22 @@ running `length( unique( pattern ) )` must return 2 or 3). Now, suppose we provi
 follows: 
 
 1. Case 1. *integer*:
+
     + `pattern = 0`: subject is alive at the censoring time;
     + `pattern = 1`: subject is dead during a transition;
     + `pattern = 2`: subject is dead out of a transition.
+    
 1. Case 2. *factor*:
+
     + `pattern = 'alive'`: this is the first level of the factor and corresponds to `pattern = 0` 
     when integer;
     + `pattern = 'dead in'`: this is the second level of the factor and corresponds to `pattern = 1` 
     when integer;
     + `pattern = 'dead out'`: this is the third level of the factor and corresponds to `pattern = 2` 
     when integer;
+    
 1. Case 3. *character*:
+
     + the unique values must be in alphabetical order to resemble the pattern of the integer and 
     factor case.
 
