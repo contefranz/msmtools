@@ -6,7 +6,7 @@ author: "Francesco Grossetti"
 date: "`r Sys.Date()`"
 fontsize: 12pt
 output: 
-  rmarkdown::html_vignette:
+  rmarkdown::pdf_document:
     number_sections: yes
     toc: yes
     toc_depth: 4
@@ -498,7 +498,7 @@ then the plot is overwritten according to `dev.cur()`. There exist two caveat: t
 you want to add a new layer to an existing plot (with `add`), it does not make any sense to let 
 the function using a new device. Hence, `devnew` is simply ignored. The latter is that, even you 
 can set `devnew = FALSE` in `prevplot()`, one should keep it as the default. If you set it to `FALSE`
-and you want a plot of `M` by setting `M = TRUE`, then this plot overwrites the prevalence one.
+and you want to plot `M` by setting `M = TRUE`, then this plot overwrites the prevalence one.
 
 
 
