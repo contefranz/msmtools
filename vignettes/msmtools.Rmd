@@ -69,9 +69,9 @@ version. For instance, if you apply `augment()` to the dataset above, you get wh
 
 ```{r running augment, collapse = TRUE}
 hosp_augmented = augment( data = hosp, data_key = subj, 
-                           n_events = adm_number, pattern = label_2,
-                           t_start = dateIN, t_end = dateOUT, 
-                           t_cens = dateCENS, verbose = FALSE )
+                          n_events = adm_number, pattern = label_2,
+                          t_start = dateIN, t_end = dateOUT, 
+                          t_cens = dateCENS, verbose = FALSE )
 
 hosp_augmented[ 1:35, .( subj, adm_number, gender, age, label_2, 
                          augmented, status, n_status ) ]
@@ -213,10 +213,10 @@ this sample, we obtain the following:
 
 ```{r complex status, collapse = TRUE }
 hosp_augmented_more = augment( data = hosp, data_key = subj,
-                                n_events = adm_number, pattern = label_2,
-                                t_start = dateIN, t_end = dateOUT,
-                                t_cens = dateCENS, more_status = rehab_it,
-                                verbose = FALSE )
+                               n_events = adm_number, pattern = label_2,
+                               t_start = dateIN, t_end = dateOUT,
+                               t_cens = dateCENS, more_status = rehab_it,
+                               verbose = FALSE )
 
 hosp_augmented_more[ 36:60, .( subj, adm_number, rehab_it,
                                augmented, status, status_exp, n_status_exp ) ]
