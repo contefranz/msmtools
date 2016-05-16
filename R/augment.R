@@ -435,13 +435,12 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     message( 'adding sequential status flag' )
   }
   if ( missing( n_events ) ) {
-    final[ , n_status := ifelse( status != state[[ 3 ]],
-                                 paste( n_events, ' ', status, sep = '' ),
-                                 state[[ 3 ]] ) ]
+    final[ status != state[[ 3 ]], n_status := paste( n_events, ' ', status, sep = '' ) ]
+    final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   } else {
-    final[ , n_status := ifelse( status != state[[ 3 ]],
-                                 paste( eval( substitute( n_events ) ), ' ', status, sep = '' ),
-                                 state[[ 3 ]] ) ]
+    final[ status != state[[ 3 ]], n_status := paste( eval( substitute( n_events ) ),
+                                                      ' ', status, sep = '' ) ]
+    final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   }
   if ( sum( is.na( final$n_status ) ) == 0 ) {
     cat( 'sequential status flag has been added successfully \n' )
@@ -531,9 +530,14 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     if ( verbose == TRUE ) {
       message( 'adding sequential expanded status flag' )
     }
-    final[ , n_status_exp := ifelse( status_exp != state[[ 3 ]],
-                                     paste( eval( substitute( n_events ) ), ' ',
-                                            status_exp, sep = '' ), state[[ 3 ]] ) ]
+    if ( missing( n_events ) ) {
+      final[ status_exp != state[[ 3 ]], n_status_exp := paste( n_events, ' ', status_exp, sep = '' ) ]
+      final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
+    } else {
+      final[ status_exp != state[[ 3 ]], n_status_exp := paste( eval( substitute( n_events ) ),
+                                                                ' ', status_exp, sep = '' ) ]
+      final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
+    }
     if ( sum( is.na( final$n_status_exp ) ) == 0 ) {
       cat( 'expanded sequential status flag has been added successfully \n' )
     } else {
