@@ -254,8 +254,8 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   } else if ( length( values ) == 2 ) {
     cat( 'detected only 2 values\n' )
     cat( '---\n' )
-    if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
-         inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
+    if ( class( eval( substitute( data$pattern ) ) ) == 'integer' ||
+         class( eval( substitute( data$pattern ) ) ) == 'numeric' ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
         match3 = data[ data[ get( pattern ) == 1,
@@ -264,7 +264,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
         match3 = data[ data[ get( pattern ) == 1,
                              .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_death ) ]
       }
-    } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'factor' ) ) {
+    } else if ( class( eval( substitute( data$pattern ) ) ) == 'factor' ) {
       match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
@@ -274,7 +274,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
         match3 = data[ data[ as.integer( get( pattern ) ) - 1 == 1,
                              .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ][ get( t_end ) != get( t_death ) ]
       }
-    } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'character' ) ) {
+    } else if ( class( eval( substitute( data$pattern ) ) ) == 'character' ) {
       match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
         match3 = data[ data[ get( pattern ) == values[ 2 ],
@@ -287,16 +287,16 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   } else if ( length( values ) == 3 ) {
     cat( 'Ok, detected 3 values\n' )
     cat( '---\n' )
-    if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'integer' ) ||
-         inherits( eval( substitute( unique( data$pattern ) ) ), 'numeric' ) ) {
+    if ( class( eval( substitute( data$pattern ) ) ) == 'integer' ||
+         class( eval( substitute( data$pattern ) ) ) == 'numeric' ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ get( pattern ) == 2, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
-    } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'factor' ) ) {
+    } else if ( class( eval( substitute( data$pattern ) ) ) == 'factor' ) {
       match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ as.integer( get( pattern ) ) - 1 == 2,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
-    } else if ( inherits( eval( substitute( unique( data$pattern ) ) ), 'character' ) ) {
+    } else if ( class( eval( substitute( data$pattern ) ) ) == 'character' ) {
       match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ get( pattern ) == values[ 3 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
     }
@@ -409,7 +409,6 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     }
   }
   status_flag = unlist( status_flag_temp, recursive = FALSE )
-
   final[ , status := status_flag ]
   if ( sum( is.na( final$status ) ) == 0 ) {
     cat( 'status flag has been added successfully \n' )
@@ -420,17 +419,27 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( verbose == TRUE ) {
     message( 'adding numeric status flag' )
   }
-  k = uniqueN( final$status )
-  lev = unique( final$status )
-  for ( i in 1:k ) {
-    final[ status == lev[ i ], status_num := i ]
-  }
-  if ( i == k ) {
+  final[ status == state[[ 1 ]], status_num := 1L ]
+  final[ status == state[[ 2 ]], status_num := 2L ]
+  final[ status == state[[ 3 ]], status_num := 3L ]
+  if ( sum( is.na( final$status_num ) ) == 0 ) {
     cat( 'numeric status has been added successfully \n' )
     cat( '---\n' )
   } else {
-    stop( 'numeric status status has not been build correctly' )
+    stop( 'numeric status has not been build correctly' )
   }
+
+  # k = uniqueN( final$status )
+  # lev = unique( final$status )
+  # for ( i in 1:k ) {
+  #   final[ status == lev[ i ], status_num := i ]
+  # }
+  # if ( i == k ) {
+  #   cat( 'numeric status has been added successfully \n' )
+  #   cat( '---\n' )
+  # } else {
+  #   stop( 'numeric status has not been build correctly' )
+  # }
   if ( verbose == TRUE ) {
     message( 'adding sequential status flag' )
   }
