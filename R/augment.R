@@ -447,7 +447,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     final[ status != state[[ 3 ]], n_status := paste( n_events, ' ', status, sep = '' ) ]
     final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   } else {
-    final[ status != state[[ 3 ]], n_status := paste( eval( substitute( n_events ) ),
+    final[ status != state[[ 3 ]], n_status := paste( eval( substitute( cols[[ 2 ]] ) ),
                                                       ' ', status, sep = '' ) ]
     final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   }
