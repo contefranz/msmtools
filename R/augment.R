@@ -361,15 +361,16 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     message( 'adding status flag' )
   }
   for ( i in seq_along( counter_events$N ) ) {
-    if ( s >= 1e6 ) {
-      if ( i %% 1e6 == 0 ) {
-        cat( '* * * iteration', i, 'of', s, '\n' )
-      }
-    } else  {
-      if ( i %% 1e5 == 0 ) {
-        cat( '* * * iteration', i, 'of', s, '\n' )
-      }
-    }
+    # if ( s >= 1e6 ) {
+    #   if ( i %% 1e6 == 0 ) {
+    #     cat( '* * * iteration', i, 'of', s, '\n' )
+    #   }
+    # } else  {
+    #   if ( i %% 1e5 == 0 ) {
+    #     cat( '* * * iteration', i, 'of', s, '\n' )
+    #   }
+    # }
+    cat( '* * * iteration', i, 'of', s, '\n' )
     if ( length( values ) == 2 ) {
       if ( missing( t_death ) ) {
         if ( counter_events$V2[ i ] == values[ 1 ] ) {
@@ -540,7 +541,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       final[ status_exp != state[[ 3 ]], n_status_exp := paste( n_events, ' ', status_exp, sep = '' ) ]
       final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
     } else {
-      final[ status_exp != state[[ 3 ]], n_status_exp := paste( eval( substitute( n_events ) ),
+      final[ status_exp != state[[ 3 ]], n_status_exp := paste( eval( substitute( cols[[ 2 ]] ) ),
                                                                 ' ', status_exp, sep = '' ) ]
       final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
     }
