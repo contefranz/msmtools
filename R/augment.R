@@ -239,6 +239,17 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       cat( '---\n' )
     }
   }
+  if ( !missing( more_status ) ) {
+    more_status = as.character( substitute( list( more_status )  )[ -1L ] )
+    test = apply( data[ , more_status, with = FALSE ], 2,
+                  function( x ) any( sum( is.na( x ) ) > 0 ) )
+    if ( any ( test ) ) {
+      cat( '---\n' )
+      message( 'detected missing values in variable:' )
+      invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
+      stop( 'Please, fix the issues and relaunch augment()' )
+    }
+  }
 
   l = lapply( 1:2, function( x ) data )
   expand = rbindlist( l )
@@ -353,55 +364,109 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     setkeyv( data, c( cols[[ 1 ]] ) )
     counter_events = t1[ t2 ]
     s = dim( counter_events )[ 1 ]
-    status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
     cat( 'dimensions computed!\n' )
     cat( '---\n' )
   }
   if ( verbose == TRUE ) {
     message( 'adding status flag' )
   }
-  for ( i in seq_along( counter_events$N ) ) {
-    # if ( s >= 1e6 ) {
-    #   if ( i %% 1e6 == 0 ) {
-    #     cat( '* * * iteration', i, 'of', s, '\n' )
-    #   }
-    # } else  {
-    #   if ( i %% 1e5 == 0 ) {
-    #     cat( '* * * iteration', i, 'of', s, '\n' )
-    #   }
-    # }
-    cat( '* * * iteration', i, 'of', s, '\n' )
-    if ( length( values ) == 2 ) {
-      if ( missing( t_death ) ) {
-        if ( counter_events$V2[ i ] == values[ 1 ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
-                                       state [[ 2 ]] )
-        } else if ( counter_events$V2[ i ] == values[ 2 ] &
-                    counter_events$t_end[ i ] == counter_events$t_cens[ i ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( counter_events$N[ i ] - 1 ) ),
-                                       state[[ 1 ]], state[[ 3 ]] )
-        } else if ( counter_events$V2[ i ] == values[ 2 ] &
-                    counter_events$t_end[ i ] != counter_events$t_cens[ i ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
-                                       state[[ 3 ]] )
+  if ( length( values ) == 2 ) {
+    alive = counter_events[ V2 == values[ 1 ] ]
+    a = nrow( alive )
+    if ( missing( t_death ) ) {
+      dead_in = counter_events[ V2 == values[ 2 ] & t_end == t_cens ]
+      dead_out = counter_events[ V2 == values[ 2 ] & t_end != t_cens ]
+    } else {
+      dead_in = counter_events[ V2 == values[ 2 ] & t_end == t_death ]
+      dead_out = counter_events[ V2 == values[ 2 ] & t_end != t_death ]
+    }
+    b = nrow( dead_in )
+    c = nrow( dead_out )
+    temp1 = dead_in[ , .SD, .SDcols = substitute( cols )[[ 1 ]] ]
+    temp2 = dead_out[ , .SD, .SDcols = substitute( cols )[[ 1 ]] ]
+    setkeyv( temp1, cols[[ 1 ]] )
+    setkeyv( temp2, cols[[ 1 ]] )
+    setkeyv( final, cols[[ 1 ]] )
+    dead_in_long = final[ temp1 ]
+    dead_out_long = final[ temp2 ]
+    alive_long = final[ get( pattern ) == values[ 1 ] ]
+    rm( temp1, temp2, final )
+    status_flag_temp_alive = vector( mode = 'list', dim( alive )[ 1 ] )
+    status_flag_temp_in = vector( mode = 'list', dim( dead_in )[ 1 ] )
+    status_flag_temp_out = vector( mode = 'list', dim( dead_out )[ 1 ] )
+
+    cat( '---\n' )
+    if ( verbose == TRUE ) {
+      message( 'processing alive units...' )
+    }
+    for ( i in seq_along( alive$N ) ) {
+      if ( a >= 1e6 ) {
+        if ( i %% 1e6 == 0 ) {
+          cat( '* * * iteration', i, 'of', a, '\n' )
         }
-      } else {
-        if ( counter_events$V2[ i ] == values[ 1 ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
-                                       state [[ 2 ]] )
-        } else if ( counter_events$V2[ i ] == values[ 2 ] &
-                    counter_events$t_end[ i ] == counter_events$t_death[ i ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
-                                            ( counter_events$N[ i ] - 1 ) ),
-                                       state[[ 1 ]], state[[ 3 ]] )
-        } else if ( counter_events$V2[ i ] == values[ 2 ] &
-                    counter_events$t_end[ i ] != counter_events$t_death[ i ] ) {
-          status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), counter_events$N[ i ] ),
-                                       state[[ 3 ]] )
+      } else  {
+        if ( i %% 1e5 == 0 ) {
+          cat( '* * * iteration', i, 'of', a, '\n' )
         }
       }
-    } else if ( length( values ) == 3 ) {
+      status_flag_temp_alive[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
+                                              alive$N[ i ] ), state [[ 2 ]] )
+    }
+    if ( verbose == TRUE ) {
+      message( 'processing units dead inside a transition...' )
+    }
+    for ( i in seq_along( dead_in$N ) ) {
+      if ( b >= 1e6 ) {
+        if ( i %% 1e6 == 0 ) {
+          cat( '* * * iteration', i, 'of', b, '\n' )
+        }
+      } else  {
+        if ( i %% 1e5 == 0 ) {
+          cat( '* * * iteration', i, 'of', b, '\n' )
+        }
+      }
+      status_flag_temp_in[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), ( dead_in$N[ i ] - 1 ) ),
+                                      state[[ 1 ]], state[[ 3 ]] )
+    }
+    if ( verbose == TRUE ) {
+      message( 'processing units dead outside a transition...' )
+    }
+    for( i in seq_along( dead_out$N ) ) {
+      if ( c >= 1e6 ) {
+        if ( i %% 1e6 == 0 ) {
+          cat( '* * * iteration', i, 'of', c, '\n' )
+        }
+      } else  {
+        if ( i %% 1e5 == 0 ) {
+          cat( '* * * iteration', i, 'of', c, '\n' )
+        }
+      }
+      status_flag_temp_out[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
+                                            dead_out$N[ i ] ), state[[ 3 ]] )
+    }
+    status_flag_alive = unlist( status_flag_temp_alive, recursive = FALSE )
+    status_flag_in = unlist( status_flag_temp_in, recursive = FALSE )
+    status_flag_out = unlist( status_flag_temp_out, recursive = FALSE )
+    alive_long[ , status := status_flag_alive ]
+    dead_in_long[ , status := status_flag_in ]
+    dead_out_long[ , status := status_flag_out ]
+    l = list( alive_long, dead_in_long, dead_out_long )
+    final = rbindlist( l )
+    setkeyv( final, cols[[ 1 ]] )
+    rm( alive, alive_long, dead_in, dead_in_long, dead_out, dead_out_long )
+    cat( '---\n' )
+  } else if ( length( values ) == 3 ) {
+    status_flag_temp = vector( mode = 'list', dim( counter_events )[ 1 ] )
+    for ( i in seq_along( counter_events$N ) ) {
+      if ( s >= 1e6 ) {
+        if ( i %% 1e6 == 0 ) {
+          cat( '* * * iteration', i, 'of', s, '\n' )
+        }
+      } else  {
+        if ( i %% 1e5 == 0 ) {
+          cat( '* * * iteration', i, 'of', s, '\n' )
+        }
+      }
       if ( counter_events$V2[ i ] == values[ 1 ] ) {
         status_flag_temp[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
                                           counter_events$N[ i ] ), state [[ 2 ]] )
@@ -414,19 +479,18 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
                                      state[[ 3 ]] )
       }
     }
-  }
-  status_flag = unlist( status_flag_temp, recursive = FALSE )
-  final[ , status := status_flag ]
-  if ( sum( is.na( final$status ) ) == 0 ) {
-    cat( 'status flag has been added successfully \n' )
-    cat( '---\n' )
-  } else {
-    stop( 'status flag has not been build correctly' )
+    status_flag = unlist( status_flag_temp, recursive = FALSE )
+    final[ , status := status_flag ]
+    if ( sum( is.na( final$status ) ) == 0 ) {
+      cat( 'status flag has been added successfully \n' )
+      cat( '---\n' )
+    } else {
+      stop( 'status flag has not been build correctly' )
+    }
   }
   if ( verbose == TRUE ) {
     message( 'adding numeric status flag' )
   }
-
   k = uniqueN( final$status )
   lev = unique( final$status )
   for ( i in 1:k ) {
@@ -445,8 +509,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     final[ status != state[[ 3 ]], n_status := paste( n_events, ' ', status, sep = '' ) ]
     final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   } else {
-    final[ status != state[[ 3 ]], n_status := paste( eval( substitute( cols[[ 2 ]] ) ),
-                                                      ' ', status, sep = '' ) ]
+    final[ status != state[[ 3 ]], n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ) ]
     final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   }
   if ( sum( is.na( final$n_status ) ) == 0 ) {
@@ -495,16 +558,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   }
 
   if ( !missing( more_status ) ) {
-    more_status = as.character( substitute( list( more_status )  )[ -1L ] )
-    test = apply( data[ , more_status, with = FALSE ], 2,
-                  function( x ) any( sum( is.na( x ) ) > 0 ) )
-    if ( any ( test ) ) {
-      cat( '---\n' )
-      message( 'detected missing values in variable:' )
-      invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
-      stop( 'Please, fix the issues and relaunch augment()' )
-    }
-
+    # more_status = as.character( substitute( list( more_status )  )[ -1L ] )
     values = eval( substitute( unique( data$more_status ) ) )
     if ( verbose == TRUE ) {
       message( 'adding expanded status flag' )
@@ -541,7 +595,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       final[ status_exp != state[[ 3 ]], n_status_exp := paste( n_events, ' ', status_exp, sep = '' ) ]
       final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
     } else {
-      final[ status_exp != state[[ 3 ]], n_status_exp := paste( eval( substitute( cols[[ 2 ]] ) ),
+      final[ status_exp != state[[ 3 ]], n_status_exp := paste( get( cols[[ 2 ]] ),
                                                                 ' ', status_exp, sep = '' ) ]
       final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
     }
