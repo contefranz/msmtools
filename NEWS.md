@@ -2,16 +2,37 @@
 
 ### Breaking changes
 
-* `augment()` gains the brand new argument `check_NA` which allows the user to decide if the function
+* `msmtools` can now run with R 3.0.0 and above for retro compatibility reasons.
+
+* `augment()` gains the new argument `check_NA` which allows the user to decide if the function
 should run some checks to find missing data in the following arguments: `data_key`, `n_events`, 
-`pattern`, `t_start` and `t_end`. Default is `FALSE`.
+`pattern`, `t_start` and `t_end`. Default is `FALSE`. Missing data checks are always carried out on
+`more_status`.
+
+* `augment()` gains the new argument `convert` which if set to `TRUE` efficiently converts the output 
+to the old school `data.frame` class. 
+
+* `survplot()` gains the new argument `return.all` which saves you some typing time when requesting both 
+the data of the Kaplan-Meier and the fitter survival. 
+
+* `survplot()` gains the new argument `convert` which if set to `TRUE` efficiently converts
+any object returned to the old school `data.frame` class.
 
 ### Changes in functions
 
+* `augment()` gets a whole new implementation which comes into play when `pattern` has only
+2 values ('alive' and 'dead'). Now the procedures runs with computational times similar to when
+`pattern` has 3 values. This is due thanks to the fast joins adopted.
+
 * `augment()` now is much faster when defining the target size for the reshaping. This was a 
-bottlneck which caused memory issues and wasted time. 
+bottleneck which caused memory issues and wasted time. 
+
+* General memory optimization in the function `augment()`.
 
 ### Bug fixes
+
+* In `augment()`, the sequential status is now correctly computed. There was a wrong call which
+blocked the object defined by `n_events`.
 
 * In `augment()`, when `pattern` was detected with two unique values, inconsistent results were
 produced during the status flag assignment. This was due to a wrong rounding of the amount of 

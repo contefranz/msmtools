@@ -5,14 +5,15 @@
 \title{Plot and get survival data from a multi-state model.}
 \usage{
 survplot(x, from = 1, to = NULL, range = NULL, covariates = "mean",
-  exacttimes = TRUE, times, grid = 100L, km = FALSE, return.km = FALSE,
-  return.p = FALSE, add = FALSE, ci = c("none", "normal", "bootstrap"),
-  interp = c("start", "midpoint"), B = 100L, legend.pos = "topright",
-  xlab = "Time", ylab = "Survival Probability", lty.fit = 1,
-  lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
-  col.ci.fit = col.fit, mark.time = FALSE, lty.km = 5, lwd.km = 1,
-  col.km = "darkblue", do.plot = TRUE, plot.width = 7, plot.height = 7,
-  devnew = TRUE, verbose = TRUE)
+  exacttimes = TRUE, times, grid = 100L, km = FALSE, return.all = FALSE,
+  return.km = NULL, return.p = NULL, convert = FALSE, add = FALSE,
+  ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
+  B = 100L, legend.pos = "topright", xlab = "Time",
+  ylab = "Survival Probability", lty.fit = 1, lwd.fit = 1,
+  col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1, col.ci.fit = col.fit,
+  mark.time = FALSE, lty.km = 5, lwd.km = 1, col.km = "darkblue",
+  do.plot = TRUE, plot.width = 7, plot.height = 7, devnew = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -43,13 +44,25 @@ If \code{times} is passed, \code{grid} is ignored. It has a default of 100 point
 
 \item{km}{If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.}
 
-\item{return.km}{If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+\item{return.all}{If \code{TRUE}, then all the datasets used to draw the plot will be return to
+the environment. This argument saves you some typing time since you do not have to pass neither
+\code{return.km} nor \code{return.p}. Default is \code{FALSE}.}
+
+\item{return.km}{If \code{TRUE}, then the dataset used for building the Kaplan-Meier is returned
+as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
+(See \code{convert}). Default is \code{FALSE}.
 \code{survplot} must be assigned to an object in order to get the data in the environment
 (see 'Value').}
 
-\item{return.p}{If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+\item{return.p}{If \code{TRUE}, then the dataset used for building the fitted survival curve
+is returned as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
+(See \code{convert}). Default is \code{FALSE}.
 \code{survplot} must be assigned to an object in order to get the data in the environment
 (see 'Value').}
+
+\item{convert}{If \code{TRUE}, then any returned object is automatically converted to the
+class \code{data.frame}. This is done in place and comes at very low cost both from running time
+and memory consumption (See \code{\link[data.table]{setDF}}).}
 
 \item{add}{If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.}
 
@@ -134,7 +147,7 @@ current environment assign \code{survplot} to an object (see 'Examples')\cr
 }
 \description{
 Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
-\code{\link[msm]{msm}} model. Fast build and return the associated datasets.
+\code{\link[msm]{msm}} model. Fast builds and returns the associated datasets.
 }
 \details{
 The function is a wrapper of \code{\link[msm]{plot.survfit.msm}} and does more things.
@@ -175,8 +188,7 @@ msm_model = msm( status_num ~ augmented_int,
 survplot( msm_model, km = TRUE, ci = 'none', verbose = FALSE, devnew = FALSE )
 
 # returning fitted and empirical data
-all_data = survplot( msm_model, ci = 'none',
-                     return.km = TRUE, return.p = TRUE,
+all_data = survplot( msm_model, ci = 'none', return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 }
 

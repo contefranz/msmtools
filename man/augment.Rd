@@ -6,7 +6,7 @@
 \usage{
 augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
   t_start, t_end, t_cens, t_death, t_augmented = "augmented", more_status,
-  check_NA = FALSE, verbose = TRUE)
+  check_NA = FALSE, convert = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{data}{A \code{data.table} object where each row represents an observation.}
@@ -60,15 +60,20 @@ some it stops with error. Default is \code{FALSE} because \code{augment} is not 
 running consistency checks, beside what is mandatory, and because the procedure is
 computationally onerous and could cause memory overhead for very highly dimensional datasets.}
 
+\item{convert}{If \code{TRUE}, then the returned object is automatically converted to the
+class \code{data.frame}. This is done in place and comes at very low cost both from running time
+and memory consumption (See \code{\link[data.table]{setDF}}).}
+
 \item{verbose}{If \code{FALSE}, all information produced by \code{print}, \code{cat} and
 \code{message} are suppressed. All is done internally so that no global
 options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 }
 \value{
-A restructured long format dataset of class \code{"data.table"} where each row
-represents a specific transition for a given subject. Moreover, \code{augment} adds some
-important variables:\cr
+An augmented format dataset of class \code{data.table}, or \code{data.frame} when
+\code{convert} is \code{TRUE}, where each row represents a specific transition for a given subject.
+Moreover, \code{augment} adds some important variables:\cr
+
 -----\cr
 \emph{augmented}: the new timing variable for the process when looking at transitions. If
 \code{t_augmented} is missing, then \code{augment} creates \emph{augmented} by default.

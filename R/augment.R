@@ -43,6 +43,9 @@
 #' some it stops with error. Default is \code{FALSE} because \code{augment} is not intended for
 #' running consistency checks, beside what is mandatory, and because the procedure is
 #' computationally onerous and could cause memory overhead for very highly dimensional datasets.
+#' @param convert If \code{TRUE}, then the returned object is automatically converted to the
+#' class \code{data.frame}. This is done in place and comes at very low cost both from running time
+#' and memory consumption (See \code{\link[data.table]{setDF}}).
 #' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat} and
 #' \code{message} are suppressed. All is done internally so that no global
 #' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
@@ -54,9 +57,10 @@
 #' it returns the subjects gived by \code{data_key} where issues occurred before giving an
 #' error and stopping. If \code{n_events} is not passed, then the ordering procedure remains the
 #' same, but the progression number is created internally with the name \code{n_events}.
-#' @return A restructured long format dataset of class \code{"data.table"} where each row
-#' represents a specific transition for a given subject. Moreover, \code{augment} adds some
-#' important variables:\cr
+#' @return An augmented format dataset of class \code{data.table}, or \code{data.frame} when
+#' \code{convert} is \code{TRUE}, where each row represents a specific transition for a given subject.
+#' Moreover, \code{augment} adds some important variables:\cr
+#'
 #' -----\cr
 #' \emph{augmented}: the new timing variable for the process when looking at transitions. If
 #' \code{t_augmented} is missing, then \code{augment} creates \emph{augmented} by default.
@@ -102,7 +106,7 @@
 #' @export
 augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT', 'DEAD' ),
                     t_start, t_end, t_cens, t_death, t_augmented = 'augmented',
-                    more_status, check_NA = FALSE, verbose = TRUE ) {
+                    more_status, check_NA = FALSE, convert = FALSE, verbose = TRUE ) {
 
   tic = proc.time()
   status         = NULL
@@ -452,7 +456,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     dead_out_long[ , status := status_flag_out ]
     l = list( alive_long, dead_in_long, dead_out_long )
     final = rbindlist( l )
-    setkeyv( final, cols[[ 1 ]] )
+    setkeyv( final, cols )
     rm( alive, alive_long, dead_in, dead_in_long, dead_out, dead_out_long )
     cat( '---\n' )
   } else if ( length( values ) == 3 ) {
@@ -614,6 +618,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     sink()
   }
   options( warn = oldw )
+  if ( convert == TRUE ) {
+    setDF( final )
+    return( final )
+  }
   return( final )
 }
 

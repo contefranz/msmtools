@@ -1,7 +1,7 @@
 #' Plot and get survival data from a multi-state model.
 #'
 #' Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
-#' \code{\link[msm]{msm}} model. Fast build and return the associated datasets.
+#' \code{\link[msm]{msm}} model. Fast builds and returns the associated datasets.
 #'
 #' @param x A \code{msm} object.
 #' @param from State from which to compute the estimated survival. Default to state 1.
@@ -22,12 +22,22 @@
 #' @param grid An integer which tells at how many points to compute the fitted survival.
 #' If \code{times} is passed, \code{grid} is ignored. It has a default of 100 points.
 #' @param km If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.
-#' @param return.km If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+#' @param return.all If \code{TRUE}, then all the datasets used to draw the plot will be return to
+#' the environment. This argument saves you some typing time since you do not have to pass neither
+#' \code{return.km} nor \code{return.p}. Default is \code{FALSE}.
+#' @param return.km If \code{TRUE}, then the dataset used for building the Kaplan-Meier is returned
+#' as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
+#' (See \code{convert}). Default is \code{FALSE}.
 #' \code{survplot} must be assigned to an object in order to get the data in the environment
 #' (see 'Value').
-#' @param return.p If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+#' @param return.p If \code{TRUE}, then the dataset used for building the fitted survival curve
+#' is returned as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
+#' (See \code{convert}). Default is \code{FALSE}.
 #' \code{survplot} must be assigned to an object in order to get the data in the environment
 #' (see 'Value').
+#' @param convert If \code{TRUE}, then any returned object is automatically converted to the
+#' class \code{data.frame}. This is done in place and comes at very low cost both from running time
+#' and memory consumption (See \code{\link[data.table]{setDF}}).
 #' @param add If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.
 #' @param ci If \code{"none"} (the default), then no confidence intervals are plotted.
 #' If \code{"normal"} or \code{"bootstrap"}, confidence intervals are plotted based on the
@@ -122,8 +132,7 @@
 #' survplot( msm_model, km = TRUE, ci = 'none', verbose = FALSE, devnew = FALSE )
 #'
 #' # returning fitted and empirical data
-#' all_data = survplot( msm_model, ci = 'none',
-#'                      return.km = TRUE, return.p = TRUE,
+#' all_data = survplot( msm_model, ci = 'none', return.all = TRUE,
 #'                      verbose = FALSE, do.plot = FALSE )
 #' }
 #'
@@ -147,7 +156,8 @@
 #' @export
 survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      exacttimes = TRUE, times, grid = 100L,
-                     km = FALSE, return.km = FALSE, return.p = FALSE, add = FALSE,
+                     km = FALSE, return.all = FALSE, return.km = NULL, return.p = NULL,
+                     convert = FALSE, add = FALSE,
                      ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
                      B = 100L, legend.pos = 'topright',
                      xlab = "Time", ylab = "Survival Probability",
@@ -241,7 +251,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       lines( times, 1 - upper, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
     }
   }
-  if ( km == TRUE || return.km == TRUE ) {
+  if ( return.all == TRUE || km == TRUE || return.km == TRUE ) {
     dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
     setnames( dat, c( 'subject', 'time', 'state' ) )
     absind = which( dat$state == to )
@@ -289,14 +299,42 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
     sink()
   }
   options( warn = oldw )
-  if ( return.km == TRUE && return.p == TRUE ) {
+
+  if ( return.all == TRUE ) {
+    if ( !is.null( return.km ) && return.km == FALSE ) {
+        stop( 'return.all is TRUE, but return.km is FALSE. Please, leave it set to NULL' )
+    }
+    if ( !is.null( return.p ) && return.p == FALSE ) {
+      stop( 'return.all is TRUE, but return.p is FALSE. Please, leave it set to NULL' )
+    }
+    if ( !is.null( return.km ) && return.km == TRUE ) {
+      warning( 'return.all is already set to TRUE. return.km will be ignored' )
+    }
+    if ( !is.null( return.p ) && return.p == TRUE ) {
+      warning( 'return.all is already set to TRUE. return.p will be ignored' )
+    }
+    if ( convert == TRUE ) {
+      setDF( wide )
+      return( invisible( list( km = wide,
+                               fitted = data.frame( time = times,
+                                                    probs = round( 1 - pr, 4 ) ) ) ) )
+    }
     return( invisible( list( km = wide,
-                  fitted = data.table( time = times,
-                                             probs = round( 1 - pr, 4 ) ) ) ) )
-  } else if ( return.km == TRUE && return.p == FALSE ) {
-    return( invisible( wide ) )
-  } else if ( return.km == FALSE && return.p == TRUE ) {
-    return( invisible( data.table( time = times, probs = round( 1 - pr, 4 ) ) ) )
+                             fitted = data.table( time = times,
+                                                  probs = round( 1 - pr, 4 ) ) ) ) )
+  } else {
+    if ( return.km == TRUE && return.p == FALSE ) {
+      if ( convert == TRUE ) {
+        setDF( wide )
+        return( invisible( wide ) )
+      }
+      return( invisible( wide ) )
+    } else if ( return.km == FALSE && return.p == TRUE ) {
+      if ( convert == TRUE ) {
+        return( invisible( data.frame( time = times, probs = round( 1 - pr, 4 ) ) ) )
+      }
+      return( invisible( data.table( time = times, probs = round( 1 - pr, 4 ) ) ) )
+    }
   }
 }
 
