@@ -323,13 +323,13 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                              fitted = data.table( time = times,
                                                   probs = round( 1 - pr, 4 ) ) ) ) )
   } else {
-    if ( return.km == TRUE && return.p == FALSE ) {
+    if ( !is.null( return.km ) && return.km == TRUE && is.null( return.p ) ) {
       if ( convert == TRUE ) {
         setDF( wide )
         return( invisible( wide ) )
       }
       return( invisible( wide ) )
-    } else if ( return.km == FALSE && return.p == TRUE ) {
+    } else if ( is.null( return.km ) && !is.null( return.p ) && return.p == TRUE ) {
       if ( convert == TRUE ) {
         return( invisible( data.frame( time = times, probs = round( 1 - pr, 4 ) ) ) )
       }
