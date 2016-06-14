@@ -116,6 +116,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   status_exp_num = NULL
   n_status_exp   = NULL
   .              = NULL
+  V2             = NULL
   oldw = getOption( "warn" )
   if ( verbose == TRUE ) {
     options( warn = 1 )

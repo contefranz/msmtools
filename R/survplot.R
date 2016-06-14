@@ -251,7 +251,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       lines( times, 1 - upper, lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
     }
   }
-  if ( return.all == TRUE || km == TRUE || return.km == TRUE ) {
+  if ( return.all == TRUE || km == TRUE || ( !is.null( return.km ) && return.km == TRUE ) ) {
     dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
     setnames( dat, c( 'subject', 'time', 'state' ) )
     absind = which( dat$state == to )
