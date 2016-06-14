@@ -10,4 +10,5 @@ before_script:
   - psql -c 'create database test;' -U postgres
 
 after_success:
-- Rscript -e 'covr::codecov()'
+        #- Rscript -e 'covr::codecov()'
+  - bash <(curl -s https://codecov.io/bash)
