@@ -513,7 +513,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     #        n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ), on = 'status' ]
     # final[ .( state[[ 3 ]] ), n_status := state[[ 3 ]], on = 'status' ]
     final[ status != state[[ 3 ]], n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ) ]
-    final[ status != state[[ 3 ]], n_status := state[[ 3 ]] ]
+    final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   }
   if ( sum( is.na( final$n_status ) ) == 0 ) {
     cat( 'sequential status flag has been added successfully \n' )
