@@ -9,5 +9,8 @@ env:
 before_script:
   - psql -c 'create database test;' -U postgres
 
+r_build_args: "--no-build-vignettes"
+r_check_args: "--no-build-vignettes --as-cran"    
+
 after_success:
   - Rscript -e 'covr::codecov()'
