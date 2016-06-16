@@ -139,7 +139,8 @@ Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov 
 hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
 
 Gentleman RC, Lawless JF, Lindsey JC, Yan P. (1994). Multi-state Markov models for analysing
-incomplete disease data with illustrations for HIV disease. \emph{Statistics in Medicine}, 13:805–821.
+incomplete disease data with illustrations for HIV disease. \emph{Statistics in Medicine},
+13:805-821. \cr
 
 Jackson, C.H. (2011). Multi-State Models for Panel Data:
 The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.

@@ -12,6 +12,6 @@ transition under a multi-state framework. \code{msmtools} works in symbiosis wit
 \code{\link[msm]{msm}} package.
 It also provides two graphical goodness-of-fit tools to inspect the model performances using
 survival curves and prevalences under the Markov assumption.
-\code{msmtools} comes with 3 functions: \code{augment}, \code{prevplot}, and \code{survplot}
+\code{msmtools} comes with 3 functions: \code{augment}, \code{prevplot}, and \code{survplot}.
 }
 

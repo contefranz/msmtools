@@ -162,8 +162,8 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   }
   pattern = as.character( substitute( list( pattern ) )[ -1L ] )
   t_start = as.character( substitute( list( t_start ) )[ -1L ] )
-  t_end = as.character( substitute( list( t_end ) )[ -1L ] )
-  t_cens = as.character( substitute( list( t_cens ) )[ -1L ] )
+  t_end   = as.character( substitute( list( t_end ) )[ -1L ] )
+  t_cens  = as.character( substitute( list( t_cens ) )[ -1L ] )
 
   if ( eval( substitute( class( data$t_start ) ) ) != eval( substitute( class( data$t_end ) ) ) ) {
     stop( 'the starting and the ending event times must be of the same class' )
@@ -444,7 +444,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       }
       flag_temp_dout[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), dout$N[ i ] ), state[[ 3 ]] )
     }
-    flag_a    = unlist( flag_temp_alive, recursive = FALSE )
+    flag_a    = unlist( flag_temp_a, recursive = FALSE )
     flag_din  = unlist( flag_temp_din, recursive = FALSE )
     flag_dout = unlist( flag_temp_dout, recursive = FALSE )
     a_long[ , status := flag_a ]
