@@ -255,10 +255,6 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       stop( 'Please, fix the issues and relaunch augment()' )
     }
   }
-
-  l = lapply( 1:2, function( x ) data )
-  expand = rbindlist( l )
-  setkeyv( expand, cols )
   values = sort( eval( substitute( unique( data$pattern ) ) ) )
 
   if ( verbose == TRUE ) {
@@ -326,9 +322,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( verbose == TRUE ) {
     message( 'augmenting data' )
   }
-  l = list( expand, match1, match3 )
+  l = list( data, data, match1, match3 )
   final = rbindlist( l )
   setkeyv( final, cols )
+
   cat( 'data have been augmented!\n' )
   cat( '---\n' )
 
