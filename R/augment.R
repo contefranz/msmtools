@@ -504,12 +504,16 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     message( 'adding sequential status flag' )
   }
   if ( missing( n_events ) ) {
-    final[ !.( state[[ 3 ]] ), n_status := paste( n_events, ' ', status, sep = '' ), on = 'status' ]
-    final[ .( state[[ 3 ]] ), n_status := state[[ 3 ]], on = 'status' ]
+    # final[ !.( state[[ 3 ]] ), n_status := paste( n_events, ' ', status, sep = '' ), on = 'status' ]
+    # final[ .( state[[ 3 ]] ), n_status := state[[ 3 ]], on = 'status' ]
+    final[ status != state[[ 3 ]], n_status := paste( n_events, ' ', status, sep = '' ) ]
+    final[ status == state[[ 3 ]], n_status := state[[ 3 ]]]
   } else {
-    final[ !.( state[[ 3 ]] ),
-           n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ), on = 'status' ]
-    final[ .( state[[ 3 ]] ), n_status := state[[ 3 ]], on = 'status' ]
+    # final[ !.( state[[ 3 ]] ),
+    #        n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ), on = 'status' ]
+    # final[ .( state[[ 3 ]] ), n_status := state[[ 3 ]], on = 'status' ]
+    final[ status != state[[ 3 ]], n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ) ]
+    final[ status != state[[ 3 ]], n_status := state[[ 3 ]] ]
   }
   if ( sum( is.na( final$n_status ) ) == 0 ) {
     cat( 'sequential status flag has been added successfully \n' )
@@ -520,12 +524,16 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   if ( verbose == TRUE ) {
     message( 'adding variable ', substitute( t_augmented ), ' as new time variable' )
   }
-  final[ .( state[[ 1 ]] ), substitute( t_augmented ) := get( t_start ), on = 'status' ]
-  final[ .( state[[ 2 ]] ), substitute( t_augmented ) := get( t_end ), on = 'status' ]
+  # final[ .( state[[ 1 ]] ), substitute( t_augmented ) := get( t_start ), on = 'status' ]
+  # final[ .( state[[ 2 ]] ), substitute( t_augmented ) := get( t_end ), on = 'status' ]
+  final[ status == state[[ 1 ]], substitute( t_augmented ) := get( t_start ) ]
+  final[ status == state[[ 2 ]], substitute( t_augmented ) := get( t_end ) ]
   if ( missing( t_death ) ) {
-    final[ .( state[[ 3 ]] ), substitute( t_augmented ) := get( t_cens ), on = 'status' ]
+    # final[ .( state[[ 3 ]] ), substitute( t_augmented ) := get( t_cens ), on = 'status' ]
+    final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_cens ) ]
   } else {
-    final[ .( state[[ 3 ]] ), substitute( t_augmented ) := get( t_death ), on = 'status' ]
+    # final[ .( state[[ 3 ]] ), substitute( t_augmented ) := get( t_death ), on = 'status' ]
+    final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_death ) ]
   }
   if ( inherits( eval( substitute( data$t_start ) ), 'Date' ) ) {
     final[ , paste( substitute( t_augmented ), '_int', sep = '' ) := as.integer( get( t_augmented ) ) ]
@@ -594,13 +602,18 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       message( 'adding sequential expanded status flag' )
     }
     if ( missing( n_events ) ) {
-      final[ !.( state[[ 3 ]] ),
-             n_status_exp := paste( n_events, ' ', status_exp, sep = '' ), on = 'status_exp' ]
-      final[ .( state[[ 3 ]] ), n_status_exp := state[[ 3 ]], on = 'status_exp' ]
+      # final[ !.( state[[ 3 ]] ),
+      #        n_status_exp := paste( n_events, ' ', status_exp, sep = '' ), on = 'status_exp' ]
+      # final[ .( state[[ 3 ]] ), n_status_exp := state[[ 3 ]], on = 'status_exp' ]
+      final[ status_exp != state[[ 3 ]], n_status_exp := paste( n_events, ' ', status_exp, sep = '' ) ]
+      final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
     } else {
-      final[ !.( state[[ 3 ]] ),
-             n_status_exp := paste( get( cols[[ 2 ]] ), ' ', status_exp, sep = '' ), on = 'status_exp' ]
-      final[ .( state[[ 3 ]] ), n_status_exp := state[[ 3 ]], on = 'status_exp' ]
+      # final[ !.( state[[ 3 ]] ),
+      #        n_status_exp := paste( get( cols[[ 2 ]] ), ' ', status_exp, sep = '' ), on = 'status_exp' ]
+      # final[ .( state[[ 3 ]] ), n_status_exp := state[[ 3 ]], on = 'status_exp' ]
+      final[ status_exp != state[[ 3 ]],
+             n_status_exp := paste( get( cols[[ 2 ]] ), ' ', status_exp, sep = '' ) ]
+      final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]]]
     }
     if ( sum( is.na( final$n_status_exp ) ) == 0 ) {
       cat( 'expanded sequential status flag has been added successfully \n' )
