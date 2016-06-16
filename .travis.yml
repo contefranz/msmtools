@@ -4,11 +4,10 @@ cache: packages
 
 warnings_are_errors: false
 env:
-- _R_CHECK_FORCE_SUGGESTS_=false
+  - _R_CHECK_FORCE_SUGGESTS_=false
 
 before_script:
   - psql -c 'create database test;' -U postgres
 
 after_success:
-        #- Rscript -e 'covr::codecov()'
-  - bash <(curl -s https://codecov.io/bash)
+  - Rscript -e 'covr::codecov()'
