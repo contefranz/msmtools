@@ -80,8 +80,8 @@ options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 }
 \description{
 Provides a graphical indication of goodness of fit of a multi-state model computed by
-\code{\link[msm]{msm}}. It also computes a rough indicator of where the data depart from the
-fitted Markov model.
+\code{\link[msm]{msm}} using observed and expected prevalences.
+It also computes a rough indicator of where the data depart from the fitted Markov model.
 }
 \details{
 When \code{M = TRUE}, a rough indicator of the deviance from the Markov model is
@@ -137,6 +137,9 @@ Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
 
 Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
 hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
+
+Gentleman RC, Lawless JF, Lindsey JC, Yan P. (1994). Multi-state Markov models for analysing
+incomplete disease data with illustrations for HIV disease. \emph{Statistics in Medicine}, 13:805–821.
 
 Jackson, C.H. (2011). Multi-State Models for Panel Data:
 The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.

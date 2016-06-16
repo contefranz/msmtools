@@ -13,7 +13,8 @@ should run some checks to find missing data in the following arguments: `data_ke
 to the old school `data.frame` class. 
 
 * `survplot()` gains the new argument `return.all` which saves you some typing time when requesting both 
-the data of the Kaplan-Meier and the fitter survival. 
+the data of the Kaplan-Meier and the fitter survival. Arguments `return.km` and `return.p` now are
+set to `NULL` by default instead of `FALSE`. 
 
 * `survplot()` gains the new argument `convert` which if set to `TRUE` efficiently converts
 any object returned to the old school `data.frame` class.
@@ -21,13 +22,19 @@ any object returned to the old school `data.frame` class.
 ### Changes in functions
 
 * `augment()` gets a whole new implementation which comes into play when `pattern` has only
-2 values ('alive' and 'dead'). Now the procedures runs with computational times similar to when
-`pattern` has 3 values. This is due thanks to the fast joins adopted.
+2 values ('alive' and 'dead'). Now the procedure runs with computational time only slightly longer
+than the standard 3 values in `pattern`. This is due thanks to the fast joins method adopted.
 
 * `augment()` now is much faster when defining the target size for the reshaping. This was a 
 bottleneck which caused memory issues and wasted time. 
 
+* `survplot()` and `prevplot()` have now a more detailed and better written help.
+
 * General memory optimization in the function `augment()`.
+
+### Other changes
+
+* Some minor changes in the vignette.
 
 ### Bug fixes
 

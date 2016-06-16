@@ -24,7 +24,7 @@
 #' @param km If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.
 #' @param return.all If \code{TRUE}, then all the datasets used to draw the plot will be return to
 #' the environment. This argument saves you some typing time since you do not have to pass neither
-#' \code{return.km} nor \code{return.p}. Default is \code{FALSE}.
+#' \code{return.km} nor \code{return.p}. Default is \code{FALSE} (See 'Details').
 #' @param return.km If \code{TRUE}, then the dataset used for building the Kaplan-Meier is returned
 #' as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
 #' (See \code{convert}). Default is \code{FALSE}.
@@ -86,14 +86,17 @@
 #' \code{survplot} manages correctly the plot of a fitted survival in
 #' an exact times framework (when \code{exacttimes = TRUE}) by just resetting the time scale
 #' and looking at the follow-up time.
-#' It can fastly compute, build and return to the user the dataset on which the Kaplan-Meier has
-#' been computed. Similarly, it can return to the user the dataset on which the fitted survival has
-#' been computed, both with user defined times (through \code{times}) and self set times (through
-#' \code{grid}). For more details about how \code{survplot} returns objects, please refer to the
-#' vignette with \code{vignette("msmtools")}.
-#' @return If both \code{return.km} and \code{return.p} are set to \code{TRUE}, then \code{survplot}
-#' returns a named list with \code{$km} and \code{$fitted} as \code{data.table}. To save them in the
-#' current environment assign \code{survplot} to an object (see 'Examples')\cr
+#' It can fastly compute, build and return to the user the datasets used to compute the Kaplan-Meier
+#' and the fitted survival by setting \code{return.all = TRUE}. When this is \code{TRUE}, setting
+#' \code{return.km} or \code{return.p} to \code{FALSE} produces an error and \code{survplot} does not
+#' conclude the job. If these are set to \code{TRUE}, a warning is prompted but the job is taken
+#' to the end. The user can defined custom times (through \code{times}) or let \code{survplot} choose
+#' them by itself (through \code{grid}). For more details about how \code{survplot} returns objects,
+#' please refer to the vignette with \code{vignette("msmtools")}.
+#' @return If \code{return.all} is set to \code{TRUE}, then \code{survplot}
+#' returns a named list with \code{$km} and \code{$fitted} as \code{data.table} or as \code{data.frame}
+#' when \code{convert = TRUE}. To save them in the
+#' working environment, assign \code{survplot} to an object (see 'Examples')\cr
 #' ------\cr
 #' \code{$km} contains up to 4 columns:\cr
 #' \emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr

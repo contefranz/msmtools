@@ -446,7 +446,7 @@ survplot( msm_model, from = 2, add = TRUE, col.fit = 'darkblue',
 ## Comparing expected and observed prevalences with `prevplot()`
 
 A second graphical tool which helps us in the attempt to understand the goodness of the model is
-given by comparing the expected and observed prevalences. `prevplot()` is a wrapper of the
+given by comparing the expected and observed prevalences [@gentleman1994multi]. `prevplot()` is a wrapper of the
 `plot.prevalence.msm()` function inside the `msm` package but, again, it does more things.
 
 Consider the multi-state model we have built above. We can compute the prevalences using
@@ -506,6 +506,6 @@ can set `devnew = FALSE` in `prevplot()`, one should keep it as the default. If 
 and you want to plot `M` by setting `M = TRUE`, then this plot overwrites the prevalence one.
 
 
-
+# References
 
 
