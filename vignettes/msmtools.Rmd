@@ -385,26 +385,26 @@ in wide format with 2 columns:
 or by `times` so that the cardinality of the data depends on them;
 * *probs*: the corresponding value of the fitted survival.
 
-Of course, you can request `survplot()` to return both the datasets by passing all the parameters.
+Of course, you can request `survplot()` to return both the datasets by setting just `return.all = TRUE`.
 Below you can see the code and the output when no assignment is done and when you save the data
-into a new object.
+into a new object in the environment.
 
 ```{r return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
 # just running survplot()
-survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+survplot( msm_model, ci = 'none', grid = 10, return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
 # running survplot() and assigning it to an object
-all_data = survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+all_data = survplot( msm_model, ci = 'none', grid = 10, 
+                     return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
-# let's see the dataset
+# let's see the datasets
 all_data
 ```
 
-`all_data` is a list of two elements. If you want to split up the datasets, just use common syntax:
+`all_data` is a list of two elements of class `data.table`. If you want to split up the datasets, 
+just use common syntax:
 
 ```{r splitting data, collapse = TRUE}
 # do not extract data using just one [].
@@ -485,17 +485,21 @@ prevplot( msm_model, prev, M = TRUE, ci = TRUE,
 ```
 
 
-## A note on `verbose` and `devnew`
+## Further details on specific arguments
 
 We are not going to discuss every arguments inside every function. This paragraph serves as a 
 guideline to better exploit `msmtools`. We have developed the package by paying lot of attention to
 the consistency of the code throughout the functions. 
 
-For example, you can find the argument `verbose` anywhere in the package. This is useful when you 
+For those of you who are more confortable with objects of class `data.frame` with no compromises, 
+both `augment()` and `survplot()` can manage that with the argument `convert = TRUE`. 
+By default, `convert` is set to `FALSE` in order to incentivize a more efficient coding.
+
+Moreover, you can find the argument `verbose` anywhere in the package. This is useful when you 
 do not want to be informed about anything that is happening internally with the only exception for 
 warnings and of course errors. If quiet is your mood, then you may want to set `verbose = FALSE`.
 
-A second argument which is shared between `survplot()` and `prevplot()` is `devnew`. This is a 
+A third argument which is shared between `survplot()` and `prevplot()` is `devnew`. This is a 
 purely graphical parameter which is set to `TRUE` by default. It allows you to decide whether 
 to plot on a new graphical device called with `dev.new()` by default. If you set `devnew = FALSE`, 
 then the plot is overwritten according to `dev.cur()`. There exist two caveat: the former is that

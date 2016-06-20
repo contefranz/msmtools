@@ -1,4 +1,4 @@
-#' Plot and get survival data from a multi-state model.
+#' Plot and get survival data from a multi-state model
 #'
 #' Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
 #' \code{\link[msm]{msm}} model. Fast builds and returns the associated datasets.
@@ -19,7 +19,7 @@
 #' @param exacttimes If \code{TRUE} (default) then transition times are known and exact. This
 #' is inherited from \code{msm} and should be set the same way.
 #' @param times An optional numeric vector giving the times at which to compute the fitted survival.
-#' @param grid An integer which tells at how many points to compute the fitted survival.
+#' @param grid An integer which tells at how many points to compute the fitted survival (See 'Details').
 #' If \code{times} is passed, \code{grid} is ignored. It has a default of 100 points.
 #' @param km If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.
 #' @param return.all If \code{TRUE}, then all the datasets used to draw the plot will be return to
@@ -29,12 +29,12 @@
 #' as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
 #' (See \code{convert}). Default is \code{FALSE}.
 #' \code{survplot} must be assigned to an object in order to get the data in the environment
-#' (see 'Value').
+#' (see 'Details').
 #' @param return.p If \code{TRUE}, then the dataset used for building the fitted survival curve
 #' is returned as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
 #' (See \code{convert}). Default is \code{FALSE}.
 #' \code{survplot} must be assigned to an object in order to get the data in the environment
-#' (see 'Value').
+#' (see 'Details').
 #' @param convert If \code{TRUE}, then any returned object is automatically converted to the
 #' class \code{data.frame}. This is done in place and comes at very low cost both from running time
 #' and memory consumption (See \code{\link[data.table]{setDF}}).
@@ -86,27 +86,32 @@
 #' \code{survplot} manages correctly the plot of a fitted survival in
 #' an exact times framework (when \code{exacttimes = TRUE}) by just resetting the time scale
 #' and looking at the follow-up time.
-#' It can fastly compute, build and return to the user the datasets used to compute the Kaplan-Meier
+#' It can fastly build and return to the user the datasets used to compute the Kaplan-Meier
 #' and the fitted survival by setting \code{return.all = TRUE}. When this is \code{TRUE}, setting
 #' \code{return.km} or \code{return.p} to \code{FALSE} produces an error and \code{survplot} does not
-#' conclude the job. If these are set to \code{TRUE}, a warning is prompted but the job is taken
-#' to the end. The user can defined custom times (through \code{times}) or let \code{survplot} choose
-#' them by itself (through \code{grid}). For more details about how \code{survplot} returns objects,
+#' conclude the job. If these are set to \code{TRUE}, a warning is raised but the job is taken
+#' to the end. For more details about how \code{survplot} returns objects,
 #' please refer to the vignette with \code{vignette("msmtools")}.
+#'
+#' The user can defined custom times (through \code{times}) or let \code{survplot} choose
+#' them on its own (through \code{grid}). In the latter case, \code{survplot} looks for the follow-up
+#' time and divides it by \code{grid}. The higher it is, the finer the grid will be so that computing
+#' the fitted survival will take longer, but will be more precise.
 #' @return If \code{return.all} is set to \code{TRUE}, then \code{survplot}
 #' returns a named list with \code{$km} and \code{$fitted} as \code{data.table} or as \code{data.frame}
 #' when \code{convert = TRUE}. To save them in the
 #' working environment, assign \code{survplot} to an object (see 'Examples')\cr
+#'
 #' ------\cr
 #' \code{$km} contains up to 4 columns:\cr
 #' \emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
-#' \emph{mintime}: the time at which to compute the fitted survival.\cr
+#' \emph{mintime}: the times at which to compute the fitted survival.\cr
 #' \emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
 #' \emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
 #' ------\cr
 #' \code{$fitted} contains 2 columns:\cr
-#' \emph{time}: time at which to compute the fitted survival.\cr
-#' \emph{probs}: the corresponding value of the fitted survival.\cr
+#' \emph{time}: times at which to compute the fitted survival.\cr
+#' \emph{probs}: the corresponding values of the fitted survival.\cr
 #' @examples
 #' \dontrun{
 #' data( hosp )
@@ -131,12 +136,22 @@
 #'                  control = list( fnscale = 6e+05, trace = 0,
 #'                  REPORT = 1, maxit = 10000 ) )
 #'
-#' # plotting the fitted and empirical survival
-#' survplot( msm_model, km = TRUE, ci = 'none', verbose = FALSE, devnew = FALSE )
+#' # plotting the fitted and empirical survival from state = 1
+#' survplot( msm_model, km = TRUE, ci = 'none',
+#'           verbose = FALSE )
+#'
+#' # plotting the fitted and empirical survival from state = 2 and
+#' # adding it to the previous plot
+#' survplot( msm_model, from = 2, km = TRUE, ci = 'none', add = TRUE,
+#'           verbose = FALSE )
 #'
 #' # returning fitted and empirical data
 #' all_data = survplot( msm_model, ci = 'none', return.all = TRUE,
 #'                      verbose = FALSE, do.plot = FALSE )
+#'
+#' # saving them separately
+#' km_data = all_data[[ 1 ]]
+#' fitted_data = all_data[[ 2 ]]
 #' }
 #'
 #' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
@@ -145,11 +160,11 @@
 #' Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
 #' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
 #'
-#' Jackson, C.H. (2011). Multi-State Models for Panel Data:
-#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+#' Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
+#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
 #' URL \url{http://www.jstatsoft.org/v38/i08/}.
-#' @seealso \code{\link[msm]{plot.survfit.msm}}, \code{\link[msm]{msm}},
-#' \code{\link[msm]{pmatrix.msm}}
+#' @seealso \code{\link[msm]{plot.survfit.msm}} \code{\link[msm]{msm}},
+#' \code{\link[msm]{pmatrix.msm}}, \code{\link[data.table]{setDF}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
 #' @importFrom msm absorbing.msm

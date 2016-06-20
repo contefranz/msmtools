@@ -1,6 +1,6 @@
 # msmtools 1.2
 
-### Breaking changes
+### Major changes
 
 * `msmtools` can now run with R 3.0.0 and above for retro compatibility reasons.
 
@@ -21,6 +21,11 @@ any object returned to the old school `data.frame` class.
 
 ### Changes in functions
 
+* `augment()` now also accepts an object of class `data.frame` as input. If so, the function internally converts
+it to a `data.table`.
+
+* `augment()` now accepts `t_augmented` without quotes too. Default name is still "augmented".
+
 * `augment()` gets a whole new implementation which comes into play when `pattern` has only
 2 values ('alive' and 'dead'). Now the procedure runs with computational time only slightly longer
 than the standard 3 values in `pattern`. This is due thanks to the fast joins method adopted.
@@ -28,13 +33,13 @@ than the standard 3 values in `pattern`. This is due thanks to the fast joins me
 * `augment()` now is much faster when defining the target size for the reshaping. This was a 
 bottleneck which caused memory issues and wasted time. 
 
-* `survplot()` and `prevplot()` have now a more detailed and better written help.
-
-* General memory optimization in the function `augment()`.
+* General memory optimization in the function `augment()`. Now the function uses ~ 30% less memory.
 
 ### Other changes
 
-* Some minor changes in the vignette.
+* All the functions now have more detailed and better written helps.
+
+* Some minor changes in the vignette to encapsulate new functionalities.
 
 ### Bug fixes
 

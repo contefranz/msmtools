@@ -2,7 +2,7 @@
 % Please edit documentation in R/prevplot.R
 \name{prevplot}
 \alias{prevplot}
-\title{Plot observed and expected prevalences for a multi-state model.}
+\title{Plot observed and expected prevalences for a multi-state model}
 \usage{
 prevplot(x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE,
   grid = 100L, x.lab.grid = 500L, xlab = "Time",
@@ -142,12 +142,12 @@ Gentleman RC, Lawless JF, Lindsey JC, Yan P. (1994). Multi-state Markov models f
 incomplete disease data with illustrations for HIV disease. \emph{Statistics in Medicine},
 13:805-821. \cr
 
-Jackson, C.H. (2011). Multi-State Models for Panel Data:
-The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
+The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
 URL \url{http://www.jstatsoft.org/v38/i08/}.
 }
 \seealso{
-\code{\link[msm]{plot.prevalence.msm}}, \code{\link[msm]{msm}},
+\code{\link[msm]{plot.prevalence.msm}} \code{\link[msm]{msm}}
 \code{\link[msm]{prevalence.msm}}
 }
 

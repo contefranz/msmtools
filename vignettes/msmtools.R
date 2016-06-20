@@ -88,16 +88,15 @@ fitted_data
 
 ## ----return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4----
 # just running survplot()
-survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+survplot( msm_model, ci = 'none', grid = 10, return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
 # running survplot() and assigning it to an object
-all_data = survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+all_data = survplot( msm_model, ci = 'none', grid = 10, 
+                     return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
-# let's see the dataset
+# let's see the datasets
 all_data
 
 ## ----splitting data, collapse = TRUE-------------------------------------

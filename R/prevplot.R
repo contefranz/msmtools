@@ -1,4 +1,4 @@
-#' Plot observed and expected prevalences for a multi-state model.
+#' Plot observed and expected prevalences for a multi-state model
 #'
 #' Provides a graphical indication of goodness of fit of a multi-state model computed by
 #' \code{\link[msm]{msm}} using observed and expected prevalences.
@@ -49,7 +49,7 @@
 #' patient \emph{k} in the state \emph{s} between observed counts \eqn{O_{is}}
 #' with expected ones \eqn{E_{is}} is build as follows:
 #' \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is} }
-#' @seealso \code{\link[msm]{plot.prevalence.msm}}, \code{\link[msm]{msm}},
+#' @seealso \code{\link[msm]{plot.prevalence.msm}} \code{\link[msm]{msm}}
 #' \code{\link[msm]{prevalence.msm}}
 #' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
 #' \emph{Statistical Methods in Medical Research}, 19, 621-651.\cr
@@ -61,8 +61,8 @@
 #' incomplete disease data with illustrations for HIV disease. \emph{Statistics in Medicine},
 #' 13:805-821. \cr
 #'
-#' Jackson, C.H. (2011). Multi-State Models for Panel Data:
-#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+#' Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
+#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
 #' URL \url{http://www.jstatsoft.org/v38/i08/}.
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @examples
