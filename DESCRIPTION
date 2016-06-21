@@ -2,7 +2,7 @@ Package: msmtools
 Type: Package
 Title: Building Augmented Data to Run Multi-State Models with 'msm' Package
 Version: 1.2
-Date: 2016-05-20
+Date: 2016-06-21
 Authors@R: person("Francesco", "Grossetti",
     email = "francesco.grossetti@polimi.it",
     role = c("aut", "cre"))
@@ -11,7 +11,6 @@ Description: A fast and general method for restructuring classical longitudinal 
     a multi-state framework using the 'msm' package.
 URL: https://github.com/contefranz/msmtools
 BugReports: https://github.com/contefranz/msmtools/issues
-News: https://github.com/contefranz/msmtools/blob/master/NEWS.md
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1
