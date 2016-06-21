@@ -7,9 +7,11 @@
 \title{Building augmented data for multi-state models: the \code{msmtools} package}
 \description{
 \code{msmtools} introduces a fast and general method for restructuring classical longitudinal datasets
-into \emph{augmented} ones. The reason for this is to facilitate the modeling of longitudinal data
-under a multi-state framework using the \code{msm} package.
-It also provides two graphical goodness-of-fit tools on estimated survival and prevalences
-to carry out model assessment under Markov assumption.
+into \emph{augmented} ones. Augmented data enhances longitudinal datasets and allow to model each
+transition under a multi-state framework. \code{msmtools} works in symbiosis with the
+\code{\link[msm]{msm}} package.
+It also provides two graphical goodness-of-fit tools to inspect the model performances using
+survival curves and prevalences under the Markov assumption.
+\code{msmtools} comes with 3 functions: \code{augment}, \code{prevplot}, and \code{survplot}.
 }
 

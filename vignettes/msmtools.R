@@ -8,7 +8,7 @@ hosp[ 1:17, .( subj, adm_number, gender, age, label_2,
 
 ## ----running augment, collapse = TRUE------------------------------------
 hosp_augmented = augment( data = hosp, data_key = subj, 
-                          n_events = adm_number, pattern = label_3,
+                          n_events = adm_number, pattern = label_2,
                           t_start = dateIN, t_end = dateOUT, 
                           t_cens = dateCENS, verbose = FALSE )
 
@@ -20,21 +20,16 @@ hosp[ 18:28, .( subj, adm_number, rehab, it, rehab_it,
                 dateIN, dateOUT, dateCENS ) ]
 
 ## ----complex status, collapse = TRUE-------------------------------------
-hosp_augmented = augment( data = hosp, data_key = subj,
-                          n_events = adm_number, pattern = label_2,
-                          t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS, more_status = rehab_it,
-                          verbose = FALSE )
+hosp_augmented_more = augment( data = hosp, data_key = subj,
+                               n_events = adm_number, pattern = label_2,
+                               t_start = dateIN, t_end = dateOUT,
+                               t_cens = dateCENS, more_status = rehab_it,
+                               verbose = FALSE )
 
-hosp_augmented[ 36:60, .( subj, adm_number, rehab_it,
-                          augmented, status, status_exp, n_status_exp ) ]
+hosp_augmented_more[ 36:60, .( subj, adm_number, rehab_it,
+                               augmented, status, status_exp, n_status_exp ) ]
 
 ## ----multistate model, collapse = TRUE-----------------------------------
-hosp_augmented = augment( data = hosp, data_key = subj,
-                          n_events = adm_number, pattern = label_2,
-                          t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS, verbose = FALSE )
-
 # let's define the initial transition matrix for our model
 Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
 Qmat[ 1, 1:3 ] = 1
@@ -93,16 +88,15 @@ fitted_data
 
 ## ----return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4----
 # just running survplot()
-survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+survplot( msm_model, ci = 'none', grid = 10, return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
 # running survplot() and assigning it to an object
-all_data = survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+all_data = survplot( msm_model, ci = 'none', grid = 10, 
+                     return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
-# let's see the dataset
+# let's see the datasets
 all_data
 
 ## ----splitting data, collapse = TRUE-------------------------------------

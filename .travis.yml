@@ -4,10 +4,17 @@ cache: packages
 
 warnings_are_errors: false
 env:
-- _R_CHECK_FORCE_SUGGESTS_=false
+  - _R_CHECK_FORCE_SUGGESTS_=false
 
 before_script:
   - psql -c 'create database test;' -U postgres
 
+#r_build_args: "--no-build-vignettes"
+#r_check_args: "--no-build-vignettes --as-cran"    
+r_packages:
+      - covr
+
 after_success:
-- Rscript -e 'covr::codecov()'
+      - Rscript -e 'library(covr); codecov()'
+#after_success:
+#  - Rscript -e 'covr::codecov()'

@@ -2,17 +2,18 @@
 % Please edit documentation in R/survplot.R
 \name{survplot}
 \alias{survplot}
-\title{Plot and get survival data from a multi-state model.}
+\title{Plot and get survival data from a multi-state model}
 \usage{
 survplot(x, from = 1, to = NULL, range = NULL, covariates = "mean",
-  exacttimes = TRUE, times, grid = 100L, km = FALSE, return.km = FALSE,
-  return.p = FALSE, add = FALSE, ci = c("none", "normal", "bootstrap"),
-  interp = c("start", "midpoint"), B = 100L, legend.pos = "topright",
-  xlab = "Time", ylab = "Survival Probability", lty.fit = 1,
-  lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
-  col.ci.fit = col.fit, mark.time = FALSE, lty.km = 5, lwd.km = 1,
-  col.km = "darkblue", do.plot = TRUE, plot.width = 7, plot.height = 7,
-  devnew = TRUE, verbose = TRUE)
+  exacttimes = TRUE, times, grid = 100L, km = FALSE, return.all = FALSE,
+  return.km = NULL, return.p = NULL, convert = FALSE, add = FALSE,
+  ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
+  B = 100L, legend.pos = "topright", xlab = "Time",
+  ylab = "Survival Probability", lty.fit = 1, lwd.fit = 1,
+  col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1, col.ci.fit = col.fit,
+  mark.time = FALSE, lty.km = 5, lwd.km = 1, col.km = "darkblue",
+  do.plot = TRUE, plot.width = 7, plot.height = 7, devnew = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -38,18 +39,30 @@ is inherited from \code{msm} and should be set the same way.}
 
 \item{times}{An optional numeric vector giving the times at which to compute the fitted survival.}
 
-\item{grid}{An integer which tells at how many points to compute the fitted survival.
+\item{grid}{An integer which tells at how many points to compute the fitted survival (See 'Details').
 If \code{times} is passed, \code{grid} is ignored. It has a default of 100 points.}
 
 \item{km}{If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is \code{FALSE}.}
 
-\item{return.km}{If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
-\code{survplot} must be assigned to an object in order to get the data in the environment
-(see 'Value').}
+\item{return.all}{If \code{TRUE}, then all the datasets used to draw the plot will be return to
+the environment. This argument saves you some typing time since you do not have to pass neither
+\code{return.km} nor \code{return.p}. Default is \code{FALSE} (See 'Details').}
 
-\item{return.p}{If \code{TRUE}, then a \code{data.table} is returned. Default is \code{FALSE}.
+\item{return.km}{If \code{TRUE}, then the dataset used for building the Kaplan-Meier is returned
+as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
+(See \code{convert}). Default is \code{FALSE}.
 \code{survplot} must be assigned to an object in order to get the data in the environment
-(see 'Value').}
+(see 'Details').}
+
+\item{return.p}{If \code{TRUE}, then the dataset used for building the fitted survival curve
+is returned as an object of class \code{data.table} unless \code{convert} is set to \code{TRUE}
+(See \code{convert}). Default is \code{FALSE}.
+\code{survplot} must be assigned to an object in order to get the data in the environment
+(see 'Details').}
+
+\item{convert}{If \code{TRUE}, then any returned object is automatically converted to the
+class \code{data.frame}. This is done in place and comes at very low cost both from running time
+and memory consumption (See \code{\link[data.table]{setDF}}).}
 
 \item{add}{If \code{TRUE}, then a new layer is added to the current plot. Default is \code{FALSE}.}
 
@@ -118,34 +131,42 @@ options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
 (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.}
 }
 \value{
-If both \code{return.km} and \code{return.p} are set to \code{TRUE}, then \code{survplot}
-returns a named list with \code{$km} and \code{$fitted} as \code{data.table}. To save them in the
-current environment assign \code{survplot} to an object (see 'Examples')\cr
+If \code{return.all} is set to \code{TRUE}, then \code{survplot}
+returns a named list with \code{$km} and \code{$fitted} as \code{data.table} or as \code{data.frame}
+when \code{convert = TRUE}. To save them in the
+working environment, assign \code{survplot} to an object (see 'Examples')\cr
+
 ------\cr
 \code{$km} contains up to 4 columns:\cr
 \emph{subject}: the ordered subject ID as passed in the \code{msm} function.\cr
-\emph{mintime}: the time at which to compute the fitted survival.\cr
+\emph{mintime}: the times at which to compute the fitted survival.\cr
 \emph{mintime_exact}: if \code{exacttimes} is \code{TRUE}, then the relative timing is reported.\cr
 \emph{anystate}: state of transition to compute the Kaplan-Meier.\cr
 ------\cr
 \code{$fitted} contains 2 columns:\cr
-\emph{time}: time at which to compute the fitted survival.\cr
-\emph{probs}: the corresponding value of the fitted survival.\cr
+\emph{time}: times at which to compute the fitted survival.\cr
+\emph{probs}: the corresponding values of the fitted survival.\cr
 }
 \description{
 Plot a Kaplan-Meier curve and compare it with the fitted survival probability computed from a
-\code{\link[msm]{msm}} model. Fast build and return the associated datasets.
+\code{\link[msm]{msm}} model. Fast builds and returns the associated datasets.
 }
 \details{
 The function is a wrapper of \code{\link[msm]{plot.survfit.msm}} and does more things.
 \code{survplot} manages correctly the plot of a fitted survival in
 an exact times framework (when \code{exacttimes = TRUE}) by just resetting the time scale
 and looking at the follow-up time.
-It can fastly compute, build and return to the user the dataset on which the Kaplan-Meier has
-been computed. Similarly, it can return to the user the dataset on which the fitted survival has
-been computed, both with user defined times (through \code{times}) and self set times (through
-\code{grid}). For more details about how \code{survplot} returns objects, please refer to the
-vignette with \code{vignette("msmtools")}.
+It can fastly build and return to the user the datasets used to compute the Kaplan-Meier
+and the fitted survival by setting \code{return.all = TRUE}. When this is \code{TRUE}, setting
+\code{return.km} or \code{return.p} to \code{FALSE} produces an error and \code{survplot} does not
+conclude the job. If these are set to \code{TRUE}, a warning is raised but the job is taken
+to the end. For more details about how \code{survplot} returns objects,
+please refer to the vignette with \code{vignette("msmtools")}.
+
+The user can defined custom times (through \code{times}) or let \code{survplot} choose
+them on its own (through \code{grid}). In the latter case, \code{survplot} looks for the follow-up
+time and divides it by \code{grid}. The higher it is, the finer the grid will be so that computing
+the fitted survival will take longer, but will be more precise.
 }
 \examples{
 \dontrun{
@@ -171,13 +192,22 @@ msm_model = msm( status_num ~ augmented_int,
                  control = list( fnscale = 6e+05, trace = 0,
                  REPORT = 1, maxit = 10000 ) )
 
-# plotting the fitted and empirical survival
-survplot( msm_model, km = TRUE, ci = 'none', verbose = FALSE, devnew = FALSE )
+# plotting the fitted and empirical survival from state = 1
+survplot( msm_model, km = TRUE, ci = 'none',
+          verbose = FALSE )
+
+# plotting the fitted and empirical survival from state = 2 and
+# adding it to the previous plot
+survplot( msm_model, from = 2, km = TRUE, ci = 'none', add = TRUE,
+          verbose = FALSE )
 
 # returning fitted and empirical data
-all_data = survplot( msm_model, ci = 'none',
-                     return.km = TRUE, return.p = TRUE,
+all_data = survplot( msm_model, ci = 'none', return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
+
+# saving them separately
+km_data = all_data[[ 1 ]]
+fitted_data = all_data[[ 2 ]]
 }
 
 }
@@ -191,12 +221,12 @@ Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
 Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
 hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
 
-Jackson, C.H. (2011). Multi-State Models for Panel Data:
-The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
+Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
+The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
 URL \url{http://www.jstatsoft.org/v38/i08/}.
 }
 \seealso{
-\code{\link[msm]{plot.survfit.msm}}, \code{\link[msm]{msm}},
-\code{\link[msm]{pmatrix.msm}}
+\code{\link[msm]{plot.survfit.msm}} \code{\link[msm]{msm}},
+\code{\link[msm]{pmatrix.msm}}, \code{\link[data.table]{setDF}}
 }
 

@@ -1,10 +1,12 @@
 ---
-title: "Building augmented data for multi-state models: the `msmtools` package"
+title: |
+  | Building augmented data for multi-state models: the `msmtools` package
+  | *version 1.2*
 author: "Francesco Grossetti"
 date: "`r Sys.Date()`"
 fontsize: 12pt
 output: 
-  rmarkdown::html_vignette:
+  rmarkdown::pdf_document:
     number_sections: yes
     toc: yes
     toc_depth: 4
@@ -19,6 +21,7 @@ vignette: >
 library( msmtools )
 ```
 
+---
 # Introduction
 
 Package `msmtools` is an `R` package whose main goal is to facilitate the workflow with
@@ -66,7 +69,7 @@ version. For instance, if you apply `augment()` to the dataset above, you get wh
 
 ```{r running augment, collapse = TRUE}
 hosp_augmented = augment( data = hosp, data_key = subj, 
-                          n_events = adm_number, pattern = label_3,
+                          n_events = adm_number, pattern = label_2,
                           t_start = dateIN, t_end = dateOUT, 
                           t_cens = dateCENS, verbose = FALSE )
 
@@ -131,22 +134,31 @@ running `length( unique( pattern ) )` must return 2 or 3). Now, suppose we provi
 follows: 
 
 1. Case 1. *integer*:
+
     + `pattern = 0`: subject is alive at the censoring time;
     + `pattern = 1`: subject is dead during a transition;
     + `pattern = 2`: subject is dead out of a transition.
+    
 1. Case 2. *factor*:
+
     + `pattern = 'alive'`: this is the first level of the factor and corresponds to `pattern = 0` 
     when integer;
     + `pattern = 'dead in'`: this is the second level of the factor and corresponds to `pattern = 1` 
     when integer;
     + `pattern = 'dead out'`: this is the third level of the factor and corresponds to `pattern = 2` 
     when integer;
+    
 1. Case 3. *character*:
+
     + the unique values must be in alphabetical order to resemble the pattern of the integer and 
     factor case.
-    
-Everything else to what described above will inevitably produce wrong behaviour of `augment()` with 
-and uncorrect results.
+
+In case one passes to `pattern` a variable which contains only two unique values, `augment()`
+automatically detects if the unit has an absorbing state occurred inside or outside a given 
+transition. We suggest to always provide a variable with three unique values because of efficiency
+and speed.  
+Everything else different from what described above will inevitably produce wrong behaviour of 
+`augment()` with and uncorrect results.
 
 The second important argument is `state`. This is passed as a list and contains the status flags 
 which will be used to compute all the status variables for the process. The length of `state` is
@@ -162,7 +174,16 @@ One can change the flags in `state`, but they must be exactly 3.
 One may need a higher level of complexity when specifying the states of subjects. This will be 
 discussed in the next section where `state` acts as the main indicator of states.
 
-
+From version 1.2, `augment()` no longer checks the presence of missing data in the arguments 
+passed to it. In fact, the new argument `check_NA` has been introduced and set to `FALSE` by default.
+Again, this is due because `augment()` has been developed just for restructuring data.
+The proceduring of searching for missing data is computationally intensive and could cause memory
+overheads. When dealing with very highly dimensional dataset, this becomes very unfeasible.
+We then suggest to perform all these types of checks before running `augment()`. If one really 
+wants to run this procedure, can set `check_NA = TRUE` and detection will be performed over 
+`data_key`, `n_events`, `pattern`, `t_start` and `t_end`. Beware, that no missing imputation or 
+deletion is carried out. If any missing value is found, then `augment()` stops with error asking
+you to fix the problem.
 
 ## What if a more complex status structure is needed?
 
@@ -191,14 +212,14 @@ specify a default transition make sure to label it with this value. So, if we ru
 this sample, we obtain the following:
 
 ```{r complex status, collapse = TRUE }
-hosp_augmented = augment( data = hosp, data_key = subj,
-                          n_events = adm_number, pattern = label_2,
-                          t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS, more_status = rehab_it,
-                          verbose = FALSE )
+hosp_augmented_more = augment( data = hosp, data_key = subj,
+                               n_events = adm_number, pattern = label_2,
+                               t_start = dateIN, t_end = dateOUT,
+                               t_cens = dateCENS, more_status = rehab_it,
+                               verbose = FALSE )
 
-hosp_augmented[ 36:60, .( subj, adm_number, rehab_it,
-                          augmented, status, status_exp, n_status_exp ) ]
+hosp_augmented_more[ 36:60, .( subj, adm_number, rehab_it,
+                               augmented, status, status_exp, n_status_exp ) ]
 ```
 
 Beside the usual status variables, of which we reported only status, `augment()` computed two more:
@@ -212,14 +233,13 @@ it in as an indicator of a more complex status structure;
 the current expandend status and the number of admission to give you the time evolution of the
 process.
 
-
 # Graphical Assessment of a Multi-state Model
 
-**msmtools** has been mainly developed to easily manage and work with longitudinal datasets
+`msmtools` has been mainly developed to easily manage and work with longitudinal datasets
 which need to be restructured in order to get msm to work properly.
 
-However, **msmtools** comes with two more functions which try to address graphically and in a very
-efficient way the problem of the Goodness-of-Fit (Gof) for a multi-state model. When dealing
+However, `msmtools` comes with two more functions which try to address graphically and in a very
+efficient way the problem of the Goodness-of-Fit (GoF) for a multi-state model. When dealing
 with this type of models, GoF is always a tough quest. Furthermore, up to now, no formal
 statistical tests are defined when a multi-state model is computed within an exact time framework
 [@titman2009model] [@titman2008general].
@@ -229,16 +249,11 @@ statistical tests are defined when a multi-state model is computed within an exa
 One of the most common graphical method to assess whether a multi-state model is behaving
 the way we expect, is to compare the empirical survival with the fitted one. `survplot()`
 helps out doing this and few more things. The function is a wrapper of the already known
-`plot.survfit.msm()` from the package **msm**.
+`plot.survfit.msm()` from the package `msm`.
 
 Suppose we ran a multi-state model on dataset hosp with the following code:
 
 ```{r multistate model, collapse = TRUE }
-hosp_augmented = augment( data = hosp, data_key = subj,
-                          n_events = adm_number, pattern = label_2,
-                          t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS, verbose = FALSE )
-
 # let's define the initial transition matrix for our model
 Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
 Qmat[ 1, 1:3 ] = 1
@@ -268,7 +283,7 @@ survplot( msm_model, km = TRUE, ci = 'none',
           verbose = FALSE, devnew = FALSE )
 ```
 
-With no surprises, the plot is not so satistying due to the really small dataset we provided.
+With no surprises, the plot is not so satisfying due to the really small dataset we provided.
 
 Now, `survplot()` takes several parameters, many of them come with a default value. For instance, the
 figureabove has been computed for a transition (IN - DEAD). We can pass to argument `from` any
@@ -284,7 +299,7 @@ survplot( msm_model, km = TRUE, from = 2, ci = 'none',
 
 If we do not want to show the Kaplan-Meier, we can pass `km = FALSE`, which is the default.
 
-### Setting a custom time sequence
+### Defining a custom time sequence
 
 By default `survplot()` computes the fitted survival on a given grid. The number of grid points is
 given by `grid`. In some cases, one would like to pass a custom time sequence. This can be achieved
@@ -370,26 +385,26 @@ in wide format with 2 columns:
 or by `times` so that the cardinality of the data depends on them;
 * *probs*: the corresponding value of the fitted survival.
 
-Of course, you can request `survplot()` to return both the datasets by passing all the parameters.
+Of course, you can request `survplot()` to return both the datasets by setting just `return.all = TRUE`.
 Below you can see the code and the output when no assignment is done and when you save the data
-into a new object.
+into a new object in the environment.
 
 ```{r return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
 # just running survplot()
-survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+survplot( msm_model, ci = 'none', grid = 10, return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
 # running survplot() and assigning it to an object
-all_data = survplot( msm_model, ci = 'none', grid = 10,
-                     return.km = TRUE, return.p = TRUE,
+all_data = survplot( msm_model, ci = 'none', grid = 10, 
+                     return.all = TRUE,
                      verbose = FALSE, do.plot = FALSE )
 
-# let's see the dataset
+# let's see the datasets
 all_data
 ```
 
-`all_data` is a list of two elements. If you want to split up the datasets, just use common syntax:
+`all_data` is a list of two elements of class `data.table`. If you want to split up the datasets, 
+just use common syntax:
 
 ```{r splitting data, collapse = TRUE}
 # do not extract data using just one [].
@@ -431,7 +446,7 @@ survplot( msm_model, from = 2, add = TRUE, col.fit = 'darkblue',
 ## Comparing expected and observed prevalences with `prevplot()`
 
 A second graphical tool which helps us in the attempt to understand the goodness of the model is
-given by comparing the expected and observed prevalences. `prevplot()` is a wrapper of the
+given by comparing the expected and observed prevalences [@gentleman1994multi]. `prevplot()` is a wrapper of the
 `plot.prevalence.msm()` function inside the `msm` package but, again, it does more things.
 
 Consider the multi-state model we have built above. We can compute the prevalences using
@@ -470,17 +485,21 @@ prevplot( msm_model, prev, M = TRUE, ci = TRUE,
 ```
 
 
-## A note on `verbose` and `devnew`
+## Further details on specific arguments
 
 We are not going to discuss every arguments inside every function. This paragraph serves as a 
 guideline to better exploit `msmtools`. We have developed the package by paying lot of attention to
 the consistency of the code throughout the functions. 
 
-For example, you can find the argument `verbose` anywhere in the package. This is useful when you 
+For those of you who are more confortable with objects of class `data.frame` with no compromises, 
+both `augment()` and `survplot()` can manage that with the argument `convert = TRUE`. 
+By default, `convert` is set to `FALSE` in order to incentivize a more efficient coding.
+
+Moreover, you can find the argument `verbose` anywhere in the package. This is useful when you 
 do not want to be informed about anything that is happening internally with the only exception for 
 warnings and of course errors. If quiet is your mood, then you may want to set `verbose = FALSE`.
 
-A second argument which is shared between `survplot()` and `prevplot()` is `devnew`. This is a 
+A third argument which is shared between `survplot()` and `prevplot()` is `devnew`. This is a 
 purely graphical parameter which is set to `TRUE` by default. It allows you to decide whether 
 to plot on a new graphical device called with `dev.new()` by default. If you set `devnew = FALSE`, 
 then the plot is overwritten according to `dev.cur()`. There exist two caveat: the former is that
@@ -488,9 +507,9 @@ then the plot is overwritten according to `dev.cur()`. There exist two caveat: t
 you want to add a new layer to an existing plot (with `add`), it does not make any sense to let 
 the function using a new device. Hence, `devnew` is simply ignored. The latter is that, even you 
 can set `devnew = FALSE` in `prevplot()`, one should keep it as the default. If you set it to `FALSE`
-and you want a plot of `M` by setting `M = TRUE`, then this plot overwrites the prevalence one.
+and you want to plot `M` by setting `M = TRUE`, then this plot overwrites the prevalence one.
 
 
-
+# References
 
 

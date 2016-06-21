@@ -4,3 +4,5 @@
 .Ruserdata
 testing.R
 inst/doc
+.DS_Store
+*.dll
