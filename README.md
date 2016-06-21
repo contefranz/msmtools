@@ -2,6 +2,7 @@
 
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/msmtools)](http://cran.r-project.org/package=msmtools)
 [![Build Status](https://travis-ci.org/contefranz/msmtools.svg?branch=dev)](https://travis-ci.org/contefranz/msmtools) 
+[![codecov](https://codecov.io/gh/contefranz/msmtools/branch/dev/graph/badge.svg)](https://codecov.io/gh/contefranz/msmtools)
 
 ---
 `msmtools` introduces a fast and general method for restructuring classical longitudinal datasets
