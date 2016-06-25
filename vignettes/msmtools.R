@@ -1,12 +1,12 @@
 ## ----ninja, echo = FALSE-------------------------------------------------
 library( msmtools )
 
-## ----long example, collapse = TRUE---------------------------------------
+## ----long_example, collapse = TRUE---------------------------------------
 data( hosp )
 hosp[ 1:17, .( subj, adm_number, gender, age, label_2, 
                dateIN, dateOUT, dateCENS ) ]
 
-## ----running augment, collapse = TRUE------------------------------------
+## ----running_augment, collapse = TRUE------------------------------------
 hosp_augmented = augment( data = hosp, data_key = subj, 
                           n_events = adm_number, pattern = label_2,
                           t_start = dateIN, t_end = dateOUT, 
@@ -19,7 +19,7 @@ hosp_augmented[ 1:35, .( subj, adm_number, gender, age, label_2,
 hosp[ 18:28, .( subj, adm_number, rehab, it, rehab_it,
                 dateIN, dateOUT, dateCENS ) ]
 
-## ----complex status, collapse = TRUE-------------------------------------
+## ----complex_status, collapse = TRUE-------------------------------------
 hosp_augmented_more = augment( data = hosp, data_key = subj,
                                n_events = adm_number, pattern = label_2,
                                t_start = dateIN, t_end = dateOUT,
@@ -29,7 +29,7 @@ hosp_augmented_more = augment( data = hosp, data_key = subj,
 hosp_augmented_more[ 36:60, .( subj, adm_number, rehab_it,
                                augmented, status, status_exp, n_status_exp ) ]
 
-## ----multistate model, collapse = TRUE-----------------------------------
+## ----multistate_model, collapse = TRUE-----------------------------------
 # let's define the initial transition matrix for our model
 Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
 Qmat[ 1, 1:3 ] = 1
@@ -49,15 +49,15 @@ msm_model = msm( status_num ~ augmented_int,
                  control = list( fnscale = 6e+05, trace = 0,
                                  REPORT = 1, maxit = 10000 ) )
 
-## ----survplot 1, fig.align = 'center', fig.width = 5, fig.height = 4-----
+## ----survplot_1, fig.align = 'center', fig.width = 5, fig.height = 4-----
 survplot( msm_model, km = TRUE, ci = 'none',
           verbose = FALSE, devnew = FALSE )
 
-## ----survplot 2, fig.align = 'center', fig.width = 5, fig.height = 4-----
+## ----survplot_2, fig.align = 'center', fig.width = 5, fig.height = 4-----
 survplot( msm_model, km = TRUE, from = 2, ci = 'none',
           verbose = FALSE, devnew = FALSE )
 
-## ----custom time seq, fig.align = 'center', fig.width = 5, fig.height = 4----
+## ----custom_time_seq, fig.align = 'center', fig.width = 5, fig.height = 4----
 time_seq = seq( 300, 800, by = 30 )
 survplot( msm_model, times = time_seq, ci = 'none',
           verbose = FALSE, devnew = FALSE )
@@ -99,7 +99,7 @@ all_data = survplot( msm_model, ci = 'none', grid = 10,
 # let's see the datasets
 all_data
 
-## ----splitting data, collapse = TRUE-------------------------------------
+## ----splitting_data, collapse = TRUE-------------------------------------
 # do not extract data using just one [].
 # This keeps the class, so it returns a list
 km_data_wrong = all_data[ 1 ]

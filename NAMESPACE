@@ -2,6 +2,7 @@
 
 export(augment)
 export(prevplot)
+export(quake)
 export(survplot)
 import(data.table)
 importFrom(grDevices,dev.cur)

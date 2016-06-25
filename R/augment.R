@@ -259,7 +259,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   }
   if ( check_NA == TRUE ) {
     if ( verbose == TRUE ) {
-      message( 'checking for any missing data in function arguments' )
+      message( 'checking for any missing values in function arguments' )
     }
     checks = c( cols, pattern, t_start, t_end )
     test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
@@ -271,7 +271,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
       stop( 'Please, fix the issues and relaunch augment()' )
     } else {
-      cat( 'Ok, no missing data detected\n')
+      cat( 'Ok, no missing values detected\n')
       cat( '---\n' )
     }
   }
