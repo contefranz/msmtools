@@ -54,6 +54,7 @@
 #' \emph{y} coordinate can be passed. If \code{NULL}, then legend is not shown.
 #' @param xlab \emph{x} axis label.
 #' @param ylab \emph{y} axis label.
+#' @param main The main title of the plot(s) as character.
 #' @param lty.fit Line type for the fitted curve. See \code{\link[graphics]{par}}.
 #' @param lwd.fit Line width for the fitted curve. See \code{\link[graphics]{par}}.
 #' @param col.fit Line color for the fitted curve. See \code{\link[graphics]{par}}.
@@ -178,7 +179,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      convert = FALSE, add = FALSE,
                      ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
                      B = 100L, legend.pos = 'topright',
-                     xlab = "Time", ylab = "Survival Probability",
+                     xlab = "Time", ylab = "Survival Probability", main,
                      lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
                      col.ci.fit = col.fit, mark.time = FALSE,
                      lty.km = 5, lwd.km = 1, col.km = "darkblue",
@@ -260,7 +261,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
         dev.set( dev.cur() )
       }
       plot( times, 1 - pr, type = "l", xlab = xlab, ylab = ylab, ylim = c( 0, 1 ),
-            lwd = lwd.fit, lty = lty.fit, col = col.fit )
+            lwd = lwd.fit, lty = lty.fit, col = col.fit, main = main )
     } else {
       lines( times, 1 - pr, lwd = lwd.fit, lty = lty.fit, col = col.fit )
     }

@@ -1,7 +1,32 @@
-#' A starting function which does something
+#' Delete different events occurring at the same time
 #'
-#' Figuring out what actually this function does
+#' Fast algorithm to get rid of transitions to different states occurring at the same exact time
+#' when dealing with augmented data as computed by \code{augment}.
 #'
+#' @param data An augmented \code{data.table} or \code{data.frame} object where each row
+#' represents a transition. If \code{data} is a \code{data.frame}, then \code{quake} internally
+#' casts it to a \code{data.table}.
+#' @param data_key A keying variable which \code{quake} uses to define a key for \code{data}.
+#' This represents the subject ID (See \code{\link[data.table]{setkey}}).
+#' @param pattern ID status at the end of the study as passed to \code{augment} (See
+#' \code{\link[msmtools]{augment}}).
+#' @param target The target variable to check duplicates. By default it is set to 'augmented_int'.
+#' @param check_NA If \code{TRUE}, then arguments \code{data_key}, \code{pattern},
+#' and \code{target} are looked up for any missing data and if the function finds
+#' any, it stops with error. Default is \code{FALSE}.
+#' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat} and
+#' \code{message} are suppressed. All is done internally so that no global
+#' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
+#' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
+#'
+#' @details blablabla some details to write down
+#' @seealso \code{\link[msmtools]{augment}}
+#'
+#' @examples
+#' data( hosp )
+#' hosp_aug = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
+#'                     t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+#' hosp_aug_clean = quake( data = hosp_aug, data_key = subj, pattern = label_3 )
 #'
 #' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
 #' @import data.table
@@ -39,7 +64,11 @@ quake = function( data, data_key, pattern, target, check_NA = FALSE, verbose = T
   }
   setkeyv( data, cols )
   pattern = as.character( substitute( list( pattern ) )[ -1L ] )
-  target = as.character( substitute( list( target ) )[ -1L ] )
+  if ( missing( target ) ) {
+    target = 'augmented_int'
+  } else {
+    target = as.character( substitute( list( target ) )[ -1L ] )
+  }
 
   if ( check_NA == TRUE ) {
     if ( verbose == TRUE ) {
@@ -95,28 +124,32 @@ quake = function( data, data_key, pattern, target, check_NA = FALSE, verbose = T
   setkeyv( duplicated, cols )
 
   if ( n_duplicated == 0 ) {
-    message( 'No duplicated occurrences have been found ', substitute( data ),
-             'according to variable ', substitute( target ), '\n' )
+    message( 'Hurray! No duplicated occurrences have been found in ', substitute( data ),
+             ' according to variable ', substitute( target ) )
   } else {
     message( 'Spotted ', n_duplicated,
              ' patients with at least a duplicated occurrence according to variable ',
              substitute( target ) )
-
     data.clean = data[ !duplicated ]
     n_patients.to.keep = uniqueN( eval( substitute( data.clean$cols ) ) )
-
     cat( n_patients.to.keep, ' patients have been reained corresponding to ',
          round( 100 * ( n_patients.to.keep / n_patients ), 2 ), '%\n', sep = '' )
     cat( 'Duplicated patients have been sucessfully removed\n' )
   }
 
   data[ , index := NULL ]
+  if ( n_duplicated > 0 ) {
+    data.clean[ , index := NULL ]
+  }
   toc = proc.time()
   time = toc - tic
   cat( '---------------------------\n' )
-  cat( 'shiver() took:', time[ 3 ], 'sec. \n', sep = ' ' )
+  cat( 'quake() took:', time[ 3 ], 'sec. \n', sep = ' ' )
   cat( '---------------------------\n' )
 
-  return( invisible( data.clean ) )
-
+  if ( n_duplicated == 0 ) {
+    return( invisible( data ) )
+  } else {
+    return( invisible( data.clean ) )
+  }
 }

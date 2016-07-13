@@ -1,3 +1,19 @@
+# msmtools 1.3
+
+### Major changes
+
+* introducing the `quake()` function which adds support in the preprocessing part of the analysis.
+`quake()` addresses the specific problem of different transitions occurring at the same exact time. 
+This is a case for which a multi-state model fails to estimate the probability associated with the
+two transitions.
+
+### Bug fixes
+
+* `pandoc` versions prior 1.17 does not fully support spaces in file names and caused a warning when 
+compiling `msmtools` under Fedora using both `clang` ang `gcc`. Now all file names are without
+spaces. `msmtools` 1.3 uses `pandoc` 1.17.1 and `pandoc-citeproc` 0.10.
+
+
 # msmtools 1.2
 
 ### Major changes
