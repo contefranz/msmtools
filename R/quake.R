@@ -35,6 +35,7 @@
 quake = function( data, data_key, pattern, target, check_NA = FALSE, verbose = TRUE ) {
 
   tic = proc.time()
+  index = NULL
 
   if ( missing( data ) ) {
     stop( 'a dataset of class data.table or data.frame must be provided' )

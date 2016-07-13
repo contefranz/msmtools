@@ -54,7 +54,7 @@
 #' \emph{y} coordinate can be passed. If \code{NULL}, then legend is not shown.
 #' @param xlab \emph{x} axis label.
 #' @param ylab \emph{y} axis label.
-#' @param main The main title of the plot(s) as character.
+#' @param main The main title of the plot(s) as character. Default is \code{NULL}.
 #' @param lty.fit Line type for the fitted curve. See \code{\link[graphics]{par}}.
 #' @param lwd.fit Line width for the fitted curve. See \code{\link[graphics]{par}}.
 #' @param col.fit Line color for the fitted curve. See \code{\link[graphics]{par}}.
@@ -179,7 +179,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      convert = FALSE, add = FALSE,
                      ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
                      B = 100L, legend.pos = 'topright',
-                     xlab = "Time", ylab = "Survival Probability", main,
+                     xlab = "Time", ylab = "Survival Probability", main = NULL,
                      lty.fit = 1, lwd.fit = 1, col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1,
                      col.ci.fit = col.fit, mark.time = FALSE,
                      lty.km = 5, lwd.km = 1, col.km = "darkblue",
