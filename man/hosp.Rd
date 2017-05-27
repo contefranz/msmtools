@@ -34,4 +34,3 @@ The dataset counts imaginary 10 patients who undergo different (re)admission int
 Some demographic and clinical variables are also included.
 }
 \keyword{datasets}
-

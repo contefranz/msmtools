@@ -1,77 +1,98 @@
 #' Plot observed and expected prevalences for a multi-state model
 #'
-#' Provides a graphical indication of goodness of fit of a multi-state model computed by
-#' \code{\link[msm]{msm}} using observed and expected prevalences.
-#' It also computes a rough indicator of where the data depart from the fitted Markov model.
+#' Provides a graphical indication of goodness of fit of a multi-state model
+#' computed by \code{\link[msm]{msm}} using observed and expected prevalences.
+#' It also computes a rough indicator of where the data depart from the fitted
+#' Markov model.
 #'
 #' @param x A \code{msm} object.
-#' @param prev.obj A list computed by \code{\link[msm]{prevalence.msm}}. It can be with or without
-#' confidence intervals. \code{prevplot} will behaves accordingly.
-#' @param M If \code{TRUE}, then a rough indicator of deviance from the model is computed
-#' (see 'Details'). Default is \code{FALSE}.
-#' @param exacttimes If \code{TRUE} (default) then transition times are known and exact. This
-#' is inherited from \code{msm} and should be set the same way.
+#' @param prev.obj A list computed by \code{\link[msm]{prevalence.msm}}.
+#' It can be with or without confidence intervals. \code{prevplot} will behaves
+#' accordingly.
+#' @param M If \code{TRUE}, then a rough indicator of deviance from the model is
+#' computed (see 'Details'). Default is \code{FALSE}.
+#' @param exacttimes If \code{TRUE} (default) then transition times are known
+#' and exact. This is inherited from \code{msm} and should be set the same way.
 #' @param ci If \code{TRUE}, then confidence intervals, if they exist, are plotted.
 #' Default is \code{FALSE}.
-#' @param grid Define how many points should be used to build the \emph{x} axis. Defaul is 100.
-#' @param x.lab.grid Define the interval on the \emph{x} axis at which draw tick marks. Default
-#' is 500.
+#' @param grid Define how many points should be used to build the \emph{x} axis.
+#' Defaul is 100.
+#' @param x.lab.grid Define the interval on the \emph{x} axis at which draw tick
+#' marks. Default is 500.
 #' @param xlab \emph{x} axis label.
 #' @param ylab \emph{y} axis label.
-#' @param lty.fit Line type for the expected prevalences. See \code{\link[graphics]{par}}.
-#' @param lwd.fit Line width for the expected prevalences. See \code{\link[graphics]{par}}.
-#' @param col.fit Line color for the expected prevalences. See \code{\link[graphics]{par}}.
+#' @param lty.fit Line type for the expected prevalences.
+#' See \code{\link[graphics]{par}}.
+#' @param lwd.fit Line width for the expected prevalences.
+#' See \code{\link[graphics]{par}}.
+#' @param col.fit Line color for the expected prevalences.
+#' See \code{\link[graphics]{par}}.
 #' @param lty.ci.fit Line type for the expected prevalences confidence limits.
 #' See \code{\link[graphics]{par}}.
 #' @param lwd.ci.fit Line width for the expected prevalences confidence limits.
 #' See \code{\link[graphics]{par}}.
 #' @param col.ci.fit Line color for the expected prevalences confidence limits.
 #' See \code{\link[graphics]{par}}.
-#' @param lty.obs Line type for the observed prevalences. See \code{\link[graphics]{par}}.
-#' @param lwd.obs Line width for the observed prevalences. See \code{\link[graphics]{par}}.
-#' @param col.obs Line color for the observed prevalences. See \code{\link[graphics]{par}}.
-#' @param legend.pos Where to position the legend. Default is \code{"topright"}, but \emph{x} and
-#' \emph{y} coordinate can be passed. If \code{NULL}, then legend is not shown.
+#' @param lty.obs Line type for the observed prevalences.
+#' See \code{\link[graphics]{par}}.
+#' @param lwd.obs Line width for the observed prevalences.
+#' See \code{\link[graphics]{par}}.
+#' @param col.obs Line color for the observed prevalences.
+#' See \code{\link[graphics]{par}}.
+#' @param legend.pos Where to position the legend. Default is \code{"topright"},
+#' but \emph{x} and \emph{y} coordinate can be passed. If \code{NULL}, then
+#' legend is not shown.
 #' @param par.col The number of columns of the plot. Default is 3.
-#' @param plot.width Width of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
-#' @param plot.height Height of new graphical device. Default is 7. See \code{\link[graphics]{par}}.
-#' @param max.m If \code{M = TRUE}, it adjusts the upper \emph{y} limit when plotting M.
-#' @param devnew Set the graphical device where to plot. By default, \code{prevplot} plots on a new
-#' device by setting \code{dev.new}. If \code{FALSE}, then a plot is drawn onto the current device
-#' as specified by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
-#' a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.
-#' @param verbose If \code{FALSE}, all information produced by \code{print}, \code{cat} and
-#' \code{message} are suppressed. All is done internally so that no global
-#' options are changed. \code{verbose} can be set to \code{FALSE} on all common OS
-#' (see also \code{\link[base]{sink}} and \code{\link[base]{options}}). Default is \code{TRUE}.
-#' @details When \code{M = TRUE}, a rough indicator of the deviance from the Markov model is
-#' computed according to Titman and Sharples (2008). A comparison at a given time \eqn{t_i} of a
-#' patient \emph{k} in the state \emph{s} between observed counts \eqn{O_{is}}
-#' with expected ones \eqn{E_{is}} is build as follows:
-#' \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is} }
+#' @param plot.width Width of new graphical device. Default is 7.
+#' See \code{\link[graphics]{par}}.
+#' @param plot.height Height of new graphical device. Default is 7.
+#' See \code{\link[graphics]{par}}.
+#' @param max.m If \code{M = TRUE}, it adjusts the upper \emph{y} limit when
+#' plotting M.
+#' @param devnew Set the graphical device where to plot. By default,
+#' \code{prevplot} plots on a new device by setting \code{dev.new}.
+#' If \code{FALSE}, then a plot is drawn onto the current device
+#' as specified by \code{dev.cur}. If \code{FALSE} and no external devices are
+#' opened, then a plot is drawn using internal graphics.
+#' See \code{\link[grDevices]{dev}}.
+#' @param verbose If \code{FALSE}, all information produced by \code{print},
+#' \code{cat} and \code{message} are suppressed. All is done internally so that
+#' no global options are changed. \code{verbose} can be set to \code{FALSE} on
+#' all common OS (see also \code{\link[base]{sink}} and
+#' \code{\link[base]{options}}). Default is \code{TRUE}.
+#' @details When \code{M = TRUE}, a rough indicator of the deviance from the
+#' Markov model is computed according to Titman and Sharples (2008).
+#' A comparison at a given time \eqn{t_i} of a patient \emph{k} in the state
+#' \emph{s} between observed counts \eqn{O_{is}} with expected ones \eqn{E_{is}}
+#' is build as follows:
+#' \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is}}
+#'
 #' @seealso \code{\link[msm]{plot.prevalence.msm}} \code{\link[msm]{msm}}
 #' \code{\link[msm]{prevalence.msm}}
-#' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for multi-state models,
-#' \emph{Statistical Methods in Medical Research}, 19, 621-651.\cr
+#' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for
+#' multi-state models, \emph{Statistical Methods in Medical Research}, 19,
+#' 621-651.\cr
 #'
-#' Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for Markov and
-#' hidden Markov models, \emph{Statistics in Medicine}, 27, 2177-2195. \cr
+#' Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for
+#' Markov and hidden Markov models, \emph{Statistics in Medicine}, 27,
+#' 2177-2195. \cr
 #'
-#' Gentleman RC, Lawless JF, Lindsey JC, Yan P. (1994). Multi-state Markov models for analysing
-#' incomplete disease data with illustrations for HIV disease. \emph{Statistics in Medicine},
-#' 13:805-821. \cr
+#' Gentleman RC, Lawless JF, Lindsey JC, Yan P. (1994). Multi-state Markov
+#' models for analysing incomplete disease data with illustrations for HIV
+#' disease. \emph{Statistics in Medicine}, 13:805-821. \cr
 #'
 #' Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
 #' URL \url{http://www.jstatsoft.org/v38/i08/}.
-#' @author Francesco Grossetti \email{francesco.grossetti@@polimi.it}.
+#' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
 #' @examples
 #' \dontrun{
 #' data( hosp )
 #'
 #' # augmenting the data
-#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number, pattern = label_3,
-#'                           t_start = dateIN, t_end = dateOUT, t_cens = dateCENS )
+#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+#'                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
+#'                           t_cens = dateCENS )
 #'
 #' # let's define the initial transition matrix for our model
 #' Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
@@ -83,10 +104,10 @@
 #' # attaching the msm package and running the model using
 #' # gender and age as covariates
 #' library( msm )
-#' msm_model = msm( status_num ~ augmented_int,
-#'                  subject = subj, data = hosp_augmented, covariates = ~ gender + age,
-#'                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat, method = 'BFGS',
-#'                  control = list( fnscale = 6e+05, trace = 0,
+#' msm_model = msm( status_num ~ augmented_int, subject = subj,
+#'                  data = hosp_augmented, covariates = ~ gender + age,
+#'                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat,
+#'                  method = 'BFGS', control = list( fnscale = 6e+05, trace = 0,
 #'                  REPORT = 1, maxit = 10000 ) )
 #'
 #' # defining the times at which compute the prevalences
@@ -107,6 +128,7 @@
 #' @importFrom graphics axis legend lines par plot
 #' @importFrom stats model.extract time
 #' @export
+
 prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid = 100L,
                      x.lab.grid = 500L, xlab = 'Time', ylab = 'Prevalence (%)',
                      lty.fit = 1, lwd.fit = 1, col.fit = 'red',

@@ -14,4 +14,3 @@ It also provides two graphical goodness-of-fit tools to inspect the model perfor
 survival curves and prevalences under the Markov assumption.
 \code{msmtools} comes with 3 functions: \code{augment}, \code{prevplot}, and \code{survplot}.
 }
-

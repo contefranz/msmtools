@@ -1,3 +1,28 @@
+# msmtools 1.3
+
+### Minor changes
+
+* Global variables are now correctly declared on top of functions using 
+`utils::globalVariables()`. This prevents the assignment to `NULL` in the preable
+of functions which decreases the elegance of the code.
+
+### Other changes
+
+* Improved the documentation's readability in the 'Value' section for 
+`augment()` and `survplot()`.
+
+* In the documentation of `augment()` now there is an explicit example which 
+returns a `data.frame`.
+
+* The author mail has changed to match his new affiliation and now is
+francesco.grossetti@unibocconi.it.
+
+### Bug fixes
+
+* After `augment()` has been run, results are now visible at the very 
+first call. This means that you can finally print on console the augmented dataset
+right away.
+
 # msmtools 1.2
 
 ### Major changes
