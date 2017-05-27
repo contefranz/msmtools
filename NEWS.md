@@ -1,4 +1,14 @@
+------
+
 # msmtools 1.3
+
+### Major changes
+
+* The new function `quake()` is introduced. This adds support in the preprocessing 
+part of the analysis. `quake()` addresses the specific problem of different 
+transitions occurring at the same exact time. This is a case for which a 
+multi-state model fails to estimate the probability associated with the
+two transitions.
 
 ### Minor changes
 
@@ -22,6 +32,13 @@ francesco.grossetti@unibocconi.it.
 * After `augment()` has been run, results are now visible at the very 
 first call. This means that you can finally print on console the augmented dataset
 right away.
+
+* `pandoc` versions prior 1.17 does not fully support spaces in file names and 
+caused a warning when compiling `msmtools` under Fedora using both `clang` 
+ang `gcc`. Now all file names are without spaces. `msmtools` 1.3 has been built
+using `pandoc` 1.19.2 and `pandoc-citeproc` 0.10.4.1
+
+------
 
 # msmtools 1.2
 
@@ -75,7 +92,7 @@ blocked the object defined by `n_events`.
 produced during the status flag assignment. This was due to a wrong rounding of the amount of 
 augmenting factor for each unit.
 
----
+------
 
 # msmtools 1.1
 
