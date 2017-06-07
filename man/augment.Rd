@@ -78,10 +78,7 @@ at very low cost both from running time and memory consumption
 (see \code{\link[data.table]{setDF}}).}
 
 \item{verbose}{If \code{FALSE}, all information produced by \code{print},
-\code{cat} and \code{message} are suppressed. All is done internally so
-that no global options are changed. \code{verbose} can be set to \code{FALSE}
-on all common OS (see also \code{\link[base]{sink}} and
-\code{\link[base]{options}}). Default is \code{TRUE}.}
+\code{cat} and \code{message} are suppressed. Default is \code{TRUE}.}
 }
 \value{
 An augmented format dataset of class \code{data.table}, or
@@ -103,7 +100,7 @@ in \code{state}. \code{augment} automatically checks whether argument
 of a given subject as reported in the vignette. The variable is cast as
 character.}
 \item{\code{status_num}}{The corresponding integer version of \emph{status}.}
-\item{\code{n_status}}{A mix of \emph{status} and \code{n_events} cast as
+\item{\code{n_status}}{A mix of \code{status} and \code{n_events} cast as
 character. This becomes useful when a multi-state model on the progression
 of the process needs to be implemented.}
 

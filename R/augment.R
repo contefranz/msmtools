@@ -65,10 +65,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' at very low cost both from running time and memory consumption
 #' (see \code{\link[data.table]{setDF}}).
 #' @param verbose If \code{FALSE}, all information produced by \code{print},
-#' \code{cat} and \code{message} are suppressed. All is done internally so
-#' that no global options are changed. \code{verbose} can be set to \code{FALSE}
-#' on all common OS (see also \code{\link[base]{sink}} and
-#' \code{\link[base]{options}}). Default is \code{TRUE}.
+#' \code{cat} and \code{message} are suppressed. Default is \code{TRUE}.
 #' @details In order to get the data processed, a monotonic increasing process
 #' needs to be ensured. In the first place, \code{augment} checks this both in
 #' case \code{n_events} is missing or not. The data are fastly ordered through
@@ -122,7 +119,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' of a given subject as reported in the vignette. The variable is cast as
 #' character.}
 #' \item{\code{status_num}}{The corresponding integer version of \emph{status}.}
-#' \item{\code{n_status}}{A mix of \emph{status} and \code{n_events} cast as
+#' \item{\code{n_status}}{A mix of \code{status} and \code{n_events} cast as
 #' character. This becomes useful when a multi-state model on the progression
 #' of the process needs to be implemented.}
 #'
@@ -167,23 +164,16 @@ if ( getRversion() >= "2.15.1" ) {
 #' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
 #' @export
 
-augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT', 'DEAD' ),
+augment = function( data, data_key, n_events, pattern,
+                    state = list ( 'IN', 'OUT', 'DEAD' ),
                     t_start, t_end, t_cens, t_death, t_augmented,
-                    more_status, check_NA = FALSE, convert = FALSE, verbose = TRUE ) {
+                    more_status, check_NA = FALSE, convert = FALSE,
+                    verbose = TRUE ) {
 
   tic = proc.time()
   oldw = getOption( "warn" )
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     options( warn = 1 )
-  }
-  if ( verbose == FALSE ) {
-    options( warn = 1 )
-    if ( .Platform$OS.type == 'windows' ) {
-      sink( file = "NUL" )
-    } else {
-      sink( file = "/dev/null" )
-    }
-    cat( '---\n' )
   }
   if ( missing( data ) ) {
     stop( 'a dataset of class data.table or data.frame must be provided' )
@@ -208,12 +198,12 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   }
   if ( missing( t_death ) ) {
     warning( 'no t_death has been passed. Assuming that ', substitute( t_cens ),
-             ' contains both censoring and death time' )
+             ' contains both censoring and death times' )
   }
   if ( inherits( data, 'data.frame' ) ) {
     setDT( data )
   }
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     cat( '-------------------------------------\n' )
     cat( '# # # # setting everything up # # # #\n' )
     cat( '-------------------------------------\n' )
@@ -236,21 +226,25 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     if ( !inherits( eval( substitute( data$n_events ) ), "integer" ) ) {
       stop( 'n_events must be an integer' )
     }
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'checking monotonicity of ', cols[[ 2 ]] )
     }
     ev = data[ , .( ev = all( get( cols[[ 2 ]] ) == cummax( get( cols[[ 2 ]] ) ) ) ),
                by = eval( cols[[ 1 ]] ) ]
     setkeyv( data, c( cols[[ 1 ]], t_start ) )
     if ( all( ev$ev ) == FALSE ) {
-      message( substitute( n_events ), ' is not monotonic increasing within ',
-               substitute( data_key ) )
-      message( 'the corresponding subjects are:' )
-      message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
+      if ( verbose ) {
+        message( substitute( n_events ), ' is not monotonic increasing within ',
+                 substitute( data_key ) )
+        message( 'the corresponding subjects are:' )
+        message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
+      }
       stop( 'Please, fix the issues and relaunch augment()' )
     } else {
-      cat( 'Ok, ', cols[[ 2 ]], ' is monotonic\n', sep = '' )
-      cat( '---\n' )
+      if ( verbose ) {
+        cat( 'Ok, ', cols[[ 2 ]], ' is monotonic\n', sep = '' )
+        cat( '---\n' )
+      }
     }
     setkeyv( data, cols )
   } else {
@@ -260,21 +254,25 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     setkeyv( data, c( cols, t_start ) )
     data[ , n_events := seq( .N ), by = eval( cols ) ]
     cols = c( cols, names( data )[ dim( data )[ 2 ] ] )
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'checking monotonicity of ', cols[[ 2 ]] )
     }
     ev = data[ , .( ev = all( get( cols[[ 2 ]] ) == cummax( get( cols[[ 2 ]] ) ) ) ),
                by = eval( cols[[ 1 ]] ) ]
     setkeyv( data, c( cols[[ 1 ]], t_start ) )
     if ( all( ev$ev ) == FALSE ) {
-      message( substitute( n_events ), ' is not monotonic increasing within ',
-               substitute( data_key ) )
-      message( 'the corresponding subjects are:' )
-      message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
+      if ( verbose ) {
+        message( substitute( n_events ), ' is not monotonic increasing within ',
+                 substitute( data_key ) )
+        message( 'the corresponding subjects are:' )
+        message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
+      }
       stop( 'Please, fix the issues and relaunch augment()' )
     } else {
-      cat( 'Ok, n_events is monotonic\n' )
-      cat( '---\n' )
+      if ( verbose ) {
+        cat( 'Ok, n_events is monotonic\n' )
+        cat( '---\n' )
+      }
     }
     setkeyv( data, cols )
   }
@@ -285,21 +283,23 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     }
   }
   if ( check_NA == TRUE ) {
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'checking for any missing values in function arguments' )
     }
     checks = c( cols, pattern, t_start, t_end )
     test = apply( data[ , checks, with = FALSE ], 2, function( x ) any( sum( is.na( x ) ) > 0 ) )
     if ( any ( test ) ) {
       cat( '---\n' )
-      if ( verbose == TRUE ) {
+      if ( verbose ) {
         message( 'detected missing values in the following variables:' )
       }
       invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
       stop( 'Please, fix the issues and relaunch augment()' )
     } else {
-      cat( 'Ok, no missing values detected\n')
-      cat( '---\n' )
+      if ( verbose ) {
+        cat( 'Ok, no missing values detected\n' )
+        cat( '---\n' )
+      }
     }
   }
   if ( !missing( more_status ) ) {
@@ -307,23 +307,27 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     test = apply( data[ , more_status, with = FALSE ], 2,
                   function( x ) any( sum( is.na( x ) ) > 0 ) )
     if ( any ( test ) ) {
-      cat( '---\n' )
-      message( 'detected missing values in variable:' )
+      if ( verbose ) {
+        cat( '---\n' )
+        message( 'detected missing values in variable:' )
+      }
       invisible( sapply( names( test[ test == TRUE ] ), function( x ) cat( x, '\n' ) ) )
       stop( 'Please, fix the issues and relaunch augment()' )
     }
   }
   values = sort( eval( substitute( unique( data$pattern ) ) ) )
 
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     message( 'checking ', substitute( pattern ), ' and defining patterns' )
   }
   if ( length( values ) < 2 ) {
     stop( 'unit identification label must be an integer, a factor or a character
           with at least 2 elements' )
   } else if ( length( values ) == 2 ) {
-    cat( 'detected only 2 values\n' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'detected only 2 values\n' )
+      cat( '---\n' )
+    }
     if ( class( eval( substitute( data$pattern ) ) ) == 'integer' ||
          class( eval( substitute( data$pattern ) ) ) == 'numeric' ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
@@ -361,8 +365,10 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       }
     }
   } else if ( length( values ) == 3 ) {
-    cat( 'Ok, detected 3 values\n' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'Ok, detected 3 values\n' )
+      cat( '---\n' )
+    }
     if ( class( eval( substitute( data$pattern ) ) ) == 'integer' ||
          class( eval( substitute( data$pattern ) ) ) == 'numeric' ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
@@ -377,18 +383,20 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       match3 = data[ data[ get( pattern ) == values[ 3 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
     }
   }
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     message( 'augmenting data' )
   }
   l = list( data, data, match1, match3 )
   final = rbindlist( l )
   setkeyv( final, cols )
 
-  cat( 'Ok, data have been augmented\n' )
-  cat( '---\n' )
+  if ( verbose ) {
+    cat( 'Ok, data have been augmented\n' )
+    cat( '---\n' )
+  }
 
   if ( length( values ) == 2 ) {
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'defining dimesions' )
     }
     if ( missing( t_death ) ) {
@@ -412,10 +420,12 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       s = dim( maker )[ 1 ]
       flag_temp = vector( mode = 'list', dim( maker )[ 1 ] )
     }
-    cat( 'Ok, dimensions computed\n' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'Ok, dimensions computed\n' )
+      cat( '---\n' )
+    }
   } else if ( length( values ) == 3 ) {
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'defining dimesions' )
     }
     t1 = data[ , .N, by = eval( cols[[ 1 ]] ) ]
@@ -424,10 +434,12 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     setkeyv( data, c( cols[[ 1 ]] ) )
     maker = t1[ t2 ]
     s = dim( maker )[ 1 ]
-    cat( 'Ok, dimensions computed\n' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'Ok, dimensions computed\n' )
+      cat( '---\n' )
+    }
   }
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     message( 'adding status flag' )
   }
   if ( length( values ) == 2 ) {
@@ -456,51 +468,61 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     flag_temp_dout = vector( mode = 'list', doutrow )
 
     cat( '---\n' )
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'processing alive units...' )
     }
     for ( i in seq_along( a$N ) ) {
-      if ( arow >= 1e6 ) {
-        if ( i %% 1e6 == 0 ) {
-          cat( '* * * iteration', i, 'of', arow, '\n' )
-        }
-      } else  {
-        if ( i %% 1e5 == 0 ) {
-          cat( '* * * iteration', i, 'of', arow, '\n' )
+      if ( verbose ) {
+        if ( arow >= 1e6 ) {
+          if ( i %% 1e6 == 0 ) {
+            cat( '* * * iteration', i, 'of', arow, '\n' )
+          }
+        } else  {
+          if ( i %% 1e5 == 0 ) {
+            cat( '* * * iteration', i, 'of', arow, '\n' )
+          }
         }
       }
-      flag_temp_a[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), a$N[ i ] ), state [[ 2 ]] )
+      flag_temp_a[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), a$N[ i ] ),
+                              state [[ 2 ]] )
     }
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'processing units dead inside a transition...' )
     }
     for ( i in seq_along( din$N ) ) {
-      if ( dinrow >= 1e6 ) {
-        if ( i %% 1e6 == 0 ) {
-          cat( '* * * iteration', i, 'of', dinrow, '\n' )
-        }
-      } else  {
-        if ( i %% 1e5 == 0 ) {
-          cat( '* * * iteration', i, 'of', dinrow, '\n' )
+      if ( verbose ) {
+        if ( dinrow >= 1e6 ) {
+          if ( i %% 1e6 == 0 ) {
+            cat( '* * * iteration', i, 'of', dinrow, '\n' )
+          }
+        } else  {
+          if ( i %% 1e5 == 0 ) {
+            cat( '* * * iteration', i, 'of', dinrow, '\n' )
+          }
         }
       }
-      flag_temp_din[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), ( din$N[ i ] - 1 ) ),
+      flag_temp_din[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
+                                     ( din$N[ i ] - 1 ) ),
                                 state[[ 1 ]], state[[ 3 ]] )
     }
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'processing units dead outside a transition...' )
     }
     for( i in seq_along( dout$N ) ) {
-      if ( doutrow >= 1e6 ) {
-        if ( i %% 1e6 == 0 ) {
-          cat( '* * * iteration', i, 'of', doutrow, '\n' )
-        }
-      } else  {
-        if ( i %% 1e5 == 0 ) {
-          cat( '* * * iteration', i, 'of', doutrow, '\n' )
+      if ( verbose ) {
+        if ( doutrow >= 1e6 ) {
+          if ( i %% 1e6 == 0 ) {
+            cat( '* * * iteration', i, 'of', doutrow, '\n' )
+          }
+        } else  {
+          if ( i %% 1e5 == 0 ) {
+            cat( '* * * iteration', i, 'of', doutrow, '\n' )
+          }
         }
       }
-      flag_temp_dout[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ), dout$N[ i ] ), state[[ 3 ]] )
+      flag_temp_dout[[ i ]] = c( rep( c( state[[ 1 ]], state[[ 2 ]] ),
+                                      dout$N[ i ] ),
+                                 state[[ 3 ]] )
     }
     flag_a    = unlist( flag_temp_a, recursive = FALSE )
     flag_din  = unlist( flag_temp_din, recursive = FALSE )
@@ -512,17 +534,21 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     final = rbindlist( l )
     setkeyv( final, cols )
     rm( a, a_long, din, din_long, dout, dout_long )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( '---\n' )
+    }
   } else if ( length( values ) == 3 ) {
     flag_temp = vector( mode = 'list', dim( maker )[ 1 ] )
     for ( i in seq_along( maker$N ) ) {
-      if ( s >= 1e6 ) {
-        if ( i %% 1e6 == 0 ) {
-          cat( '* * * iteration', i, 'of', s, '\n' )
-        }
-      } else  {
-        if ( i %% 1e5 == 0 ) {
-          cat( '* * * iteration', i, 'of', s, '\n' )
+      if ( verbose ) {
+        if ( s >= 1e6 ) {
+          if ( i %% 1e6 == 0 ) {
+            cat( '* * * iteration', i, 'of', s, '\n' )
+          }
+        } else  {
+          if ( i %% 1e5 == 0 ) {
+            cat( '* * * iteration', i, 'of', s, '\n' )
+          }
         }
       }
       if ( maker$V2[ i ] == values[ 1 ] ) {
@@ -538,13 +564,15 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     flag = unlist( flag_temp, recursive = FALSE )
     final[ , status := flag ]
     if ( sum( is.na( final$status ) ) == 0 ) {
-      cat( 'status flag has been added successfully \n' )
-      cat( '---\n' )
+      if ( verbose ) {
+        cat( 'status flag has been added successfully \n' )
+        cat( '---\n' )
+      }
     } else {
       stop( 'status flag has not been build correctly' )
     }
   }
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     message( 'adding numeric status flag' )
   }
   k = uniqueN( final$status )
@@ -553,29 +581,28 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     final[ status == lev[ i ], status_num := i ]
   }
   if ( i == k ) {
-    cat( 'numeric status has been added successfully \n' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'numeric status has been added successfully \n' )
+      cat( '---\n' )
+    }
   } else {
     stop( 'numeric status has not been build correctly' )
   }
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     message( 'adding sequential status flag' )
   }
   if ( missing( n_events ) ) {
-    # final[ !.( state[[ 3 ]] ), n_status := paste( n_events, ' ', status, sep = '' ), on = 'status' ]
-    # final[ .( state[[ 3 ]] ), n_status := state[[ 3 ]], on = 'status' ]
     final[ status != state[[ 3 ]], n_status := paste( n_events, ' ', status, sep = '' ) ]
     final[ status == state[[ 3 ]], n_status := state[[ 3 ]]]
   } else {
-    # final[ !.( state[[ 3 ]] ),
-    #        n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ), on = 'status' ]
-    # final[ .( state[[ 3 ]] ), n_status := state[[ 3 ]], on = 'status' ]
     final[ status != state[[ 3 ]], n_status := paste( get( cols[[ 2 ]] ), ' ', status, sep = '' ) ]
     final[ status == state[[ 3 ]], n_status := state[[ 3 ]] ]
   }
   if ( sum( is.na( final$n_status ) ) == 0 ) {
-    cat( 'sequential status flag has been added successfully \n' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'sequential status flag has been added successfully \n' )
+      cat( '---\n' )
+    }
   } else {
     stop( 'sequential status flag has not been build correctly' )
   }
@@ -584,18 +611,14 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
   } else {
     t_augmented = as.character( substitute( t_augmented ) )
   }
-  if ( verbose == TRUE ) {
+  if ( verbose ) {
     message( 'adding variable ', substitute( t_augmented ), ' as new time variable' )
   }
-  # final[ .( state[[ 1 ]] ), substitute( t_augmented ) := get( t_start ), on = 'status' ]
-  # final[ .( state[[ 2 ]] ), substitute( t_augmented ) := get( t_end ), on = 'status' ]
   final[ status == state[[ 1 ]], substitute( t_augmented ) := get( t_start ) ]
   final[ status == state[[ 2 ]], substitute( t_augmented ) := get( t_end ) ]
   if ( missing( t_death ) ) {
-    # final[ .( state[[ 3 ]] ), substitute( t_augmented ) := get( t_cens ), on = 'status' ]
     final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_cens ) ]
   } else {
-    # final[ .( state[[ 3 ]] ), substitute( t_augmented ) := get( t_death ), on = 'status' ]
     final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_death ) ]
   }
   if ( inherits( eval( substitute( data$t_start ) ), 'Date' ) ) {
@@ -603,32 +626,38 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
     id_col = which( names( data ) == substitute( t_start ) )
     setcolorder( final, c( 1:( id_col - 1 ), ( dim( final )[ 2 ] - 1 ), dim( final )[ 2 ],
                            id_col:( dim( final )[ 2 ] - 2 ) ) )
-    cat( 'variables \"', substitute( t_augmented ), '\" and \"',
-         paste( substitute( t_augmented ), '_int', sep = '' ),
-         '\" successfully added and repositioned\n', sep = '' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'variables \"', substitute( t_augmented ), '\" and \"',
+           paste( substitute( t_augmented ), '_int', sep = '' ),
+           '\" successfully added and repositioned\n', sep = '' )
+      cat( '---\n' )
+    }
   } else if ( inherits( eval( substitute( data$t_start ) ), 'difftime' ) ) {
     final[ , paste( substitute( t_augmented ), '_num', sep = '' ) := as.numeric( get( t_augmented ) ) ]
     id_col = which( names( data ) == substitute( t_start ) )
     setcolorder( final, c( 1:( id_col - 1 ), ( dim( final )[ 2 ] - 1 ), dim( final )[ 2 ],
                            id_col:( dim( final )[ 2 ] - 2 ) ) )
-    cat( 'variables \"', substitute( t_augmented ), '\" and \"',
-         paste( substitute( t_augmented ), '_num', sep = '' ),
-         '\" successfully added and repositioned\n', sep = '' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'variables \"', substitute( t_augmented ), '\" and \"',
+           paste( substitute( t_augmented ), '_num', sep = '' ),
+           '\" successfully added and repositioned\n', sep = '' )
+      cat( '---\n' )
+    }
   } else if ( inherits( eval( substitute( data$t_start ) ), 'integer' ) ||
               inherits( eval( substitute( data$t_start ) ), 'numeric' ) ) {
 
     id_col = which( names( data ) == substitute( t_start ) )
     setcolorder( final, c( 1:( id_col - 1 ), dim( final )[ 2 ],
                            id_col:( dim( final )[ 2 ] - 1 ) ) )
-    cat( 'variable \"', substitute( t_augmented ),
-         '\" successfully added and repositioned\n', sep = '' )
-    cat( '---\n' )
+    if ( verbose ) {
+      cat( 'variable \"', substitute( t_augmented ),
+           '\" successfully added and repositioned\n', sep = '' )
+      cat( '---\n' )
+    }
   }
 
   if ( !missing( more_status ) ) {
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' )
       message( 'detected a more complex status given by variable ', substitute( more_status ),
                '. Processing...')
@@ -636,7 +665,7 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       cat( '---\n' )
     }
     values = eval( substitute( unique( data$more_status ) ) )
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'adding expanded status flag' )
     }
     final[ status == state[[ 3 ]], status_exp := state[[ 3 ]] ]
@@ -645,12 +674,14 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
              status_exp := paste( values[ i ], '_', status, sep = '' ) ]
     }
     if ( sum( is.na( final$status_exp ) ) == 0 ) {
-      cat( 'expanded status flag has been added successfully \n' )
-      cat( '---\n' )
+      if ( verbose ) {
+        cat( 'expanded status flag has been added successfully \n' )
+        cat( '---\n' )
+      }
     } else {
       stop( 'expanded status flag has not been build correctly' )
     }
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'adding numeric expanded status flag' )
     }
     k = uniqueN( final$status_exp )
@@ -659,47 +690,45 @@ augment = function( data, data_key, n_events, pattern, state = list ( 'IN', 'OUT
       final[ status_exp == lev[ i ], status_exp_num := i ]
     }
     if ( i == k ) {
-      cat( 'numeric expanded status has been added successfully \n' )
-      cat( '---\n' )
+      if ( verbose ) {
+        cat( 'numeric expanded status has been added successfully \n' )
+        cat( '---\n' )
+      }
     } else {
       stop( 'numeric expanded status has not been build correctly' )
     }
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       message( 'adding sequential expanded status flag' )
     }
     if ( missing( n_events ) ) {
-      # final[ !.( state[[ 3 ]] ),
-      #        n_status_exp := paste( n_events, ' ', status_exp, sep = '' ), on = 'status_exp' ]
-      # final[ .( state[[ 3 ]] ), n_status_exp := state[[ 3 ]], on = 'status_exp' ]
       final[ status_exp != state[[ 3 ]], n_status_exp := paste( n_events, ' ', status_exp, sep = '' ) ]
       final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]] ]
     } else {
-      # final[ !.( state[[ 3 ]] ),
-      #        n_status_exp := paste( get( cols[[ 2 ]] ), ' ', status_exp, sep = '' ), on = 'status_exp' ]
-      # final[ .( state[[ 3 ]] ), n_status_exp := state[[ 3 ]], on = 'status_exp' ]
       final[ status_exp != state[[ 3 ]],
              n_status_exp := paste( get( cols[[ 2 ]] ), ' ', status_exp, sep = '' ) ]
       final[ status_exp == state[[ 3 ]], n_status_exp := state[[ 3 ]]]
     }
     if ( sum( is.na( final$n_status_exp ) ) == 0 ) {
-      cat( 'sequential expanded status flag has been added successfully \n' )
+      if ( verbose ) {
+        cat( 'sequential expanded status flag has been added successfully \n' )
+      }
     } else {
       stop( 'sequential expanded status flag has not been build correctly' )
     }
   }
   toc = proc.time()
   time = toc - tic
-  cat( '---------------------------\n' )
-  cat( 'augment() took:', time[ 3 ], 'sec. \n', sep = ' ' )
-  cat( '---------------------------\n' )
-  if ( verbose == FALSE ) {
-    sink()
+  if ( verbose ) {
+    cat( '---------------------------\n' )
+    cat( 'augment() took:', time[ 3 ], 'sec. \n', sep = ' ' )
+    cat( '---------------------------\n' )
   }
   options( warn = oldw )
   if ( convert == TRUE ) {
     setDF( final )
     return( final )
   }
-  return( final[] )
+  final[]
+  return( final )
 }
 

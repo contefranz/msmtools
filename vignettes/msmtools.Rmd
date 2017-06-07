@@ -1,12 +1,14 @@
 ---
 title: |
-  | Building augmented data for multi-state models: the `msmtools` package
-  | *version 1.2*
-author: "Francesco Grossetti"
+  | Building augmented data for multi-state models: the **msmtools** package
+subtitle: "*version 1.3*"
+author: |
+  | Francesco Grossetti
+  | francesco.grossetti@unibocconi.it
 date: "`r Sys.Date()`"
 fontsize: 12pt
 output: 
-  rmarkdown::pdf_document:
+  rmarkdown::html_vignette:
     number_sections: yes
     toc: yes
     toc_depth: 4
@@ -21,12 +23,13 @@ vignette: >
 library( msmtools )
 ```
 
----
+***
 # Introduction
 
-Package `msmtools` is an `R` package whose main goal is to facilitate the workflow with
-longitudinal datasets which need to be analyzed in the context of multi-state models. In particular,
-`msmtools` acts as the `msm` package companion [@jackson2011multi]. Moreover, `msmtools` is 
+Package **msmtools** is an `R` package which has been conceived to facilitate 
+the workflow with longitudinal datasets which need to be analyzed in the context 
+of multi-state models. In particular, **msmtools** acts as the **msm** package 
+companion [@jackson2011multi]. Moreover, **msmtools** is 
 focused on efficiency and speed, also thanks to package `data.table` [@data.table].
 
 ## Longitudinal Dataset
@@ -38,7 +41,7 @@ a first level is given by the subject, and a second level is given by the single
 out on that subject. A very common case of longitudinal dataset deals with hospital admissions.
 A patient, our subject, can have a series of entries which correspond to hospital admissions. Each
 hospital admission is recorded in a single row of the dataset. Let's consider a simplified version
-of the `hosp` dataset which comes with `msmtools` package and represents synthetic
+of the `hosp` dataset which comes with **msmtools** package and represents synthetic
 hospital admissions for 10 patients. For a detailed description of the dataset, please run `?hosp`.
 For demonstration purposes, we extract only the first 2 patients, reducing the `hosp` dataset
 to a test sample of 17 rows per 8 variables as you can see below.
@@ -233,12 +236,24 @@ it in as an indicator of a more complex status structure;
 the current expandend status and the number of admission to give you the time evolution of the
 process.
 
+## Polishing the augmented data
+
+From version 1.3, **msmtools** gained the new function `polish()` which adds
+support in the preprocessing phase. The function detects whether there are 
+transitions which occur at the same time but land on different states within a
+subject as specified by `data_key`. `polish()` needs to be run on an augmented 
+dataset as computed by `augment()`. It then checks the presence of duplicates
+trough the `time` parameter which refers to the new time variable for the process.
+By default, `polish()` searches for either `augmented_int` or `augmented_num` 
+depending on what `augment()` detected during the reshaping procedure.
+
+***
 # Graphical Assessment of a Multi-state Model
 
-`msmtools` has been mainly developed to easily manage and work with longitudinal datasets
+**msmtools** has been mainly developed to easily manage and work with longitudinal datasets
 which need to be restructured in order to get msm to work properly.
 
-However, `msmtools` comes with two more functions which try to address graphically and in a very
+However, **msmtools** comes with two more functions which try to address graphically and in a very
 efficient way the problem of the Goodness-of-Fit (GoF) for a multi-state model. When dealing
 with this type of models, GoF is always a tough quest. Furthermore, up to now, no formal
 statistical tests are defined when a multi-state model is computed within an exact time framework
@@ -249,7 +264,7 @@ statistical tests are defined when a multi-state model is computed within an exa
 One of the most common graphical method to assess whether a multi-state model is behaving
 the way we expect, is to compare the empirical survival with the fitted one. `survplot()`
 helps out doing this and few more things. The function is a wrapper of the already known
-`plot.survfit.msm()` from the package `msm`.
+`plot.survfit.msm()` from the package **msm**.
 
 Suppose we ran a multi-state model on dataset hosp with the following code:
 
@@ -340,15 +355,15 @@ head( km_data )
 The structure of the data is consistent. `survplot()` always computes a dataset in wide format, as
 requested by `survfit` with 3 columns:
 
-* *subject*: the ordered subject ID as passed to `msm` function;
+* *subject*: the ordered subject ID as passed to `msm()` function;
 * *mintime*: the time at which the event occurred;
 * *anystate*: tansition indicator to compute the Kaplan-Meier.
 
 The only modification you might encounter really depends on argument `exacttimes`.
-This is inherited from `msm` function whose aim was to tell the model
+This is inherited from `msm()` function whose aim was to tell the model
 that transitions occurred at exact and known times, including deaths. This is the main reason why
-this argument should always be set the same way you set it in `msm`. In our case, we do have a
-multi-state model in which transitions are well known and exact as you can see from the `msm` call
+this argument should always be set the same way you have set it in `msm()`. In our case, we do have a
+multi-state model in which transitions are well known and exact as you can see from the `msm()` call
 above. `survplot()` puts `exacttimes = TRUE` by default so we don't have to worry about it.
 So, when `exacttimes = TRUE`, `survplot()` adds a new time variable which provides the relative
 time for each transition within a given subject. For instance, `km_data` has another column 
@@ -447,7 +462,7 @@ survplot( msm_model, from = 2, add = TRUE, col.fit = 'darkblue',
 
 A second graphical tool which helps us in the attempt to understand the goodness of the model is
 given by comparing the expected and observed prevalences [@gentleman1994multi]. `prevplot()` is a wrapper of the
-`plot.prevalence.msm()` function inside the `msm` package but, again, it does more things.
+`plot.prevalence.msm()` function inside the **msm** package but, again, it does more things.
 
 Consider the multi-state model we have built above. We can compute the prevalences using
 `prevalence.msm()` function. This produces a named list which will be used inside `prevplot()`.
@@ -488,7 +503,7 @@ prevplot( msm_model, prev, M = TRUE, ci = TRUE,
 ## Further details on specific arguments
 
 We are not going to discuss every arguments inside every function. This paragraph serves as a 
-guideline to better exploit `msmtools`. We have developed the package by paying lot of attention to
+guideline to better exploit **msmtools**. We have developed the package by paying lot of attention to
 the consistency of the code throughout the functions. 
 
 For those of you who are more confortable with objects of class `data.frame` with no compromises, 

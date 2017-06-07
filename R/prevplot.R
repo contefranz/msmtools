@@ -5,6 +5,7 @@
 #' It also computes a rough indicator of where the data depart from the fitted
 #' Markov model.
 #'
+#' @inheritParams augment
 #' @param x A \code{msm} object.
 #' @param prev.obj A list computed by \code{\link[msm]{prevalence.msm}}.
 #' It can be with or without confidence intervals. \code{prevplot} will behaves
@@ -55,11 +56,6 @@
 #' as specified by \code{dev.cur}. If \code{FALSE} and no external devices are
 #' opened, then a plot is drawn using internal graphics.
 #' See \code{\link[grDevices]{dev}}.
-#' @param verbose If \code{FALSE}, all information produced by \code{print},
-#' \code{cat} and \code{message} are suppressed. All is done internally so that
-#' no global options are changed. \code{verbose} can be set to \code{FALSE} on
-#' all common OS (see also \code{\link[base]{sink}} and
-#' \code{\link[base]{options}}). Default is \code{TRUE}.
 #' @details When \code{M = TRUE}, a rough indicator of the deviance from the
 #' Markov model is computed according to Titman and Sharples (2008).
 #' A comparison at a given time \eqn{t_i} of a patient \emph{k} in the state
@@ -129,13 +125,15 @@
 #' @importFrom stats model.extract time
 #' @export
 
-prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid = 100L,
-                     x.lab.grid = 500L, xlab = 'Time', ylab = 'Prevalence (%)',
+prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE,
+                     grid = 100L, x.lab.grid = 500L,
+                     xlab = 'Time', ylab = 'Prevalence (%)',
                      lty.fit = 1, lwd.fit = 1, col.fit = 'red',
                      lty.ci.fit = 2, lwd.ci.fit = 1, col.ci.fit = col.fit,
                      lwd.obs = 1, lty.obs = 1, col.obs = 'darkblue',
-                     legend.pos = 'topright', par.col = 3, plot.width = 10, plot.height = 5,
-                     max.m = 0.1, devnew = TRUE, verbose = TRUE ) {
+                     legend.pos = 'topright', par.col = 3, plot.width = 10,
+                     plot.height = 5, max.m = 0.1, devnew = TRUE,
+                     verbose = TRUE ) {
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
@@ -144,13 +142,13 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
 
   oldw = getOption( "warn" )
   options( warn = 1 )
-  if ( verbose == FALSE ) {
-    if ( .Platform$OS.type == 'windows' ) {
-      sink( file = "NUL" )
-    } else {
-      sink( file = "/dev/null" )
-    }
-  }
+  # if ( verbose == FALSE ) {
+  #   if ( .Platform$OS.type == 'windows' ) {
+  #     sink( file = "NUL" )
+  #   } else {
+  #     sink( file = "/dev/null" )
+  #   }
+  # }
 
   t_min = range( model.extract( x$data$mf, "time" ) )[ 1 ]
   t_max = range( model.extract( x$data$mf, "time" ) )[ 2 ]
@@ -160,12 +158,16 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
   status_names = colnames( x$qmodel$imatrix )
 
   if ( devnew == TRUE ) {
-    cat( '---\n' )
-    cat( 'setting new graphical device\n')
+    if ( verbose ) {
+      cat( '---\n' )
+      cat( 'setting new graphical device\n' )
+    }
     dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
   } else if ( devnew == FALSE ) {
-    cat( '---\n' )
-    cat( 'plotting on device', dev.cur(), '\n' )
+    if ( verbose ) {
+      cat( '---\n' )
+      cat( 'plotting on device', dev.cur(), '\n' )
+    }
     dev.set( dev.cur() )
   }
   if ( abs_state <= par.col ) {
@@ -178,8 +180,10 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
 
     if ( exacttimes == FALSE ) {
       for ( i in 1:abs_state ) {
-        cat( '---\n' )
-        cat( 'plotting prevalences for state', status_names[ i ], '\n' )
+        if ( verbose ) {
+          cat( '---\n' )
+          cat( 'plotting prevalences for state', status_names[ i ], '\n' )
+        }
         plot( x_axis, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
               col = col.obs, lty = lty.obs, lwd = lwd.obs,
               main = paste( 'State ', status_names[ i ], sep = '' ),
@@ -201,8 +205,10 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
       }
     } else {
       for ( i in 1:abs_state ) {
-        cat( '---\n' )
-        cat( 'plotting prevalences for state', status_names[ i ], '\n' )
+        if ( verbose ) {
+          cat( '---\n' )
+          cat( 'plotting prevalences for state', status_names[ i ], '\n' )
+        }
         plot( x_axis_scaled, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
               col = col.obs, lty = lty.obs, lwd = lwd.obs,
               main = paste( 'State ', status_names[ i ], sep = '' ),
@@ -225,15 +231,17 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
     }
   } else {
     if ( ci == TRUE ) {
-      if ( verbose == TRUE ) {
+      if ( verbose ) {
         message( substitute( prev.obj ), ' has no confidence intervals. Argument ci will be ignored.' )
       }
     }
     par( mfrow = c( n_row, par.col ) )
     if ( exacttimes == FALSE ) {
       for ( i in 1:abs_state ) {
+        if ( verbose ) {
         cat( '---\n' )
         cat( 'plotting prevalences for state', status_names[ i ], '\n' )
+        }
         plot( x_axis, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
               col = col.obs, lty = lty.obs, lwd = lwd.obs,
               main = paste( 'State ', status_names[ i ], sep = '' ),
@@ -249,8 +257,10 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
       }
     } else {
       for ( i in 1:abs_state ) {
+        if ( verbose ) {
         cat( '---\n' )
         cat( 'plotting prevalences for state', status_names[ i ], '\n' )
+        }
         plot( x_axis_scaled, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
               col = col.obs, lty = lty.obs, lwd = lwd.obs,
               main = paste( 'State ', status_names[ i ], sep = '' ),
@@ -267,7 +277,7 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
     }
   }
   if ( M == TRUE ) {
-    if ( verbose == TRUE ) {
+    if ( verbose ) {
       cat( '---\n' )
       message( 'computing M statistic' )
       cat( '---\n' )
@@ -286,19 +296,25 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
     y.max.M = temp[ length( temp ) - 1 ] + max.m * temp[ length( temp ) - 1 ]
 
     if ( devnew == TRUE ) {
+      if ( verbose ) {
       cat( '---\n' )
       cat( 'setting new graphical device\n')
+      }
       dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
     } else if ( devnew == FALSE ) {
+      if ( verbose ) {
       cat( '---\n' )
       cat( 'plotting on device', dev.cur(), '\n' )
+      }
       dev.set( dev.cur() )
     }
     par( mfrow = c( n_row, par.col ) )
     if ( exacttimes == FALSE ) {
       for ( i in 1:abs_state ) {
+        if ( verbose ) {
         cat( '---\n' )
         cat( 'plotting M for state', status_names[ i ], '\n' )
+        }
         plot( x_axis, M.obj[ , i ], type = 'l', xaxt = 'n',
               main = paste( 'M for state ', status_names[ i ], sep = '' ),
               xlab = xlab, ylab = 'M', ylim = c( 0, y.max.M ) )
@@ -306,8 +322,10 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
       }
     } else {
       for ( i in 1:abs_state ) {
+        if ( verbose ) {
         cat( '---\n' )
         cat( 'plotting M for state', status_names[ i ], '\n' )
+        }
         plot( x_axis_scaled, M.obj[ , i ], type = 'l', xaxt = 'n',
               main = paste( 'M for state ', status_names[ i ], sep = '' ),
               xlab = xlab, ylab = 'M', ylim = c( 0, y.max.M ) )
@@ -315,9 +333,9 @@ prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE, grid
       }
     }
   }
-  if ( verbose == FALSE ) {
-    sink()
-  }
+  # if ( verbose == FALSE ) {
+  #   sink()
+  # }
   options( warn = oldw )
 }
 

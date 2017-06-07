@@ -7,6 +7,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' computed from a \code{\link[msm]{msm}} model. Fast builds and returns the
 #' associated datasets.
 #'
+#' @inheritParams augment
 #' @param x A \code{msm} object.
 #' @param from State from which to compute the estimated survival.
 #' Default to state 1.
@@ -102,11 +103,6 @@ if ( getRversion() >= "2.15.1" ) {
 #' If \code{FALSE}, then a plot is drawn onto the current device as specified
 #' by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
 #' a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.
-#' @param verbose If \code{FALSE}, all information produced by \code{print},
-#' \code{cat} and \code{message} are suppressed. All is done internally so
-#' that no global options are changed. \code{verbose} can be set to
-#' \code{FALSE} on all common OS (see also \code{\link[base]{sink}} and
-#' \code{\link[base]{options}}). Default is \code{TRUE}.
 #' @details The function is a wrapper of \code{\link[msm]{plot.survfit.msm}}
 #' and does more things. \code{survplot} manages correctly the plot of a fitted
 #' survival in an exact times framework (when \code{exacttimes = TRUE}) by just
@@ -239,15 +235,15 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
     rg = range
   }
   oldw = getOption( "warn" )
-  if ( verbose == FALSE ) {
-    options( warn = -1 )
-    if ( .Platform$OS.type == 'windows' ) {
-      sink( file = "NUL" )
-    } else {
-      sink( file = "/dev/null" )
-    }
-    cat( '---\n' )
-  }
+  # if ( verbose == FALSE ) {
+  #   options( warn = -1 )
+  #   if ( .Platform$OS.type == 'windows' ) {
+  #     sink( file = "NUL" )
+  #   } else {
+  #     sink( file = "/dev/null" )
+  #   }
+  #   cat( '---\n' )
+  # }
   interp = match.arg( interp )
   ci = match.arg( ci )
   if ( exacttimes == TRUE ) {
@@ -270,8 +266,10 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   for ( t in times ) {
     counter = counter + 1
     if ( counter %% 10 == 0 ) {
+      if ( verbose ) {
       cat( '---\n' )
       cat( 't =', round( t, 0 ), '\n' )
+      }
     }
     P = pmatrix.msm( x, t, t1 = times[ 1 ], covariates = covariates, ci = ci, B = B )
     if ( ci != "none" ) {
@@ -339,12 +337,14 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
 
   time.end = proc.time()
   time.total = time.end - time.start
+  if ( verbose ) {
   cat( '---\n' )
   cat( 'Function took:', time.total[ 3 ], '\n' )
   cat( '---\n' )
-  if ( verbose == FALSE ) {
-    sink()
   }
+  # if ( verbose == FALSE ) {
+  #   sink()
+  # }
   options( warn = oldw )
 
   if ( return.all == TRUE ) {
