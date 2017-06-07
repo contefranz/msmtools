@@ -1,8 +1,36 @@
+# msmtools 1.3
+
+## Release summary
+
+This is version 1.3 of **msmtools**
+
+## Package development
+
+* macOS 10.12.5 with R 3.4.0
+
+## R CMD build
+
+* local macOS
+* win build through devtools::build_win()
+
+## R CMD check results
+
+* There were no ERRORs nor WARNINGs nor NOTEs. 
+
+* `devtools::build_win()` found possible mispelling in the DESCRIPTION file. 
+Though the file is correct.
+
+* `devtools::build_win()` found non canonical URL in the vignette and in the 
+README. The former is included in the bibliography and the latter is due to
+a Github link.
+
+
+***
 # msmtools 1.2
 
 ## Release summary
 
-This is version 1.2 of `msmtools`
+This is version 1.2 of **msmtools**
 
 ## Package development
 
@@ -22,12 +50,12 @@ There was 1 NOTE:
 * Unknown, possibly mis-spelled, fields in DESCRIPTION: 'News'
 This is due to the presence of a GitHub link which points at the file NEWS.md.
 
----
+***
 # msmtools 1.1
 
 ## Release summary
 
-This is version 1.1 of `msmtools`
+This is version 1.1 of **msmtools**
 
 ## Package development
 
