@@ -1,7 +1,8 @@
 # Building augmented data for multi-state models: the `msmtools` package
 
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/msmtools)](http://cran.r-project.org/package=msmtools)
-[![Build Status](https://travis-ci.org/contefranz/msmtools.svg?branch=master)](https://travis-ci.org/contefranz/msmtools)
+Linux/Unix: [![Build Status](https://travis-ci.org/contefranz/msmtools.svg?branch=master)](https://travis-ci.org/contefranz/msmtools)
+Windows: [![Build status](https://ci.appveyor.com/api/projects/status/9d38hi27w1f7ccko/branch/master?svg=true)](https://ci.appveyor.com/project/contefranz/msmtools/branch/master)
 
 ***
 

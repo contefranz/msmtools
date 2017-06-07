@@ -34,6 +34,9 @@ in HTML format which provides a faster and lighter access.
 * In the documentation of `augment()` now there is an explicit example which 
 returns a `data.frame`.
 
+* Windows builds of **msmtools** are now constantly checked through 
+[Appveyor](https://www.appveyor.com).
+
 * The author/maintainer e-mail has changed to match his new affiliation and now is
 francesco.grossetti@unibocconi.it.
 
