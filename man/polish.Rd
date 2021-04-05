@@ -4,8 +4,15 @@
 \alias{polish}
 \title{Remove observations with different states occurring at the same time}
 \usage{
-polish(data, data_key, pattern, time, check_NA = FALSE, convert = FALSE,
-  verbose = TRUE)
+polish(
+  data,
+  data_key,
+  pattern,
+  time,
+  check_NA = FALSE,
+  convert = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{A \code{data.table} or \code{data.frame} object in longitudinal

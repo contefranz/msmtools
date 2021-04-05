@@ -1,7 +1,6 @@
 ---
-title: |
-  | Building augmented data for multi-state models: the **msmtools** package
-subtitle: "*version 1.3*"
+title: "Building augmented data for multi-state models: the msmtools package"
+subtitle: "*version 2.0.0*"
 author: |
   | Francesco Grossetti
   | francesco.grossetti@unibocconi.it
@@ -14,13 +13,14 @@ output:
     toc_depth: 4
 bibliography: references.bib
 vignette: >
-  %\VignetteIndexEntry{Using msmtools with longitudinal data}
+  %\VignetteIndexEntry{Building augmented data for multi-state models: the msmtools package}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown_notangle}
 ---
 
 ```{r ninja, echo = FALSE }
 library( msmtools )
+library( ggplot2 )
 ```
 
 ***
@@ -278,24 +278,23 @@ depending on what `augment()` detected during the reshaping procedure.
 # Graphical Assessment of a Multi-state Model
 
 **msmtools** has been mainly developed to easily manage and work with 
-longitudinal datasets which need to be restructured in order to get msm to work 
-properly.
+longitudinal datasets that need to be restructured in order to get `msm()` to work 
+properly. This is the main goal of the function `augment()`.
 
-However, **msmtools** comes with two more functions which try to address 
-graphically and in a very efficient way the problem of the Goodness-of-Fit (GoF) 
-for a multi-state model. When dealing with this type of models, GoF is always a 
-tough quest. Furthermore, up to now, no formal statistical tests are defined 
+However, **msmtools** comes with two additional functions which try to graphically evaluate
+the Goodness-of-Fit (GoF) of a multi-state model estimated via `msm()`. 
+In this framework, GoF is always a tough quest. Furthermore, up to now, no formal statistical tests are defined 
 when a multi-state model is computed within an exact time framework
 [@titman2009model; @titman2008general].
 
 ## Comparing fitted and empirical survival with `survplot()`
 
 One of the most common graphical method to assess whether a multi-state model 
-is behaving the way we expect, is to compare the empirical survival with the 
-fitted one. `survplot()` helps out doing this and few more things. The function 
-is a wrapper of the already known `plot.survfit.msm()` from the package **msm**.
+is behaving properly, compares the empirical survival probability, as given by the Kaplan-Meier estimator,
+with the estimated one. The function `survplot()` helps in this regards and does few more things.
+The function is primarily a wrapper of the already known `plot.survfit.msm()` from the package **msm**.
 
-Suppose we ran a multi-state model on dataset hosp with the following code:
+Suppose we run a multi-state model on the included dataset `hosp` with the following code:
 
 ```{r multistate_model, collapse = TRUE }
 # let's define the initial transition matrix for our model
@@ -318,189 +317,142 @@ msm_model = msm( status_num ~ augmented_int,
                                  REPORT = 1, maxit = 10000 ) )
 ```
 
-We now have a multi-state model for which we can carry out some graphical 
-inspections. So, we want a simple comparison between the fitted survival curve 
-and the empirical one, computed using the Kaplan-Meier estimator. 
-The code is as follows:
+To run a comparison between the estimated and the empirical survival curves, we run the following
+simple code:
 
 ```{r survplot_1, fig.align = 'center', fig.width = 5, fig.height = 4}
-survplot( msm_model, km = TRUE, ci = 'none',
-          verbose = FALSE, devnew = FALSE )
+gof1 = survplot( x = msm_model, km = TRUE )
 ```
 
-With no surprises, the plot is not so satisfying due to the really small 
-dataset we provided.
+No surprise here, the plot is not very satisfying due to the really small dataset we used for
+estimation. The workflow of `survplot()` has been greatly simplified and from version 2.0.0 it takes
+fewer parameters. It also supports **ggplot2**. By default, `survplot()` returns a `gg/ggplot` 
+object and always renders the plot requested. This allows the user to further manipulate the 
+plot itself. I recommend to always assign the output to something, in this case `gof1`.  
 
-Now, `survplot()` takes several parameters, many of them come with a default 
-value. For instance, the figure above has been computed for a transition 
-(IN - DEAD). We can pass to argument `from` any starting state we want. 
-If `to` is missing, `survplot()` will check what is the higher value in the
-corresponding `msm` object and grabs it. Of course, you are free to compute any 
-survival you want, given the transition is allowed in the initial transition 
-matrix `Qmat`. Let's plot the survival comparison for the transition 
+`survplot()` can plot the survival probability for any valid transition as defined in the transition
+matrix passed to `msm()`. For instance, the previous plot shows the survival curves for the transition 
+(IN - DEAD). We can use the argument `from` and `to` to specify other transitions. 
+If `to` is missing, `survplot()` checks what is the higher value in the
+corresponding `msm` object and grabs it. Let's now plot the survival comparison for the transition 
 (OUT - DEAD):
 
 ```{r survplot_2, fig.align = 'center', fig.width = 5, fig.height = 4}
-survplot( msm_model, km = TRUE, from = 2, ci = 'none',
-          verbose = FALSE, devnew = FALSE )
+gof2 = survplot( x = msm_model, km = TRUE, from = 2 )
 ```
 
-If we do not want to show the Kaplan-Meier, we can pass `km = FALSE`, which is 
-the default.
+If we do not want to show the Kaplan-Meier, just set `km = FALSE` to go back to the default behavior.
 
 ### Defining a custom time sequence
 
-By default `survplot()` computes the fitted survival on a given grid. 
+By default `survplot()` computes the estimated survival on a given grid. 
 The number of grid points is given by `grid`. In some cases, one would like to 
-pass a custom time sequence. This can be achieved by passing the argument 
+explicitly pass a custom time sequence. This can be achieved by passing to the argument 
 `times` a numeric vector. Now `grid` is ignored.
 
-Consider our dataset and suppose we want to compute a fitted survival only for 
+Consider our dataset and suppose we want to compute an estimated survival only for 
 specific points in time. The following code addresses this request.
 
 ```{r custom_time_seq, fig.align = 'center', fig.width = 5, fig.height = 4}
 time_seq = seq( 300, 800, by = 30 )
-survplot( msm_model, times = time_seq, ci = 'none',
-          verbose = FALSE, devnew = FALSE )
+custom_time = survplot( x = msm_model, times = time_seq )
 ```
 
 ### Obtaining the dataset for the Kaplan-Meier
 
-It is possible to tell `survplot()` to return the associated Kaplan-Meier 
-dataset by setting `return.km = TRUE`. This fastly computes the data through 
-`data.table`. Passing only `km = TRUE` won't return any data, even if they must 
-be computed anyway to plot results.
+In addition to plotting, `survplot()` can return the desired data structure associated with a 
+specific survival curve. For instance, by specifying `out = "km"` the data used to draw the 
+Kaplan-Meier curve is returned. The code below shows how this works.
+
+<!-- It is possible to tell `survplot()` to return the associated Kaplan-Meier  -->
+<!-- dataset by setting `return.km = TRUE`. This fastly computes the data through  -->
+<!-- `data.table`. Passing only `km = TRUE` won't return any data, even if they must  -->
+<!-- be computed anyway to plot results. -->
 
 ```{r returnKM, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
-survplot( msm_model, ci = 'none', return.km = TRUE,
-          verbose = FALSE, do.plot = FALSE )
+km_out = survplot( x = msm_model, km = TRUE, out = "km")
 ```
 
-No results are printed. If you want to store the information in the current 
-environment, you must assign `survplot()` to an object as follows:
+There are a couple of things to note. First, if one wants to get the data associated with the 
+Kaplan-Meier, `km` must be set to `TRUE`. There is no possibility to get the data without plotting
+the related empirical curve. Second, if `out` is not set to `"none"`, `survplot()` returns a named list.
+In the first position there is always the plot identified by the element `$p`. In this case, the 
+second element is the Kaplan-Meier idenfied by `$km`. You can see the `head()` below.
 
-```{r returnKM2, collapse = TRUE}
-# running survplot() and assigning it to an object
-km_data = survplot( msm_model, ci = 'none', return.km = TRUE,
-                    verbose = FALSE, do.plot = FALSE )
-
-# let's see the dataset
-head( km_data )
+```{r}
+head(km_out$km)
 ```
 
-The structure of the data is consistent. `survplot()` always computes a dataset 
-in wide format, as requested by `survfit` with 3 columns:
+As you can see, the structure of the data is consistent. `survplot()` always returns a dataset 
+with the following columns ordered by either `time` or `time_exact`.
 
-* *subject*: the ordered subject ID as passed to `msm()` function;
+* *subject*: the subject ID as passed to `msm()` function;
 
-* *mintime*: the time at which the event occurred;
+* *time*: the time at which the event occurred;
 
-* *anystate*: tansition indicator to compute the Kaplan-Meier.
+* *time_exact*: the relative time at which the event occurred. This is defined when `exacttimes = TRUE`;
 
-The only modification you might encounter really depends on argument `exacttimes`.
-This is inherited from `msm()` function whose aim was to tell the model
-that transitions occurred at exact and known times, including deaths. 
-This is the main reason why this argument should always be set the same way you 
-have set it in `msm()`. In our case, we do have a multi-state model in which 
-transitions are well known and exact as you can see from the `msm()` call
-above. `survplot()` puts `exacttimes = TRUE` by default so we don't have to 
-worry about it. So, when `exacttimes = TRUE`, `survplot()` adds a new time 
-variable which provides the relative time for each transition within a given 
-subject. For instance, `km_data` has another column named *mintime_exact* which 
-is cast the same way of *augmented*.
+* *anystate*: tansition indicator to compute the Kaplan-Meier;
 
-### Obtaining the dataset for the fitted survival
+* *km*: the value of the empirical survival probability.
 
-Similarly to what done for the Kaplan-Meier, it is possible to obtain the data 
-used to compute the fitted survival as well. This can be achieve by setting 
-`return.p = TRUE`. If `times` is passed, then the resulting dataset will have 
+
+### Obtaining the dataset for the estimated survival
+
+Similarly to what has been done for the Kaplan-Meier, it is possible to obtain the data 
+used to compute the estimated survival as well. This can be achieve by setting 
+`out = "fitted"`. When `times` is passed, the resulting dataset will have 
 as many rows as the elements in `times`. If `times` is missing, then `survplot()` 
-uses `grid` to know how many time points are requested. Below there is the
-snippet that addresses what described.
+uses `grid` to know how many time points are requested. An example is shown in the next snippet.
 
 ```{r returnP, collapse = TRUE}
-survplot( msm_model, ci = 'none', grid = 10, return.p = TRUE,
-          verbose = FALSE, do.plot = FALSE )
+fitted = survplot( x = msm_model, grid = 10, out = "fitted" )
 ```
 
-As before, saving the data in the current environment follows the same procedure 
-as seen before:
+As before, we have a named list with two elements, the first one is the plot and the second one
+is the desired data structure which can be accessed with `$fitted`. You can see the `head()` below.
 
-```{r returnP2, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
-# running survplot() and assigning it to an object
-fitted_data = survplot( msm_model, ci = 'none', grid = 10, return.p = TRUE,
-                        verbose = FALSE, do.plot = FALSE )
-
-# let's see the dataset
-fitted_data
+```{r}
+head(fitted$fitted)
 ```
 
 The structure of the data is consistent here too. `survplot()` always computes 
-a dataset in wide format with 2 columns:
+a dataset with two columns and it is ordered by time.
 
-* *time*: time at which to compute the fitted survival. It can be obtained 
+* *time*: time at which to compute the estimated survival. It can be obtained 
 either by `grid` or by `times` so that the cardinality of the data depends on them;
 
-* *probs*: the corresponding value of the fitted survival.
+* *surv*: the value of the estimated survival probability.
 
-Of course, you can request `survplot()` to return both the datasets by setting 
-just `return.all = TRUE`. Below you can see the code and the output when no 
-assignment is done and when you save the data into a new object in the environment.
+### Obtaining all the data
+
+Of course, you can request `survplot()` to return both the datasets by specifying `out = "all"`.
+In this case, a named list with three elements is returned. The mechanism to access the elements is
+the same described above. The snippet below reports an example.
 
 ```{r return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
 # just running survplot()
-survplot( msm_model, ci = 'none', grid = 10, return.all = TRUE,
-                     verbose = FALSE, do.plot = FALSE )
-
-# running survplot() and assigning it to an object
-all_data = survplot( msm_model, ci = 'none', grid = 10, 
-                     return.all = TRUE,
-                     verbose = FALSE, do.plot = FALSE )
-
-# let's see the datasets
-all_data
+out_all = survplot( x = msm_model, km = TRUE, out = "all")
 ```
 
-`all_data` is a list of two elements of class `data.table`. 
-If you want to split up the datasets,  just use common syntax:
+<!-- ### The plot layering  -->
 
-```{r splitting_data, collapse = TRUE}
-# do not extract data using just one [].
-# This keeps the class, so it returns a list
-km_data_wrong = all_data[ 1 ]
-# extracting data using the list way so be careful to use double []
-km_data_1 = all_data[[ 1 ]]
-# extracting data using the '$' access operator
-km_data_2 = all_data$km
-identical( km_data_wrong, km_data_1 )
-identical( km_data_1, km_data_2 )
-km_data_1
+<!-- Multi-state models, as their name suggests, are specifically designed to work  -->
+<!-- when more than one  status exists. Infact, they tipically work when more than 2  -->
+<!-- status are present. In our example, we have 3 states: `'IN'`, `'OUT'`, `'DEAD'`.  -->
+<!-- Now, what if we want to plot on the same device more than just one fitted  -->
+<!-- survival curve? Suppose we want to plot the expected survival computed from -->
+<!-- state 1 and 2. That means, from `'IN'` and `'OUT'` to `'DEAD'`. The plot  -->
+<!-- layering addresses exactly this problem and `survplot()` supports this with  -->
+<!-- the argument `add`. Let's see this in the following example:  -->
 
-fitted_data_1 = all_data[[ 2 ]]
-fitted_data_2 = all_data$fitted
-identical( fitted_data_1, fitted_data_2 )
-fitted_data_1
-```
+<!-- ```{r layering, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4} -->
+<!-- # plotting the first survival from state 'IN' -->
+<!-- survplot( x = msm_model, from = 1 ) -->
 
-### The plot layering 
-
-Multi-state models, as their name suggests, are specifically designed to work 
-when more than one  status exists. Infact, they tipically work when more than 2 
-status are present. In our example, we have 3 states: `'IN`, `'OUT'`, `'DEAD`. 
-Now, what if we want to plot on the same device more than just one fitted 
-survival curve? Suppose we want to plot the expected survival computed from
-state 1 and 2. That means, from `'IN` and `'OUT'` to `'DEAD'`. The plot 
-layering addresses exactly this problem and `survplot()` supports this with 
-the argument `add`. Let's see this in the following example: 
-
-```{r layering, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
-# plotting the first survival from state 'IN'
-survplot( msm_model, from = 1, devnew = FALSE, verbose = FALSE )
-
-# plotting the first survival from state 'OUT'
-survplot( msm_model, from = 2, add = TRUE, col.fit = 'darkblue',
-          devnew = FALSE, verbose = FALSE )
-```
+<!-- # plotting the first survival from state 'OUT' -->
+<!-- survplot( x = msm_model, from = 2 ) -->
+<!-- ``` -->
 
 ## Comparing expected and observed prevalences with `prevplot()`
 
@@ -520,11 +472,11 @@ t_max = max( hosp_augmented$augmented_int )
 steps = 100L
 
 # computing prevalences
-prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
+prev = prevalence.msm( x = msm_model, covariates = 'mean', ci = 'normal',
                             times = seq( t_min, t_max, steps ) )
 
 # and plotting them using prevplot()
-prevplot( msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
+prevplot( x = msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
 ```
 
 It is mandatory for `prevplot()` to work with a `msm` object and a list 
@@ -539,40 +491,40 @@ which gives an idea of the deviance from the Markov model. This is computed
 according to Titman and Sharples (2008). The following code addresses this request.
 
 ```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3, warning = F}
-prevplot( msm_model, prev, M = TRUE, ci = TRUE, 
+prevplot( x = msm_model, prev, M = TRUE, ci = TRUE, 
           devnew = FALSE, verbose = FALSE )
 ```
 
 
-## Further details on specific arguments
+<!-- ## Further details on specific arguments -->
 
-We are not going to discuss every arguments inside every function. This 
-paragraph serves as a guideline to better exploit **msmtools**. We have 
-developed the package by paying lot of attention to the consistency of the code 
-throughout the functions. 
+<!-- We are not going to discuss every arguments inside every function. This  -->
+<!-- paragraph serves as a guideline to better exploit **msmtools**. We have  -->
+<!-- developed the package by paying lot of attention to the consistency of the code  -->
+<!-- throughout the functions.  -->
 
-For those of you who are more confortable with objects of class `data.frame` 
-with no compromises, both `augment()` and `survplot()` can manage that with the 
-argument `convert = TRUE`.  By default, `convert` is set to `FALSE` in order to 
-incentivize a more efficient coding.
+<!-- For those of you who are more confortable with objects of class `data.frame`  -->
+<!-- with no compromises, both `augment()` and `survplot()` can manage that with the  -->
+<!-- argument `convert = TRUE`.  By default, `convert` is set to `FALSE` in order to  -->
+<!-- incentivize a more efficient coding. -->
 
-Moreover, you can find the argument `verbose` anywhere in the package. 
-This is useful when you do not want to be informed about anything that is 
-happening internally with the only exception for warnings and of course errors. 
-If quiet is your mood, then you may want to set `verbose = FALSE`.
+<!-- Moreover, you can find the argument `verbose` anywhere in the package.  -->
+<!-- This is useful when you do not want to be informed about anything that is  -->
+<!-- happening internally with the only exception for warnings and of course errors.  -->
+<!-- If quiet is your mood, then you may want to set `verbose = FALSE`. -->
 
-A third argument which is shared between `survplot()` and `prevplot()` is 
-`devnew`. This is a purely graphical parameter which is set to `TRUE` by 
-default. It allows you to decide whether to plot on a new graphical device 
-called with `dev.new()` by default. If you set `devnew = FALSE`, 
-then the plot is overwritten according to `dev.cur()`. There exist two caveat: 
-the former is that `devnew` is bypassed if the argument `add = TRUE` is passed 
-to `survplot()`. This means that, when you want to add a new layer to an 
-existing plot (with `add`), it does not make any sense to let the function using 
-a new device. Hence, `devnew` is simply ignored. The latter is that, even you 
-can set `devnew = FALSE` in `prevplot()`, one should keep it as the default. 
-If you set it to `FALSE` and you want to plot `M` by setting `M = TRUE`, then 
-this plot overwrites the prevalence one.
+<!-- A third argument which is shared between `survplot()` and `prevplot()` is  -->
+<!-- `devnew`. This is a purely graphical parameter which is set to `TRUE` by  -->
+<!-- default. It allows you to decide whether to plot on a new graphical device  -->
+<!-- called with `dev.new()` by default. If you set `devnew = FALSE`,  -->
+<!-- then the plot is overwritten according to `dev.cur()`. There exist two caveat:  -->
+<!-- the former is that `devnew` is bypassed if the argument `add = TRUE` is passed  -->
+<!-- to `survplot()`. This means that, when you want to add a new layer to an  -->
+<!-- existing plot (with `add`), it does not make any sense to let the function using  -->
+<!-- a new device. Hence, `devnew` is simply ignored. The latter is that, even you  -->
+<!-- can set `devnew = FALSE` in `prevplot()`, one should keep it as the default.  -->
+<!-- If you set it to `FALSE` and you want to plot `M` by setting `M = TRUE`, then  -->
+<!-- this plot overwrites the prevalence one. -->
 
 
 # References

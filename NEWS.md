@@ -1,3 +1,41 @@
+# msmtools 2.0.0
+***
+
+**msmtools** sees several updates which come with potential breaking changes due to the dropping
+of several arguments in some functions. The most relevant feature being shipped with v2.0.0 is
+that both `survplot()` and `prevplot()` now support **ggplot2**. All in all, this justifies the 
+jump in versions thus bringing **msmtools** to version 2.0.0.
+
+### Breaking changes
+
+* `survplot()` requires much less arguments now but at the same time is a bit less flexible. This 
+is particularly reflected in plot customization which is now "self-imposed". I summarize what's different w.r.t. v1.3 below:
+  - There are no more arguments related to plot rendering, like colors and linetype. The function always
+  returns the same type of plot as a `gg` and `ggplot` object. 
+  - Also, `survplot()` returns nothing but the rendered plot by default. The user can tell the function
+  to return additional objects like the `fitted` data, the Kaplan-Meier data `km`, 
+  or one of them with the argument `out`. 
+  - Conversions are gone forever. `survplot()` always returns a `data.table` when `out` requires
+  such object. 
+  - There are no more controls over the device being used when rendering a plot. The function now
+  just uses the default for simplicity and to avoid confusion due to different OSes. There is no
+  possibility anymore to add lines (i.e. additional plots) to an already rendered plot. Just use
+  `survplot()` twice with different input parameters and the combine the plots afterwards. The 
+  underlying data structures for the plot are always returned and made available through a `gg/ggplot`
+  object.
+  - There are no more controls over what is printed at console. You will get few messages and that's it.
+
+### Major changes
+
+* `survplot()` lets you specify the type of confidence intervals for the Kaplan-Meier in addition to
+the already available types for the fitted curve. The argument is `ci_km`. 
+* Specify what is the desired output through the argument `out` which takes a vector of characters.
+* By default, `survplot()` always renders the plot and returns it.
+
+### Minor changes
+
+* Updated vignette.
+
 # msmtools 1.3
 ***
 
@@ -13,10 +51,10 @@ by `data_key` is deleted.
 ### Minor changes
 
 * Global variables are now correctly declared on top of functions using 
-`utils::globalVariables()`. This prevents the assignment to `NULL` in the preable
+`utils::globalVariables()`. This prevents the assignment to `NULL` in the preamble
 of functions which decreases the elegance of the code.
 
-* The printing of information is now way more simplier and is not based 
+* The printing of information is now way more simpler and is not based 
 on `sink()` anymore. This has been done to be less intrusive into the OS 
 when redirecting on console messages. Also, no more OS type check is done so that
 the control with argument `verbose` is the most general possible. Warnings are
@@ -25,7 +63,7 @@ function call.
 
 ### Other changes
 
-* The vignette has been updated to include new functionalities and it is now
+* The vignette has been updated to include new features and it is now
 in HTML format which provides a faster and lighter access.
 
 * Improved the documentation's readability in the 'Value' section for 

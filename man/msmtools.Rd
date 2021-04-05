@@ -3,7 +3,6 @@
 \docType{package}
 \name{msmtools}
 \alias{msmtools}
-\alias{msmtools-package}
 \title{Building augmented data for multi-state models: the \code{msmtools} package}
 \description{
 \code{msmtools} introduces a fast and general method for restructuring classical longitudinal datasets

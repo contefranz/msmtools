@@ -4,13 +4,33 @@
 \alias{prevplot}
 \title{Plot observed and expected prevalences for a multi-state model}
 \usage{
-prevplot(x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE,
-  grid = 100L, x.lab.grid = 500L, xlab = "Time",
-  ylab = "Prevalence (\%)", lty.fit = 1, lwd.fit = 1, col.fit = "red",
-  lty.ci.fit = 2, lwd.ci.fit = 1, col.ci.fit = col.fit, lwd.obs = 1,
-  lty.obs = 1, col.obs = "darkblue", legend.pos = "topright",
-  par.col = 3, plot.width = 10, plot.height = 5, max.m = 0.1,
-  devnew = TRUE, verbose = TRUE)
+prevplot(
+  x,
+  prev.obj,
+  M = FALSE,
+  exacttimes = TRUE,
+  ci = FALSE,
+  grid = 100L,
+  x.lab.grid = 500L,
+  xlab = "Time",
+  ylab = "Prevalence (\%)",
+  lty.fit = 1,
+  lwd.fit = 1,
+  col.fit = "red",
+  lty.ci.fit = 2,
+  lwd.ci.fit = 1,
+  col.ci.fit = col.fit,
+  lwd.obs = 1,
+  lty.obs = 1,
+  col.obs = "darkblue",
+  legend.pos = "topright",
+  par.col = 3,
+  plot.width = 10,
+  plot.height = 5,
+  max.m = 0.1,
+  devnew = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{A \code{msm} object.}

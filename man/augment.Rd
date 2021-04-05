@@ -4,9 +4,22 @@
 \alias{augment}
 \title{A fast and general method for building augmented data}
 \usage{
-augment(data, data_key, n_events, pattern, state = list("IN", "OUT", "DEAD"),
-  t_start, t_end, t_cens, t_death, t_augmented, more_status, check_NA = FALSE,
-  convert = FALSE, verbose = TRUE)
+augment(
+  data,
+  data_key,
+  n_events,
+  pattern,
+  state = list("IN", "OUT", "DEAD"),
+  t_start,
+  t_end,
+  t_cens,
+  t_death,
+  t_augmented,
+  more_status,
+  check_NA = FALSE,
+  convert = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{A \code{data.table} or \code{data.frame} object in longitudinal

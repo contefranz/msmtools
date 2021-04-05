@@ -4,7 +4,8 @@
 \name{hosp}
 \alias{hosp}
 \title{Synthetic Hospital Admissions}
-\format{A \code{data.table} with 53 rows and 12 variables:
+\format{
+A \code{data.table} with 53 rows and 12 variables:
 \describe{
   \item{subj}{Subject ID (integer)}
   \item{adm_number}{Hospital admissions counter (integer)}
@@ -24,7 +25,8 @@
   \item{dateIN}{Exact admission date (date)}
   \item{dateOUT}{Exact discharge date (date)}
   \item{dateCENS}{Either censoring time or exact death time (date)}
-}}
+}
+}
 \usage{
 hosp
 }

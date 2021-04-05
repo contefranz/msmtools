@@ -1,3 +1,36 @@
+# msmtools 2.0.0
+
+## Release summary
+
+This marks a major redesign in how the package manages plots. It now uses **ggplot2**.
+Also, most of the cumbersome arguments related to devices and plot layering have been improved and
+substantially removed. The above changes are enough to declare that **msmtools** has now
+reached full maturity and thus justify the jump to version 2.0.0.
+
+## Package development
+
+* macOS 10.15.7 with R 4.0.4
+
+## R CMD build
+
+* local MacOS
+* win build through devtools::build_win()
+
+## R CMD check results
+
+* There were no ERRORs nor WARNINGs nor NOTEs. 
+
+* `devtools::build_win()` found possible mispelling in the DESCRIPTION file. 
+Though the file is correct.
+
+* `devtools::build_win()` found non canonical URL in the vignette and in the 
+README. The former is included in the bibliography and the latter is due to
+a Github link.
+
+
+***
+
+
 # msmtools 1.3
 
 ## Release summary

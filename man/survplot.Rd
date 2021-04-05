@@ -4,16 +4,22 @@
 \alias{survplot}
 \title{Plot and get survival data from a multi-state model}
 \usage{
-survplot(x, from = 1, to = NULL, range = NULL, covariates = "mean",
-  exacttimes = TRUE, times, grid = 100L, km = FALSE, return.all = FALSE,
-  return.km = NULL, return.p = NULL, convert = FALSE, add = FALSE,
-  ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
-  B = 100L, legend.pos = "topright", xlab = "Time",
-  ylab = "Survival Probability", main = NULL, lty.fit = 1, lwd.fit = 1,
-  col.fit = "red", lty.ci.fit = 3, lwd.ci.fit = 1, col.ci.fit = col.fit,
-  mark.time = FALSE, lty.km = 5, lwd.km = 1, col.km = "darkblue",
-  do.plot = TRUE, plot.width = 7, plot.height = 7, devnew = TRUE,
-  verbose = TRUE)
+survplot(
+  x,
+  from = 1,
+  to = NULL,
+  range = NULL,
+  covariates = "mean",
+  exacttimes = TRUE,
+  times,
+  grid = 100L,
+  km = FALSE,
+  out = c("none", "fitted", "km", "all"),
+  ci = c("none", "normal", "bootstrap"),
+  interp = c("start", "midpoint"),
+  B = 100L,
+  ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin")
+)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -29,7 +35,7 @@ the plot.}
 
 \item{covariates}{Covariate values for which to evaluate the expected
 probabilities. These can either be: the string \code{"mean"}, denoting the
-means of the covariates in the data (this is the default), the number 0,
+means of the covariates in the data (default), the number 0,
 indicating that all the covariates should be set to zero, or a list of values,
 with optional names. For example:\cr
 \code{list (75, 1)}\cr
@@ -43,47 +49,24 @@ and exact. This is inherited from \code{msm} and should be set the same way.}
 \item{times}{An optional numeric vector giving the times at which to compute
 the fitted survival.}
 
-\item{grid}{An integer which tells at how many points to compute the fitted
+\item{grid}{An integer specifying the grid points at which to compute the fitted
 survival (see 'Details').
-If \code{times} is passed, \code{grid} is ignored. It has a default of 100
-points.}
+If \code{times} is passed, \code{grid} is ignored. Default to 100 points.}
 
-\item{km}{If \code{TRUE}, then the Kaplan-Meier curve is shown. Default is
+\item{km}{If \code{TRUE}, then the Kaplan-Meier curve is plotted. Default is
 \code{FALSE}.}
 
-\item{return.all}{If \code{TRUE}, then all the datasets used to draw the plot
-will be return to the environment. This argument saves you some typing time
-since you do not have to pass neither \code{return.km} nor \code{return.p}.
-Default is \code{FALSE} (see 'Details').}
+\item{out}{A character vector specifying what the function has to return. Accepted values are
+\code{"none"} (default) to return just the plot, \code{"fitted"} to return the fitted survival
+curve only, \code{"km"} to return the Kaplan-Meier only, \code{"all"} to return all of the above.}
 
-\item{return.km}{If \code{TRUE}, then the dataset used for building the
-Kaplan-Meier is returned as an object of class \code{data.table} unless
-\code{convert} is set to \code{TRUE} (see \code{convert}).
-Default is \code{FALSE}. \code{survplot} must be assigned to an object in
-order to get the data in the environment (see 'Details').}
+\item{ci}{A character vector with the type of confidence intervals to compute for the fitted
+survival curve. Specify either \code{"none"} (default), for no confidence intervals,
+\code{"normal"} or \code{"bootstrap"}, for confidence intervals computed with the respective
+method in \code{\link[msm]{pmatrix.msm}}. This is very computationally-intensive,
+since intervals must be computed at a series of times.}
 
-\item{return.p}{If \code{TRUE}, then the dataset used for building the
-fitted survival curve is returned as an object of class \code{data.table}
-unless \code{convert} is set to \code{TRUE}
-(see \code{convert}). Default is \code{FALSE}. \code{survplot} must be
-assigned to an object in order to get the data in the environment
-(see 'Details').}
-
-\item{convert}{If \code{TRUE}, then any returned object is automatically
-converted to the class \code{data.frame}. This is done in place and comes at
-very low cost both from running time and memory consumption
-(see \code{\link[data.table]{setDF}}).}
-
-\item{add}{If \code{TRUE}, then a new layer is added to the current plot.
-Default is \code{FALSE}.}
-
-\item{ci}{If \code{"none"} (the default), then no confidence intervals are
-plotted. If \code{"normal"} or \code{"bootstrap"}, confidence intervals are
-plotted based on the respective method in \code{\link[msm]{pmatrix.msm}}.
-This is very computationally-intensive, since intervals must be computed at
-a series of times.}
-
-\item{interp}{If \code{"start"} (the default), then the entry time into the
+\item{interp}{If \code{"start"} (default), then the entry time into the
 absorbing state is assumed to be the time it is first observed in the data.
 If \code{"midpoint"}, then the entry time into the absorbing state is assumed
 to be halfway between the time it is first observed and the previous
@@ -94,97 +77,27 @@ models with observations at arbitrary times.}
 The default is 100 rather than the usual 1000, since these plots are for
 rough diagnostic purposes.}
 
-\item{legend.pos}{Where to position the legend. Default is \code{"topright"},
-but \emph{x} and \emph{y} coordinate can be passed. If \code{NULL}, then
-legend is not shown.}
-
-\item{xlab}{\emph{x} axis label.}
-
-\item{ylab}{\emph{y} axis label.}
-
-\item{main}{The main title of the plot(s) as character. Default is \code{NULL}.}
-
-\item{lty.fit}{Line type for the fitted curve. See \code{\link[graphics]{par}}.}
-
-\item{lwd.fit}{Line width for the fitted curve. See \code{\link[graphics]{par}}.}
-
-\item{col.fit}{Line color for the fitted curve. See \code{\link[graphics]{par}}.}
-
-\item{lty.ci.fit}{Line type for the fitted curve confidence limits.
-See \code{\link[graphics]{par}}.}
-
-\item{lwd.ci.fit}{Line width for the fitted curve confidence limits.
-See \code{\link[graphics]{par}}.}
-
-\item{col.ci.fit}{Line color for the fitted curve confidence limits.
-See \code{\link[graphics]{par}}.}
-
-\item{mark.time}{Mark the empirical survival curve at each censoring point.
-See \code{\link[survival]{lines.survfit}}.}
-
-\item{lty.km}{Line type for the Kaplan-Meier passed to
-\code{\link[survival]{lines.survfit}}. See \code{\link[graphics]{par}}.}
-
-\item{lwd.km}{Line width for the Kaplan-Meier passed to
-\code{\link[survival]{lines.survfit}}. See \code{\link[graphics]{par}}.}
-
-\item{col.km}{Line color for the Kaplan-Meier passed to
-\code{\link[survival]{lines.survfit}}. See \code{\link[graphics]{par}}.}
-
-\item{do.plot}{If \code{FALSE}, then no plot is shown at all.
-Default is \code{TRUE}.}
-
-\item{plot.width}{Width of new graphical device. Default is 7.
-See \code{\link[graphics]{par}}.}
-
-\item{plot.height}{Height of new graphical device. Default is 7.
-See \code{\link[graphics]{par}}.}
-
-\item{devnew}{Set the graphical device where to plot. By default,
-\code{survplot} plots on a new device by setting \code{dev.new}.
-If \code{FALSE}, then a plot is drawn onto the current device as specified
-by \code{dev.cur}. If \code{FALSE} and no external devices are opened, then
-a plot is drawn using internal graphics. See \code{\link[grDevices]{dev}}.}
-
-\item{verbose}{If \code{FALSE}, all information produced by \code{print},
-\code{cat} and \code{message} are suppressed. Default is \code{TRUE}.}
+\item{ci_km}{A character vector with the type of confidence intervals to compute for the
+Kaplan-Meier curve. Specify either \code{"none"}, \code{"plain"}, \code{"log"}, \code{"log-log"},
+\code{"logit"}, or \code{"arcsin"}, as coded in \code{\link[survival]{survfit}}.}
 }
 \value{
-If \code{return.all} is set to \code{TRUE}, then \code{survplot}
-returns a named list with \code{$km} and \code{$fitted} as \code{data.table}
-or as \code{data.frame} when \code{convert = TRUE}. To save them in the
-working environment, assign \code{survplot} to an object (see 'Examples').\cr
-
-\code{$km} contains up to 4 columns:\cr
-\item{\code{subject}}{The ordered subject ID as passed in the \code{msm}
-function.}
-\item{\code{mintime}}{The times at which to compute the fitted survival.}
-\item{\code{mintime_exact}}{If \code{exacttimes} is \code{TRUE}, then the
-relative timing is reported.}
-\item{\code{anystate}}{State of transition to compute the Kaplan-Meier.}
-------\cr
-
-\code{$fitted} contains 2 columns:\cr
-\item{\code{time}}{Times at which to compute the fitted survival.}
-\item{\code{probs}}{The corresponding values of the fitted survival.}
+When \code{out = "none"}, a \code{gg/ggplot} object is returned. If \code{out} is anything
+else, then a named list is returned. The Kaplan-Meier data can be accessed with \code{$km} while
+the estimated survival data with \code{$fitted}. If \code{out = "all"}, the plot, the Kaplan-Meier
+and the estimated curve are returned.
 }
 \description{
-Plot a Kaplan-Meier curve and compare it with the fitted survival probability
-computed from a \code{\link[msm]{msm}} model. Fast builds and returns the
-associated datasets.
+Plot the fitted survival probability computed over a \code{\link[msm]{msm}} model and
+compare it with the Kaplan-Meier. Fast build and return the underlying data structures.
 }
 \details{
 The function is a wrapper of \code{\link[msm]{plot.survfit.msm}}
 and does more things. \code{survplot} manages correctly the plot of a fitted
 survival in an exact times framework (when \code{exacttimes = TRUE}) by just
-resetting the time scale and looking at the follow-up time. It can fastly
-build and return to the user the datasets used to compute the Kaplan-Meier
-and the fitted survival by setting \code{return.all = TRUE}. When this is
-\code{TRUE}, setting \code{return.km} or \code{return.p} to \code{FALSE}
-produces an error and \code{survplot} does not conclude the job. If these
-are set to \code{TRUE}, a warning is raised but the job is taken
-to the end. For more details about how \code{survplot} returns objects,
-please refer to the vignette with \code{vignette("msmtools")}.
+resetting the time scale and looking at the follow-up time. It can quickly
+build and return to the user the data structures used to compute the Kaplan-Meier
+and the fitted survival probability by specifying \code{out = "all"}.
 
 The user can defined custom times (through \code{times}) or let
 \code{survplot} choose them on its own (through \code{grid}).
@@ -218,21 +131,12 @@ msm_model = msm( status_num ~ augmented_int, subject = subj,
                  REPORT = 1, maxit = 10000 ) )
 
 # plotting the fitted and empirical survival from state = 1
-survplot( msm_model, km = TRUE, ci = 'none',
-          verbose = FALSE )
+theplot = survplot( x = msm_model, km = TRUE )
 
 # plotting the fitted and empirical survival from state = 2 and
-# adding it to the previous plot
-survplot( msm_model, from = 2, km = TRUE, ci = 'none', add = TRUE,
-          verbose = FALSE )
+and returning both the fitted and the empirical curve
+out_all = survplot( msm_model, from = 2, km = TRUE, out = "all" )
 
-# returning fitted and empirical data
-all_data = survplot( msm_model, ci = 'none', return.all = TRUE,
-                     verbose = FALSE, do.plot = FALSE )
-
-# saving them separately
-km_data = all_data[[ 1 ]]
-fitted_data = all_data[[ 2 ]]
 }
 
 }
