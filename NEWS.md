@@ -40,7 +40,6 @@ v1.3 below:
   The first row has the standard prevalence plot, the second row has the Deviance M.
   - There are no more controls over what is printed at console. You will get few messages and that's it.
   
-
 ### Major changes
 
 * `survplot()` lets you specify the type of confidence intervals for the Kaplan-Meier in addition to
