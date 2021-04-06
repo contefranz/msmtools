@@ -4,33 +4,7 @@
 \alias{prevplot}
 \title{Plot observed and expected prevalences for a multi-state model}
 \usage{
-prevplot(
-  x,
-  prev.obj,
-  M = FALSE,
-  exacttimes = TRUE,
-  ci = FALSE,
-  grid = 100L,
-  x.lab.grid = 500L,
-  xlab = "Time",
-  ylab = "Prevalence (\%)",
-  lty.fit = 1,
-  lwd.fit = 1,
-  col.fit = "red",
-  lty.ci.fit = 2,
-  lwd.ci.fit = 1,
-  col.ci.fit = col.fit,
-  lwd.obs = 1,
-  lty.obs = 1,
-  col.obs = "darkblue",
-  legend.pos = "topright",
-  par.col = 3,
-  plot.width = 10,
-  plot.height = 5,
-  max.m = 0.1,
-  devnew = TRUE,
-  verbose = TRUE
-)
+prevplot(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE)
 }
 \arguments{
 \item{x}{A \code{msm} object.}
@@ -39,81 +13,19 @@ prevplot(
 It can be with or without confidence intervals. \code{prevplot} will behaves
 accordingly.}
 
-\item{M}{If \code{TRUE}, then a rough indicator of deviance from the model is
-computed (see 'Details'). Default is \code{FALSE}.}
-
 \item{exacttimes}{If \code{TRUE} (default) then transition times are known
 and exact. This is inherited from \code{msm} and should be set the same way.}
 
+\item{M}{If \code{TRUE}, then a rough indicator of deviance from the model is
+computed (see 'Details'). Default is \code{FALSE}.}
+
 \item{ci}{If \code{TRUE}, then confidence intervals, if they exist, are plotted.
 Default is \code{FALSE}.}
-
-\item{grid}{Define how many points should be used to build the \emph{x} axis.
-Defaul is 100.}
-
-\item{x.lab.grid}{Define the interval on the \emph{x} axis at which draw tick
-marks. Default is 500.}
-
-\item{xlab}{\emph{x} axis label.}
-
-\item{ylab}{\emph{y} axis label.}
-
-\item{lty.fit}{Line type for the expected prevalences.
-See \code{\link[graphics]{par}}.}
-
-\item{lwd.fit}{Line width for the expected prevalences.
-See \code{\link[graphics]{par}}.}
-
-\item{col.fit}{Line color for the expected prevalences.
-See \code{\link[graphics]{par}}.}
-
-\item{lty.ci.fit}{Line type for the expected prevalences confidence limits.
-See \code{\link[graphics]{par}}.}
-
-\item{lwd.ci.fit}{Line width for the expected prevalences confidence limits.
-See \code{\link[graphics]{par}}.}
-
-\item{col.ci.fit}{Line color for the expected prevalences confidence limits.
-See \code{\link[graphics]{par}}.}
-
-\item{lwd.obs}{Line width for the observed prevalences.
-See \code{\link[graphics]{par}}.}
-
-\item{lty.obs}{Line type for the observed prevalences.
-See \code{\link[graphics]{par}}.}
-
-\item{col.obs}{Line color for the observed prevalences.
-See \code{\link[graphics]{par}}.}
-
-\item{legend.pos}{Where to position the legend. Default is \code{"topright"},
-but \emph{x} and \emph{y} coordinate can be passed. If \code{NULL}, then
-legend is not shown.}
-
-\item{par.col}{The number of columns of the plot. Default is 3.}
-
-\item{plot.width}{Width of new graphical device. Default is 7.
-See \code{\link[graphics]{par}}.}
-
-\item{plot.height}{Height of new graphical device. Default is 7.
-See \code{\link[graphics]{par}}.}
-
-\item{max.m}{If \code{M = TRUE}, it adjusts the upper \emph{y} limit when
-plotting M.}
-
-\item{devnew}{Set the graphical device where to plot. By default,
-\code{prevplot} plots on a new device by setting \code{dev.new}.
-If \code{FALSE}, then a plot is drawn onto the current device
-as specified by \code{dev.cur}. If \code{FALSE} and no external devices are
-opened, then a plot is drawn using internal graphics.
-See \code{\link[grDevices]{dev}}.}
-
-\item{verbose}{If \code{FALSE}, all information produced by \code{print},
-\code{cat} and \code{message} are suppressed. Default is \code{TRUE}.}
 }
 \description{
 Provides a graphical indication of goodness of fit of a multi-state model
 computed by \code{\link[msm]{msm}} using observed and expected prevalences.
-It also computes a rough indicator of where the data depart from the fitted
+It also computes a rough indicator of where the data depart from the estimated
 Markov model.
 }
 \details{
@@ -123,6 +35,9 @@ A comparison at a given time \eqn{t_i} of a patient \emph{k} in the state
 \emph{s} between observed counts \eqn{O_{is}} with expected ones \eqn{E_{is}}
 is build as follows:
 \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is}}
+
+The plot of the deviance M is returned together with the standard prevalence plot in the second
+row. This is not editable by the user.
 }
 \examples{
 \dontrun{
@@ -159,7 +74,7 @@ prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
                        times = seq( t_min, t_max, steps ) )
 
 # and plotting them using prevplot()
-prevplot( msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
+gof = prevplot( x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE )
 }
 
 }

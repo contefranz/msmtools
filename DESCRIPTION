@@ -18,9 +18,13 @@ Depends: R (>= 3.0)
 Imports: data.table (>= 1.9.6),
     msm (>= 1.6),
     survival (>= 2.38.0),
-    ggplot2 (>= 3.3.3)
+    ggplot2 (>= 3.3.3),
+    patchwork (>= 1.1.1),
+    scales (>= 1.1.1)
 Suggests: testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    roxygen2,
+    usethis
 VignetteBuilder: knitr
 Encoding: UTF-8

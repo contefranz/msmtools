@@ -25,12 +25,30 @@ is particularly reflected in plot customization which is now "self-imposed". I s
   object.
   - There are no more controls over what is printed at console. You will get few messages and that's it.
 
+* similarly, `prevplot()` has been greatly improved. There are no more loops in the function and
+everything is done by reference so it is very efficient. I briefly summarize what's different w.r.t.
+v1.3 below:
+  - There are no more arguments related to plot rendering. `prevplot()` always returns a `gg/ggplot`
+  object. 
+  - All arguments related to the grid or time steps are gone. Everything is managed consistently
+  by extracting the correct model frame from the prevalence object computed with `prevalence.msm()`.
+  - For loops are gone too since plots make use of `facet_wrap()` to automatically decide how many
+  grobs to render. For now, there is no customization possibile since I expect that for most cases 
+  the number of states is limited in number anyway. There might be some flexibility added in future
+  releases.
+  - When `M = TRUE`, `prevplot()` uses **patchwork** to wrap the two plots in two different rows.
+  The first row has the standard prevalence plot, the second row has the Deviance M.
+  - There are no more controls over what is printed at console. You will get few messages and that's it.
+  
+
 ### Major changes
 
 * `survplot()` lets you specify the type of confidence intervals for the Kaplan-Meier in addition to
 the already available types for the fitted curve. The argument is `ci_km`. 
 * Specify what is the desired output through the argument `out` which takes a vector of characters.
 * By default, `survplot()` always renders the plot and returns it.
+* `prevplot()` drops plot layering in favor of direct **ggplot2** support.
+* `prevplot()` has become faster due to smarter data extraction and binding.
 
 ### Minor changes
 

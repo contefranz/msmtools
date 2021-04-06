@@ -476,7 +476,7 @@ prev = prevalence.msm( x = msm_model, covariates = 'mean', ci = 'normal',
                             times = seq( t_min, t_max, steps ) )
 
 # and plotting them using prevplot()
-prevplot( x = msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
+prev_plot = prevplot( x = msm_model, prev.obj = prev, exacttimes = TRUE, M = FALSE, ci = TRUE )
 ```
 
 It is mandatory for `prevplot()` to work with a `msm` object and a list 
@@ -491,8 +491,7 @@ which gives an idea of the deviance from the Markov model. This is computed
 according to Titman and Sharples (2008). The following code addresses this request.
 
 ```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3, warning = F}
-prevplot( x = msm_model, prev, M = TRUE, ci = TRUE, 
-          devnew = FALSE, verbose = FALSE )
+gof = prevplot( x = msm_model, prev.obj = prev, exacttimes = TRUE, M = TRUE, ci = TRUE )
 ```
 
 

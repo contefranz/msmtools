@@ -1,67 +1,32 @@
+if ( getRversion() >= "2.15.1" ) {
+  utils::globalVariables( c( "obs", "hat" ) )
+}
 #' Plot observed and expected prevalences for a multi-state model
 #'
 #' Provides a graphical indication of goodness of fit of a multi-state model
 #' computed by \code{\link[msm]{msm}} using observed and expected prevalences.
-#' It also computes a rough indicator of where the data depart from the fitted
+#' It also computes a rough indicator of where the data depart from the estimated
 #' Markov model.
 #'
-#' @inheritParams augment
 #' @param x A \code{msm} object.
 #' @param prev.obj A list computed by \code{\link[msm]{prevalence.msm}}.
 #' It can be with or without confidence intervals. \code{prevplot} will behaves
 #' accordingly.
-#' @param M If \code{TRUE}, then a rough indicator of deviance from the model is
-#' computed (see 'Details'). Default is \code{FALSE}.
 #' @param exacttimes If \code{TRUE} (default) then transition times are known
 #' and exact. This is inherited from \code{msm} and should be set the same way.
+#' @param M If \code{TRUE}, then a rough indicator of deviance from the model is
+#' computed (see 'Details'). Default is \code{FALSE}.
 #' @param ci If \code{TRUE}, then confidence intervals, if they exist, are plotted.
 #' Default is \code{FALSE}.
-#' @param grid Define how many points should be used to build the \emph{x} axis.
-#' Defaul is 100.
-#' @param x.lab.grid Define the interval on the \emph{x} axis at which draw tick
-#' marks. Default is 500.
-#' @param xlab \emph{x} axis label.
-#' @param ylab \emph{y} axis label.
-#' @param lty.fit Line type for the expected prevalences.
-#' See \code{\link[graphics]{par}}.
-#' @param lwd.fit Line width for the expected prevalences.
-#' See \code{\link[graphics]{par}}.
-#' @param col.fit Line color for the expected prevalences.
-#' See \code{\link[graphics]{par}}.
-#' @param lty.ci.fit Line type for the expected prevalences confidence limits.
-#' See \code{\link[graphics]{par}}.
-#' @param lwd.ci.fit Line width for the expected prevalences confidence limits.
-#' See \code{\link[graphics]{par}}.
-#' @param col.ci.fit Line color for the expected prevalences confidence limits.
-#' See \code{\link[graphics]{par}}.
-#' @param lty.obs Line type for the observed prevalences.
-#' See \code{\link[graphics]{par}}.
-#' @param lwd.obs Line width for the observed prevalences.
-#' See \code{\link[graphics]{par}}.
-#' @param col.obs Line color for the observed prevalences.
-#' See \code{\link[graphics]{par}}.
-#' @param legend.pos Where to position the legend. Default is \code{"topright"},
-#' but \emph{x} and \emph{y} coordinate can be passed. If \code{NULL}, then
-#' legend is not shown.
-#' @param par.col The number of columns of the plot. Default is 3.
-#' @param plot.width Width of new graphical device. Default is 7.
-#' See \code{\link[graphics]{par}}.
-#' @param plot.height Height of new graphical device. Default is 7.
-#' See \code{\link[graphics]{par}}.
-#' @param max.m If \code{M = TRUE}, it adjusts the upper \emph{y} limit when
-#' plotting M.
-#' @param devnew Set the graphical device where to plot. By default,
-#' \code{prevplot} plots on a new device by setting \code{dev.new}.
-#' If \code{FALSE}, then a plot is drawn onto the current device
-#' as specified by \code{dev.cur}. If \code{FALSE} and no external devices are
-#' opened, then a plot is drawn using internal graphics.
-#' See \code{\link[grDevices]{dev}}.
 #' @details When \code{M = TRUE}, a rough indicator of the deviance from the
 #' Markov model is computed according to Titman and Sharples (2008).
 #' A comparison at a given time \eqn{t_i} of a patient \emph{k} in the state
 #' \emph{s} between observed counts \eqn{O_{is}} with expected ones \eqn{E_{is}}
 #' is build as follows:
 #' \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is}}
+#'
+#' The plot of the deviance M is returned together with the standard prevalence plot in the second
+#' row. This is not editable by the user.
 #'
 #' @seealso \code{\link[msm]{plot.prevalence.msm}} \code{\link[msm]{msm}}
 #' \code{\link[msm]{prevalence.msm}}
@@ -116,227 +81,127 @@
 #'                        times = seq( t_min, t_max, steps ) )
 #'
 #' # and plotting them using prevplot()
-#' prevplot( msm_model, prev, ci = TRUE, devnew = FALSE, verbose = FALSE )
+#' gof = prevplot( x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE )
 #' }
 #'
-#' @import data.table
-#' @importFrom grDevices dev.cur dev.new dev.set
-#' @importFrom graphics axis legend lines par plot
+#' @importFrom data.table as.data.table setnames setcolorder melt
 #' @importFrom stats model.extract time
+#' @importFrom ggplot2 ggplot aes geom_line facet_wrap scale_y_continuous xlab ylab theme_bw ggtitle theme
+#' @importFrom scales percent
+#' @importFrom patchwork wrap_plots
 #' @export
 
-prevplot = function( x, prev.obj, M = FALSE, exacttimes = TRUE, ci = FALSE,
-                     grid = 100L, x.lab.grid = 500L,
-                     xlab = 'Time', ylab = 'Prevalence (%)',
-                     lty.fit = 1, lwd.fit = 1, col.fit = 'red',
-                     lty.ci.fit = 2, lwd.ci.fit = 1, col.ci.fit = col.fit,
-                     lwd.obs = 1, lty.obs = 1, col.obs = 'darkblue',
-                     legend.pos = 'topright', par.col = 3, plot.width = 10,
-                     plot.height = 5, max.m = 0.1, devnew = TRUE,
-                     verbose = TRUE ) {
+prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE ) {
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
   if ( !inherits( prev.obj, "list" ) )
     stop( "prev.obj must be a list computed by \"prevalence.msm\"" )
 
-  oldw = getOption( "warn" )
-  options( warn = 1 )
-  # if ( verbose == FALSE ) {
-  #   if ( .Platform$OS.type == 'windows' ) {
-  #     sink( file = "NUL" )
-  #   } else {
-  #     sink( file = "/dev/null" )
-  #   }
-  # }
+  state_names = colnames( x$qmodel$imatrix )
 
-  t_min = range( model.extract( x$data$mf, "time" ) )[ 1 ]
-  t_max = range( model.extract( x$data$mf, "time" ) )[ 2 ]
-  x_axis = seq( t_min, t_max, grid )
-  x_axis_scaled = seq( t_min, t_max, grid ) - t_min
-  abs_state = as.integer( absorbing.msm( x ) )
-  status_names = colnames( x$qmodel$imatrix )
+  # extract the prevalences from prev.obj
+  prev_obs = as.data.table(prev.obj$`Observed percentages`, keep.rownames = "time")
+  setnames( prev_obs, c(2L:ncol(prev_obs)), state_names )
+  prev_hat = as.data.table(prev.obj$`Expected percentages`$estimates, keep.rownames = "time")
 
-  if ( devnew == TRUE ) {
-    if ( verbose ) {
-      cat( '---\n' )
-      cat( 'setting new graphical device\n' )
+  # keep.rownames is a char so I cast it back to integer
+  prev_obs[ , time := as.integer( time ) ]
+  prev_hat[ , time := as.integer( time ) ]
+  # these are all wide, but ggplot works best when passing a long format data.frame
+  # I reshape them and work my way with facet_wrap() instead of looping
+  prev_obs_long = melt( prev_obs, id.vars = "time", variable.name = "state", value.name = "obs")
+  prev_hat_long = melt( prev_hat, id.vars = "time", variable.name = "state", value.name = "hat")
+
+  if ( ci ) {
+    cat("Extracting confidence intervals\n")
+    if ( length( prev.obj$`Expected percentages` ) > 1 ) {
+      ci_lwr_hat = as.data.table(prev.obj$`Expected percentages`$ci[ , , 1L ])
+      ci_upr_hat = as.data.table(prev.obj$`Expected percentages`$ci[ , , 2L ])
+      setnames(ci_lwr_hat, names(ci_lwr_hat), state_names)
+      setnames(ci_upr_hat, names(ci_upr_hat), state_names)
+      # add "time" variable
+      ci_lwr_hat[ , time := prev_hat[ , time ] ]
+      ci_upr_hat[ , time := prev_hat[ , time ] ]
+      # re-order columns cause we are cool
+      setcolorder( ci_lwr_hat, c(ncol(ci_lwr_hat), 1L:(ncol(ci_lwr_hat)-1L)) )
+      setcolorder( ci_upr_hat, c(ncol(ci_upr_hat), 1L:(ncol(ci_upr_hat)-1L)) )
+      # melt the guys!
+      ci_lwr_hat_long = melt( ci_lwr_hat, id.vars = "time", variable.name = "state", value.name = "lwr")
+      ci_upr_hat_long = melt( ci_upr_hat, id.vars = "time", variable.name = "state", value.name = "upr")
+
+    } else {
+      stop("There are no CIs in \"prev.obj\"")
     }
-    dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
-  } else if ( devnew == FALSE ) {
-    if ( verbose ) {
-      cat( '---\n' )
-      cat( 'plotting on device', dev.cur(), '\n' )
-    }
-    dev.set( dev.cur() )
   }
-  if ( abs_state <= par.col ) {
-    n_row = 1
+
+  if ( ci ) {
+    # bind all data together
+    to_plot = cbind( prev_obs_long, prev_hat_long[ , .( hat ) ],
+                     ci_lwr_hat_long[ , .(lwr) ], ci_upr_hat_long[ , .(upr) ] )
+    # instead of going crazy after scales::percent, I just rescale the vectors here
+    to_plot[ , `:=` ( obs = obs / 100L, hat = hat / 100L, lwr = lwr / 100L, upr = upr / 100L ) ]
   } else {
-    n_row = ceiling( abs_state / par.col )
+    # bind all data together
+    to_plot = cbind( prev_obs_long, prev_hat_long[ , .( hat ) ] )
+    # instead of going crazy after scales::percent, I just rescale the vectors here
+    to_plot[ , `:=` ( obs = obs / 100L, hat = hat / 100L ) ]
   }
-  if ( length( prev.obj$Expected ) == 2 ) {
-    par( mfrow = c( n_row, par.col ) )
+  # this works for exact times of transitions
+  if ( exacttimes ) {
+    to_plot[ , time := time - min(time) ]
+  }
 
-    if ( exacttimes == FALSE ) {
-      for ( i in 1:abs_state ) {
-        if ( verbose ) {
-          cat( '---\n' )
-          cat( 'plotting prevalences for state', status_names[ i ], '\n' )
-        }
-        plot( x_axis, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
-              col = col.obs, lty = lty.obs, lwd = lwd.obs,
-              main = paste( 'State ', status_names[ i ], sep = '' ),
-              xlab = xlab, ylab = ylab, ylim = c( 0, 100 ) )
-        axis( side = 1, at = seq( min( x_axis ), max( x_axis ), x.lab.grid ) )
-        lines( x_axis, prev.obj$`Expected percentages`$estimates[ , i ], type = 'l',
-               lwd = lwd.fit, lty = lty.fit, col = col.fit )
-        if ( ci == TRUE ) {
-          lines( x_axis, prev.obj$`Expected percentages`$ci[ , i, 1 ], type = 'l',
-                 lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
-          lines( x_axis, prev.obj$`Expected percentages`$ci[ , i, 2 ], type = 'l',
-                 lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
-        }
-        if ( !is.null( legend.pos ) ) {
-          legend( legend.pos, legend = c( 'Fitted', 'Observed' ),
-                  lwd = c( lwd.fit, lwd.obs ), lty = c( lty.fit, lty.obs ),
-                  col = c( col.fit, col.obs ) )
-        }
-      }
+
+  if ( M ) {
+    cat("Computing Deviance M\n")
+    prev_obs_abs = as.data.table(prev.obj$Observed)
+    prev_hat_abs = prev.obj$Expected
+    if ( length( prev_hat_abs ) > 1L ) {
+      M_gof = ( prev_obs_abs - prev_hat_abs$estimates )^2L / prev_hat_abs$estimates
     } else {
-      for ( i in 1:abs_state ) {
-        if ( verbose ) {
-          cat( '---\n' )
-          cat( 'plotting prevalences for state', status_names[ i ], '\n' )
-        }
-        plot( x_axis_scaled, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
-              col = col.obs, lty = lty.obs, lwd = lwd.obs,
-              main = paste( 'State ', status_names[ i ], sep = '' ),
-              xlab = xlab, ylab = ylab, ylim = c( 0, 100 ) )
-        axis( side = 1, at = seq( min( x_axis_scaled ), max( x_axis_scaled ), x.lab.grid ) )
-        lines( x_axis_scaled, prev.obj$`Expected percentages`$estimates[ , i ], type = 'l',
-               lwd = lwd.fit, lty = lty.fit, col = col.fit )
-        if ( ci == TRUE ) {
-          lines( x_axis_scaled, prev.obj$`Expected percentages`$ci[ , i, 1 ], type = 'l',
-                 lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
-          lines( x_axis_scaled, prev.obj$`Expected percentages`$ci[ , i, 2 ], type = 'l',
-                 lwd = lwd.ci.fit, lty = lty.ci.fit, col = col.ci.fit )
-        }
-        if ( !is.null( legend.pos ) ) {
-          legend( legend.pos, legend = c( 'Fitted', 'Observed' ),
-                  lwd = c( lwd.fit, lwd.obs ), lty = c( lty.fit, lty.obs ),
-                  col = c( col.fit, col.obs ) )
-        }
-      }
+      M_gof = ( prev_obs_abs - prev_hat_abs )^2L / prev_hat_abs
     }
+    setnames( M_gof, 1L:(ncol(M_gof)-1L), state_names)
+    M_gof[ , `:=` (time = prev_hat[ , time ], Total = NULL) ]
+    M_gof_long = melt( M_gof, id.vars = "time",  variable.name = "state", value.name = "M")
+    to_plot = cbind( to_plot, M_gof_long[ , .(M)])
+    to_plot[ , M := M / 100L ]
+  }
+
+  # build the plot
+  p_canvas = ggplot( to_plot ) +
+    facet_wrap(. ~ state) +
+    scale_y_continuous(labels = percent) +
+    xlab("Time") + ylab("Prevalence") +
+    theme_bw() +
+    ggtitle("Prevalence Plot") +
+    theme(legend.position = "bottom")
+
+  p = p_canvas +
+    geom_line(aes( x = time, y = obs, group = 1, color = "Observed" ) ) +
+    geom_line(aes( x = time, y = hat, group = 1, color = "Estimated" ) ) +
+    scale_color_manual( name = "", values = c( "Estimated" = "red", "Observed" = "darkblue") )
+
+  if ( ci ) {
+    p = p +
+      geom_line( aes( x = time, y = lwr, group = 1, color = "Estimated" ), linetype = 3 ) +
+      geom_line( aes( x = time, y = upr, group = 1, color = "Estimated" ), linetype = 3 )
+  }
+
+  if ( M ) {
+    p_gof = p_canvas +
+      geom_line( aes( x = time, y = M, group = 1 ) ) +
+      ylab("Deviance M") +
+      theme_bw() +
+      ggtitle("Deviance of Markov Model")
+    p_combined = wrap_plots( p, p_gof, nrow = 2L )
+    print( p_combined )
+    return( p_combined )
   } else {
-    if ( ci == TRUE ) {
-      if ( verbose ) {
-        message( substitute( prev.obj ), ' has no confidence intervals. Argument ci will be ignored.' )
-      }
-    }
-    par( mfrow = c( n_row, par.col ) )
-    if ( exacttimes == FALSE ) {
-      for ( i in 1:abs_state ) {
-        if ( verbose ) {
-        cat( '---\n' )
-        cat( 'plotting prevalences for state', status_names[ i ], '\n' )
-        }
-        plot( x_axis, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
-              col = col.obs, lty = lty.obs, lwd = lwd.obs,
-              main = paste( 'State ', status_names[ i ], sep = '' ),
-              xlab = xlab, ylab = ylab, ylim = c( 0, 100 ) )
-        axis( side = 1, at = seq( min( x_axis ), max( x_axis ), x.lab.grid ) )
-        lines( x_axis, prev.obj$`Expected percentages`[ , i ], type = 'l',
-               lwd = lwd.fit, lty = lty.fit, col = col.fit )
-        if ( !is.null( legend.pos ) ) {
-          legend( legend.pos, legend = c( 'Fitted', 'Observed' ),
-                  lwd = c( lwd.fit, lwd.obs ), lty = c( lty.fit, lty.obs ),
-                  col = c( col.fit, col.obs ) )
-        }
-      }
-    } else {
-      for ( i in 1:abs_state ) {
-        if ( verbose ) {
-        cat( '---\n' )
-        cat( 'plotting prevalences for state', status_names[ i ], '\n' )
-        }
-        plot( x_axis_scaled, prev.obj$`Observed percentages`[ , i ], type = 'l', xaxt = 'n',
-              col = col.obs, lty = lty.obs, lwd = lwd.obs,
-              main = paste( 'State ', status_names[ i ], sep = '' ),
-              xlab = xlab, ylab = ylab, ylim = c( 0, 100 ) )
-        axis( side = 1, at = seq( min( x_axis_scaled ), max( x_axis_scaled ), x.lab.grid ) )
-        lines( x_axis_scaled, prev.obj$`Expected percentages`[ , i ], type = 'l',
-               lwd = lwd.fit, lty = lty.fit, col = col.fit )
-        if ( !is.null( legend.pos ) ) {
-          legend( legend.pos, legend = c( 'Fitted', 'Observed' ),
-                  lwd = c( lwd.fit, lwd.obs ), lty = c( lty.fit, lty.obs ),
-                  col = c( col.fit, col.obs ) )
-        }
-      }
-    }
+    print( p )
+    return( p )
   }
-  if ( M == TRUE ) {
-    if ( verbose ) {
-      cat( '---\n' )
-      message( 'computing M statistic' )
-      cat( '---\n' )
-    }
-    if ( length( prev.obj$Expected ) == 2 ) {
-      M.obj = ( prev.obj$Observed - prev.obj$Expected$estimates )^2 / prev.obj$Expected$estimates
-    } else {
-      M.obj = ( prev.obj$Observed - prev.obj$Expected )^2 / prev.obj$Expected
-    }
-
-    if ( !inherits( M.obj, "matrix" ) )
-      stop( "M must be a matrix" )
-    colnames( M.obj )[ 1:abs_state ] = status_names
-    M.obj[ is.na( M.obj ) ] = 0
-    temp = sort( c( M.obj ) )
-    y.max.M = temp[ length( temp ) - 1 ] + max.m * temp[ length( temp ) - 1 ]
-
-    if ( devnew == TRUE ) {
-      if ( verbose ) {
-      cat( '---\n' )
-      cat( 'setting new graphical device\n')
-      }
-      dev.new( noRStudioGD = TRUE, width = plot.width, height = plot.height )
-    } else if ( devnew == FALSE ) {
-      if ( verbose ) {
-      cat( '---\n' )
-      cat( 'plotting on device', dev.cur(), '\n' )
-      }
-      dev.set( dev.cur() )
-    }
-    par( mfrow = c( n_row, par.col ) )
-    if ( exacttimes == FALSE ) {
-      for ( i in 1:abs_state ) {
-        if ( verbose ) {
-        cat( '---\n' )
-        cat( 'plotting M for state', status_names[ i ], '\n' )
-        }
-        plot( x_axis, M.obj[ , i ], type = 'l', xaxt = 'n',
-              main = paste( 'M for state ', status_names[ i ], sep = '' ),
-              xlab = xlab, ylab = 'M', ylim = c( 0, y.max.M ) )
-        axis( side = 1, at = seq( min( x_axis ), max( x_axis ), x.lab.grid ) )
-      }
-    } else {
-      for ( i in 1:abs_state ) {
-        if ( verbose ) {
-        cat( '---\n' )
-        cat( 'plotting M for state', status_names[ i ], '\n' )
-        }
-        plot( x_axis_scaled, M.obj[ , i ], type = 'l', xaxt = 'n',
-              main = paste( 'M for state ', status_names[ i ], sep = '' ),
-              xlab = xlab, ylab = 'M', ylim = c( 0, y.max.M ) )
-        axis( side = 1, at = seq( min( x_axis_scaled ), max( x_axis_scaled ), x.lab.grid ) )
-      }
-    }
-  }
-  # if ( verbose == FALSE ) {
-  #   sink()
-  # }
-  options( warn = oldw )
 }
 
 
