@@ -3,8 +3,6 @@
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 [![release](https://img.shields.io/badge/release-v2.0.0-blue.svg)](https://github.com/contefranz/OpTop/releases/tag/2.0.0)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
-Linux/Unix: [![Build Status](https://travis-ci.org/contefranz/msmtools.svg?branch=master)](https://travis-ci.org/contefranz/msmtools)
-Windows: [![Build status](https://ci.appveyor.com/api/projects/status/9d38hi27w1f7ccko/branch/master?svg=true)](https://ci.appveyor.com/project/contefranz/msmtools/branch/master)
 
 ***
 
