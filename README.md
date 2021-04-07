@@ -1,7 +1,7 @@
 # Building augmented data for multi-state models: the `msmtools` package
 
-[![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![release](https://img.shields.io/badge/dev.%20version-2.0.0-blue)](https://github.com/contefranz/OpTop/releases/tag/2.0.0)
+[![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![release](https://img.shields.io/badge/dev.%20version-2.0.0-blue)](https://github.com/contefranz/msmtools)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 
 ***
@@ -49,7 +49,7 @@ For more information about **msmtools**, please check out the vignette with
 Bugs and issues can be reported at
 [www.github.com/contefranz/msmtools/issues](www.github.com/contefranz/msmtools/issues).
 
-## Breaking changes from [![release](https://img.shields.io/badge/dev.%20version-2.0.0-blue)](https://github.com/contefranz/OpTop/releases/tag/2.0.0)
+## Breaking changes from version 2.0.0
 
 **msmtools** has received a lot of improvements in the plotting functions. In particular, from
 version 2.0.0 both `survplot()` and `prevplot()` support [**ggplot2**](https://ggplot2.tidyverse.org). 

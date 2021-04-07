@@ -24,7 +24,7 @@ and ending time of the process are known and recorded. If \code{data} is a
 for \code{data}. This represents the subject ID (see
 \code{\link[data.table]{setkey}}).}
 
-\item{pattern}{Either an integer, a factor or a characer with 2 or 3 unique
+\item{pattern}{Either an integer, a factor or a character with 2 or 3 unique
 values which provides the ID status at the end of the study. \code{pattern}
 has a predefined structure. When 2 values are detected, they must be in the
 format: 0 = "alive", 1 = "dead". When 3 values are detected, then the format

@@ -6,3 +6,5 @@ testing.R
 inst/doc
 .DS_Store
 *.dll
+vignettes/msmtools.R
+vignettes/msmtools.html

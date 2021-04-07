@@ -113,7 +113,7 @@ if ( getRversion() >= "2.15.1" ) {
 #'
 #' Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
-#' URL \url{http://www.jstatsoft.org/v38/i08/}.
+#' URL \url{https://www.jstatsoft.org/v38/i08/}.
 #' @seealso \code{\link[msm]{plot.survfit.msm}} \code{\link[msm]{msm}},
 #' \code{\link[msm]{pmatrix.msm}}, \code{\link[data.table]{setDF}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
