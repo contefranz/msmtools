@@ -103,7 +103,7 @@ right away.
 
 * `pandoc` versions prior 1.17 does not fully support spaces in file names and 
 caused a warning when compiling `msmtools` under Fedora using both `clang` 
-ang `gcc`. Now all file names are without spaces. `msmtools` 1.3 has been built
+and `gcc`. Now all file names are without spaces. `msmtools` 1.3 has been built
 using `pandoc` 1.19.2 and `pandoc-citeproc` 0.10.4.1
 
 *** ***
@@ -181,7 +181,7 @@ values in a vector.
 
 ### Bug fixes
 
-* `augment()` now correctly repositions new created variables.
+* `augment()` now correctly positions new created variables.
 
 ### Other changes
 

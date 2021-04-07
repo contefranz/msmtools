@@ -177,7 +177,7 @@ In case one passes to `pattern` a variable which contains only two unique values
 inside or outside a given transition. We suggest to always provide a variable 
 with three unique values because of efficiency and speed.  
 Everything else different from what described above will inevitably produce 
-wrong behaviour of `augment()` with and uncorrect results.
+wrong behavior of `augment()` with and wrong results.
 
 The second important argument is `state`. This is passed as a list and contains 
 the status flags which will be used to compute all the status variables for the 
@@ -199,7 +199,7 @@ acts as the main indicator of states.
 From version 1.2, `augment()` no longer checks the presence of missing data in 
 the arguments passed to it. In fact, the new argument `check_NA` has been 
 introduced and set to `FALSE` by default. Again, this is due because `augment()` 
-has been developed just for restructuring data. The proceduring of searching for 
+has been developed just for restructuring data. The search for 
 missing data is computationally intensive and could cause memory overheads. 
 When dealing with very highly dimensional dataset, this becomes very unfeasible.
 We then suggest to perform all these types of checks before running `augment()`. 
@@ -213,7 +213,7 @@ you to fix the problem.
 
 `augment()` by default takes a very simple status structure given by 3 different 
 values. In general, this is enough to define a multi-state model. But what if 
-we need a more complex structure. Let’s consider again the dataset `hosp` for 
+we needed a more complex structure. Let’s consider again the dataset `hosp` for 
 the 3rd, 4th, 5th, and 6th patient with the following variables:
 
 ```{r subsetting, collapse = TRUE }
@@ -260,7 +260,7 @@ complex status structure;
 
 * *status_exp_num*: the corresponding integer version of *status_exp*;
 * *n_status_exp*: similar to what has been done before, `augment()` mixes 
-information coming from the current expandend status and the number of admission 
+information coming from the current expanded status and the number of admission 
 to give you the time evolution of the process.
 
 ## Polishing the augmented data
@@ -392,7 +392,7 @@ with the following columns ordered by either `time` or `time_exact`.
 
 * *time_exact*: the relative time at which the event occurred. This is defined when `exacttimes = TRUE`;
 
-* *anystate*: tansition indicator to compute the Kaplan-Meier;
+* *anystate*: transition indicator to compute the Kaplan-Meier;
 
 * *km*: the value of the empirical survival probability.
 
@@ -463,7 +463,7 @@ prev_plot = prevplot( x = msm_model, prev.obj = prev, exacttimes = TRUE, M = FAL
 It is mandatory for `prevplot()` to work with a `msm` object and a list 
 computed by `prevalence.msm` are passed.
 
-It is also possibile to plot the following statistic:
+It is also possible to plot the following statistic:
 
 $$
 M = \frac{(O_{is} - E_{is})^2} {E_{is}}
