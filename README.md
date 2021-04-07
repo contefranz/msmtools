@@ -2,7 +2,7 @@
 
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![release](https://img.shields.io/badge/dev.%20version-2.0.0-blue)](https://github.com/contefranz/msmtools)
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 
 ***
 
@@ -47,7 +47,7 @@ For more information about **msmtools**, please check out the vignette with
 `vignette( "msmtools" )`.
 
 Bugs and issues can be reported at
-[www.github.com/contefranz/msmtools/issues](www.github.com/contefranz/msmtools/issues).
+[https://github.com/contefranz/msmtools/issues](https://github.com/contefranz/msmtools/issues).
 
 ## Breaking changes from version 2.0.0
 
