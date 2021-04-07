@@ -435,25 +435,6 @@ the same described above. The snippet below reports an example.
 out_all = survplot( x = msm_model, km = TRUE, out = "all")
 ```
 
-<!-- ### The plot layering  -->
-
-<!-- Multi-state models, as their name suggests, are specifically designed to work  -->
-<!-- when more than one  status exists. Infact, they tipically work when more than 2  -->
-<!-- status are present. In our example, we have 3 states: `'IN'`, `'OUT'`, `'DEAD'`.  -->
-<!-- Now, what if we want to plot on the same device more than just one fitted  -->
-<!-- survival curve? Suppose we want to plot the expected survival computed from -->
-<!-- state 1 and 2. That means, from `'IN'` and `'OUT'` to `'DEAD'`. The plot  -->
-<!-- layering addresses exactly this problem and `survplot()` supports this with  -->
-<!-- the argument `add`. Let's see this in the following example:  -->
-
-<!-- ```{r layering, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4} -->
-<!-- # plotting the first survival from state 'IN' -->
-<!-- survplot( x = msm_model, from = 1 ) -->
-
-<!-- # plotting the first survival from state 'OUT' -->
-<!-- survplot( x = msm_model, from = 2 ) -->
-<!-- ``` -->
-
 ## Comparing expected and observed prevalences with `prevplot()`
 
 A second graphical tool which helps us in the attempt to understand the 
@@ -494,36 +475,6 @@ according to Titman and Sharples (2008). The following code addresses this reque
 gof = prevplot( x = msm_model, prev.obj = prev, exacttimes = TRUE, M = TRUE, ci = TRUE )
 ```
 
-
-<!-- ## Further details on specific arguments -->
-
-<!-- We are not going to discuss every arguments inside every function. This  -->
-<!-- paragraph serves as a guideline to better exploit **msmtools**. We have  -->
-<!-- developed the package by paying lot of attention to the consistency of the code  -->
-<!-- throughout the functions.  -->
-
-<!-- For those of you who are more confortable with objects of class `data.frame`  -->
-<!-- with no compromises, both `augment()` and `survplot()` can manage that with the  -->
-<!-- argument `convert = TRUE`.  By default, `convert` is set to `FALSE` in order to  -->
-<!-- incentivize a more efficient coding. -->
-
-<!-- Moreover, you can find the argument `verbose` anywhere in the package.  -->
-<!-- This is useful when you do not want to be informed about anything that is  -->
-<!-- happening internally with the only exception for warnings and of course errors.  -->
-<!-- If quiet is your mood, then you may want to set `verbose = FALSE`. -->
-
-<!-- A third argument which is shared between `survplot()` and `prevplot()` is  -->
-<!-- `devnew`. This is a purely graphical parameter which is set to `TRUE` by  -->
-<!-- default. It allows you to decide whether to plot on a new graphical device  -->
-<!-- called with `dev.new()` by default. If you set `devnew = FALSE`,  -->
-<!-- then the plot is overwritten according to `dev.cur()`. There exist two caveat:  -->
-<!-- the former is that `devnew` is bypassed if the argument `add = TRUE` is passed  -->
-<!-- to `survplot()`. This means that, when you want to add a new layer to an  -->
-<!-- existing plot (with `add`), it does not make any sense to let the function using  -->
-<!-- a new device. Hence, `devnew` is simply ignored. The latter is that, even you  -->
-<!-- can set `devnew = FALSE` in `prevplot()`, one should keep it as the default.  -->
-<!-- If you set it to `FALSE` and you want to plot `M` by setting `M = TRUE`, then  -->
-<!-- this plot overwrites the prevalence one. -->
 
 
 # References

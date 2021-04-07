@@ -1,4 +1,4 @@
-# msmtools 2.0.0
+# msmtools 2.0.0 (development version)
 ***
 
 **msmtools** sees several updates which come with potential breaking changes due to the dropping
@@ -33,7 +33,7 @@ v1.3 below:
   - All arguments related to the grid or time steps are gone. Everything is managed consistently
   by extracting the correct model frame from the prevalence object computed with `prevalence.msm()`.
   - For loops are gone too since plots make use of `facet_wrap()` to automatically decide how many
-  grobs to render. For now, there is no customization possibile since I expect that for most cases 
+  grobs to render. For now, there is no customization possible since I expect that for most cases 
   the number of states is limited in number anyway. There might be some flexibility added in future
   releases.
   - When `M = TRUE`, `prevplot()` uses **patchwork** to wrap the two plots in two different rows.

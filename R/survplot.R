@@ -126,25 +126,29 @@ if ( getRversion() >= "2.15.1" ) {
 #' @export
 
 survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
-                        exacttimes = TRUE, times, grid = 100L, km = FALSE,
-                        out = c( "none", "fitted", "km", "all" ),
-                        ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
-                        B = 100L,
-                        ci_km = c( "none", "plain", "log", "log-log", "logit", "arcsin") ) {
-
-
+                     exacttimes = TRUE, times, grid = 100L, km = FALSE,
+                     out = c( "none", "fitted", "km", "all" ),
+                     ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
+                     B = 100L,
+                     ci_km = c( "none", "plain", "log", "log-log", "logit", "arcsin") ) {
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
   if ( !is.numeric( from ) )
     stop( 'from must be numeric' )
-  if ( is.null( to ) )
+  if ( is.null( to ) ) {
     to = max( absorbing.msm( x ) )
-  else {
+  } else {
     if ( !is.numeric( to ) )
       stop( "to must be numeric" )
     if ( !( to %in% absorbing.msm( x ) ) )
       stop( "to must be an absorbing state" )
+  }
+  if ( !is.logical(exacttimes) ) {
+    stop( "exacttimes must be either TRUE or FALSE")
+  }
+  if ( !is.logical(km) ) {
+    stop( "km must be either TRUE or FALSE")
   }
   if ( is.null( range ) )
     rg = range( model.extract( x$data$mf, "time" ) )
@@ -161,11 +165,10 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   out = match.arg( out )
   states = rownames( x$qmodel$imatrix )
 
-
   if ( exacttimes ) {
     if ( missing( times ) ) {
       timediff = ( rg[ 2L ] - rg[ 1L ] ) / grid
-      times = seq( 1, diff( rg ), timediff )
+      times = seq( 1L, diff( rg ), timediff )
     } else {
       times = times
     }
@@ -188,6 +191,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   surv_probabilities = data.table(rowid = seq_along( times ) )
   for ( t in seq_along( times ) ) {
     # Extract the transition prob matrix and compute CI if ci != "none"
+    # I use the parlance set() for fast and efficient assignment
     P = pmatrix.msm( x, times[ t ], t1 = times[ 1L ], covariates = covariates, ci = ci, B = B )
     if ( ci != "none" ) {
       set( x = surv_probabilities, i = t,
@@ -203,6 +207,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   surv_probabilities[ , rowid := NULL ]
 
   if ( km ) {
+    # extract the necessary data to be used with survfit()
     dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
     setnames( dat, c( 'subject', 'time', 'state' ) )
     absind = which( dat$state == to )
@@ -220,6 +225,7 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
       )
       setnames( wide, c( 'subject', 'time', 'anystate' ) )
     }
+    # this computes the KM curve
     if ( exacttimes ) {
       wide[ , time_exact := time - min( time ) ]
       p_km = survfit( Surv( wide$time_exact, wide$anystate ) ~ 1, conf.type = ci_km )

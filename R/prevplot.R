@@ -97,6 +97,15 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE ) {
     stop( "x must be a msm model" )
   if ( !inherits( prev.obj, "list" ) )
     stop( "prev.obj must be a list computed by \"prevalence.msm\"" )
+  if ( !is.logical(exacttimes) ) {
+    stop( "exacttimes must be either TRUE or FALSE")
+  }
+  if ( !is.logical(M) ) {
+    stop( "M must be either TRUE or FALSE")
+  }
+  if ( !is.logical(ci) ) {
+    stop( "ci must be either TRUE or FALSE")
+  }
 
   state_names = colnames( x$qmodel$imatrix )
 
@@ -129,7 +138,6 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE ) {
       # melt the guys!
       ci_lwr_hat_long = melt( ci_lwr_hat, id.vars = "time", variable.name = "state", value.name = "lwr")
       ci_upr_hat_long = melt( ci_upr_hat, id.vars = "time", variable.name = "state", value.name = "upr")
-
     } else {
       stop("There are no CIs in \"prev.obj\"")
     }
@@ -151,7 +159,6 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE ) {
   if ( exacttimes ) {
     to_plot[ , time := time - min(time) ]
   }
-
 
   if ( M ) {
     cat("Computing Deviance M\n")
