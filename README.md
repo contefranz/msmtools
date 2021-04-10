@@ -1,7 +1,7 @@
 # Building augmented data for multi-state models: the `msmtools` package
 
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![release](https://img.shields.io/badge/dev.%20version-2.0.0-blue)](https://github.com/contefranz/msmtools)
+[![release](https://img.shields.io/badge/dev.%20version-2.0.1-blue)](https://github.com/contefranz/msmtools)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 
 ***

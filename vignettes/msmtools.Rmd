@@ -320,7 +320,7 @@ msm_model = msm( status_num ~ augmented_int,
 To run a comparison between the estimated and the empirical survival curves, we run the following
 simple code:
 
-```{r survplot_1, fig.align = 'center', fig.width = 5, fig.height = 4}
+```{r survplot_1, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
 gof1 = survplot( x = msm_model, km = TRUE )
 ```
 
@@ -337,7 +337,7 @@ If `to` is missing, `survplot()` checks what is the higher value in the
 corresponding `msm` object and grabs it. Let's now plot the survival comparison for the transition 
 (OUT - DEAD):
 
-```{r survplot_2, fig.align = 'center', fig.width = 5, fig.height = 4}
+```{r survplot_2, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
 gof2 = survplot( x = msm_model, km = TRUE, from = 2 )
 ```
 
@@ -353,7 +353,7 @@ explicitly pass a custom time sequence. This can be achieved by passing to the a
 Consider our dataset and suppose we want to compute an estimated survival only for 
 specific points in time. The following code addresses this request.
 
-```{r custom_time_seq, fig.align = 'center', fig.width = 5, fig.height = 4}
+```{r custom_time_seq, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
 time_seq = seq( 300, 800, by = 30 )
 custom_time = survplot( x = msm_model, times = time_seq )
 ```
@@ -369,7 +369,7 @@ Kaplan-Meier curve is returned. The code below shows how this works.
 <!-- `data.table`. Passing only `km = TRUE` won't return any data, even if they must  -->
 <!-- be computed anyway to plot results. -->
 
-```{r returnKM, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
+```{r returnKM, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
 km_out = survplot( x = msm_model, km = TRUE, out = "km")
 ```
 
@@ -405,7 +405,7 @@ used to compute the estimated survival as well. This can be achieve by setting
 as many rows as the elements in `times`. If `times` is missing, then `survplot()` 
 uses `grid` to know how many time points are requested. An example is shown in the next snippet.
 
-```{r returnP, collapse = TRUE}
+```{r returnP, collapse = TRUE, fig.align='center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
 fitted = survplot( x = msm_model, grid = 10, out = "fitted" )
 ```
 
@@ -430,7 +430,7 @@ Of course, you can request `survplot()` to return both the datasets by specifyin
 In this case, a named list with three elements is returned. The mechanism to access the elements is
 the same described above. The snippet below reports an example.
 
-```{r return_all, collapse = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4}
+```{r return_all, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
 # just running survplot()
 out_all = survplot( x = msm_model, km = TRUE, out = "all")
 ```
@@ -446,7 +446,7 @@ prevalences using `prevalence.msm()` function. This produces a named list which
 will be used inside `prevplot()`. For instance, running the following code 
 builds a plot of prevalences for each state of the model.
 
-```{r prev, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3}
+```{r prev, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
 # defining the times at which compute the prevalences
 t_min = min( hosp_augmented$augmented_int )
 t_max = max( hosp_augmented$augmented_int )
@@ -468,10 +468,10 @@ It is also possible to plot the following statistic:
 $$
 M = \frac{(O_{is} - E_{is})^2} {E_{is}}
 $$
-which gives an idea of the deviance from the Markov model. This is computed 
+This gives an idea of the deviance from the Markov model and is computed 
 according to Titman and Sharples (2008). The following code addresses this request.
 
-```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width = 7, fig.height = 3, warning = F}
+```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=9, fig.fullwidth = TRUE, warning = F}
 gof = prevplot( x = msm_model, prev.obj = prev, exacttimes = TRUE, M = TRUE, ci = TRUE )
 ```
 

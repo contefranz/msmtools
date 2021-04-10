@@ -1,4 +1,14 @@
-# msmtools 2.0.0 (development version)
+# msmtools 2.0.1
+***
+
+This is a maintenance update. There are no major updates worth of notice besides few tweaks in 
+the vignette which was not rendered appropriately.
+
+### Minor changes
+
+* Fixed few issues in the vignette where plots were not rendered nicely.
+
+# msmtools 2.0.0
 ***
 
 **msmtools** sees several updates which come with potential breaking changes due to the dropping
