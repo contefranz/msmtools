@@ -622,7 +622,7 @@ augment = function( data, data_key, n_events, pattern,
     final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_death ) ]
   }
   if ( inherits( eval( substitute( data$t_start ) ), 'Date' ) ) {
-    final[ , paste( substitute( t_augmented ), '_int', sep = '' ) := as.integer( get( t_augmented ) ) ]
+    final[ , paste0( t_augmented, '_int' ) := as.integer( get( t_augmented ) ) ]
     id_col = which( names( data ) == substitute( t_start ) )
     setcolorder( final, c( 1:( id_col - 1 ), ( dim( final )[ 2 ] - 1 ), dim( final )[ 2 ],
                            id_col:( dim( final )[ 2 ] - 2 ) ) )
