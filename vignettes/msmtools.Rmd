@@ -1,6 +1,6 @@
 ---
 title: "Building augmented data for multi-state models: the msmtools package"
-subtitle: "*version 2.0.0*"
+subtitle: "*version 2.1.0*"
 author: |
   | Francesco Grossetti
   | francesco.grossetti@unibocconi.it
@@ -19,8 +19,9 @@ vignette: >
 ---
 
 ```{r ninja, echo = FALSE }
-library( msmtools )
-library( ggplot2 )
+library(data.table)
+library(msmtools)
+library(ggplot2)
 ```
 
 ***

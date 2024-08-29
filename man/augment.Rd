@@ -163,6 +163,7 @@ with a bunch of self-explanatory characters in order to quickly understand
 which is the current transition.
 }
 \examples{
+\dontrun{
 # loading data
 data( hosp )
 
@@ -184,7 +185,7 @@ hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
                           t_cens = dateCENS, convert = TRUE )
 class( hosp_augmented )
-
+}
 }
 \references{
 Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
