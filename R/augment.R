@@ -208,11 +208,11 @@ augment = function( data, data_key, n_events, pattern,
     cat( '# # # # setting everything up # # # #\n' )
     cat( '-------------------------------------\n' )
   }
-  data_key = deparse1(substitute(data_key))
-  pattern = deparse1( substitute(  pattern ) )
-  t_start = deparse1( substitute(  t_start  ))
-  t_end   = deparse1( substitute(  t_end  ))
-  t_cens  = deparse1( substitute(  t_cens  ))
+  data_key = as.character(substitute(data_key))
+  pattern = as.character( substitute(  pattern ) )
+  t_start = as.character( substitute(  t_start  ))
+  t_end   = as.character( substitute(  t_end  ))
+  t_cens  = as.character( substitute(  t_cens  ))
 
   if ( class( data[[t_start]] ) != class( data[[t_end]] ) )  {
     stop( 'the starting and the ending event times must be of the same class' )
@@ -221,7 +221,7 @@ augment = function( data, data_key, n_events, pattern,
   }
   setkey( data, NULL )
   if ( !missing( n_events ) ) {
-    n_events = deparse1(substitute(n_events))
+    n_events = as.character(substitute(n_events))
     cols = c(data_key, n_events)
     if ( !length( cols ) )
       cols = colnames( data )
@@ -279,7 +279,7 @@ augment = function( data, data_key, n_events, pattern,
     setkeyv( data, cols )
   }
   if ( !missing( t_death ) ) {
-    t_death = deparse1( substitute( t_death ) )
+    t_death = as.character( substitute( t_death ) )
     if ( class( data[[t_cens]] ) != class( data[[t_death]]  ) ) {
       stop( 'the censoring and the death event times must be of the same class' )
     }
@@ -305,7 +305,7 @@ augment = function( data, data_key, n_events, pattern,
     }
   }
   if ( !missing( more_status ) ) {
-    more_status = deparse1( substitute( more_status )  )
+    more_status = as.character( substitute( more_status )  )
     test = apply( data[ , more_status, with = FALSE ], 2,
                   function( x ) any( sum( is.na( x ) ) > 0 ) )
     if ( any ( test ) ) {
@@ -609,7 +609,7 @@ augment = function( data, data_key, n_events, pattern,
   if ( missing( t_augmented ) ) {
     t_augmented = 'augmented'
   } else {
-    t_augmented = deparse1( substitute( t_augmented ) )
+    t_augmented = as.character( substitute( t_augmented ) )
   }
   if ( verbose ) {
     message( 'adding variable ',  t_augmented , ' as new time variable' )
