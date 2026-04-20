@@ -328,8 +328,7 @@ augment = function( data, data_key, n_events, pattern,
       cat( 'detected only 2 values\n' )
       cat( '---\n' )
     }
-    if ( class( data[[ pattern ]] ) == 'integer' ||
-         class( data[[ pattern ]] ) == 'numeric' ) {
+    if ( inherits( data[[ pattern ]], c( 'integer', 'numeric' ) ) ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
         match3 = data[ data[ get( pattern ) == 1,
@@ -340,7 +339,7 @@ augment = function( data, data_key, n_events, pattern,
                              .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1
                        ][ get( t_end ) != get( t_death ) ]
       }
-    } else if ( class( data[[ pattern ]] ) == 'factor' ) {
+    } else if ( inherits( data[[ pattern ]], 'factor' ) ) {
       match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
@@ -352,7 +351,7 @@ augment = function( data, data_key, n_events, pattern,
                              .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1
                        ][ get( t_end ) != get( t_death ) ]
       }
-    } else if ( class( data[[ pattern ]] ) == 'character' ) {
+    } else if ( inherits( data[[ pattern ]], 'character' ) ) {
       match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
         match3 = data[ data[ get( pattern ) == values[ 2 ],
@@ -369,16 +368,15 @@ augment = function( data, data_key, n_events, pattern,
       cat( 'Ok, detected 3 values\n' )
       cat( '---\n' )
     }
-    if ( class( data[[ pattern ]] ) == 'integer' ||
-         class( data[[ pattern ]] ) == 'numeric' ) {
+    if ( inherits( data[[ pattern ]], c( 'integer', 'numeric' ) ) ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ get( pattern ) == 2, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
-    } else if ( class( data[[ pattern ]] ) == 'factor' ) {
+    } else if ( inherits( data[[ pattern ]], 'factor' ) ) {
       match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ as.integer( get( pattern ) ) - 1 == 2,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
-    } else if ( class( data[[ pattern ]] ) == 'character' ) {
+    } else if ( inherits( data[[ pattern ]], 'character' ) ) {
       match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ get( pattern ) == values[ 3 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
     }

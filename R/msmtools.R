@@ -9,7 +9,5 @@
 #' \code{msmtools} comes with 4 functions: \code{augment}, \code{polish},
 #' \code{prevplot}, and \code{survplot}.
 #'
-#' @docType package
-#' @name msmtools
-NULL
-#> NULL
+#' @keywords internal
+"_PACKAGE"
