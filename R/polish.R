@@ -112,8 +112,8 @@ polish = function( data, data_key, pattern, time,
   }
 
   data[ , index := sequence( .N ) ]
-  n_patients = uniqueN( eval( substitute( data$cols ) ) )
-  values = sort( eval( substitute( unique( data$pattern ) ) ) )
+  n_patients = uniqueN( data[[ cols[[ 1 ]] ]] )
+  values = sort( unique( data[[ pattern ]] ) )
   if ( length( values ) < 2 ) {
     stop( 'unit identification label must be an integer,
           a factor or a character with at least 2 elements' )
@@ -126,7 +126,7 @@ polish = function( data, data_key, pattern, time,
   alive.no.last = alive[ !alive.last ]
 
   if ( verbose ) {
-    message( 'checking ', substitute( pattern ), ' and defining patterns' )
+    message( 'checking ', pattern, ' and defining patterns' )
   }
   if ( length( values ) == 2 ) {
     if ( verbose ) {
@@ -147,23 +147,22 @@ polish = function( data, data_key, pattern, time,
   row.duplicated = duplicated( data.no.last.event,
                                by = c( eval( cols ), eval( time ) ) )
   duplicated = data.no.last.event[ row.duplicated == TRUE ]
-  n_duplicated = uniqueN( eval( substitute( duplicated$cols ) ) )
+  n_duplicated = uniqueN( duplicated[[ cols[[ 1 ]] ]] )
   setkeyv( duplicated, cols )
 
   if ( n_duplicated == 0 ) {
     if ( verbose ) {
-      cat( 'Hurray! No duplicated occurrences have been found in ',
-           substitute( data ), ' according to variable ',
-           substitute( time ), "\n", sep = "" )
+      cat( 'Hurray! No duplicated occurrences have been found according to variable ',
+           time, "\n", sep = "" )
     }
   } else {
     if ( verbose ) {
       message( 'Spotted ', n_duplicated,
                ' patients with at least a duplicated occurrence according to variable ',
-               substitute( time ) )
+               time )
     }
     data.clean = data[ !duplicated ]
-    n_patients.to.keep = uniqueN( eval( substitute( data.clean$cols ) ) )
+    n_patients.to.keep = uniqueN( data.clean[[ cols[[ 1 ]] ]] )
     if ( verbose ) {
       cat( n_patients.to.keep, ' patients have been reained corresponding to ',
            round( 100 * ( n_patients.to.keep / n_patients ), 2 ), '%\n', sep = '' )

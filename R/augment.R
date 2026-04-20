@@ -213,9 +213,9 @@ augment = function( data, data_key, n_events, pattern,
   t_end   = as.character( substitute( list( t_end ) )[ -1L ] )
   t_cens  = as.character( substitute( list( t_cens ) )[ -1L ] )
 
-  if ( eval( substitute( class( data$t_start ) ) ) != eval( substitute( class( data$t_end ) ) ) ) {
+  if ( class( data[[ t_start ]] ) != class( data[[ t_end ]] ) ) {
     stop( 'the starting and the ending event times must be of the same class' )
-  } else if ( eval( substitute( class( data$t_start ) ) ) != eval( substitute( class( data$t_cens ) ) ) ) {
+  } else if ( class( data[[ t_start ]] ) != class( data[[ t_cens ]] ) ) {
     stop( 'the starting and the censoring event times must be of the same class' )
   }
   setkey( data, NULL )
@@ -223,7 +223,7 @@ augment = function( data, data_key, n_events, pattern,
     cols = as.character( substitute( list( data_key, n_events ) )[ -1L ] )
     if ( !length( cols ) )
       cols = colnames( data )
-    if ( !inherits( eval( substitute( data$n_events ) ), "integer" ) ) {
+    if ( !inherits( data[[ cols[[ 2 ]] ]], "integer" ) ) {
       stop( 'n_events must be an integer' )
     }
     if ( verbose ) {
@@ -234,8 +234,8 @@ augment = function( data, data_key, n_events, pattern,
     setkeyv( data, c( cols[[ 1 ]], t_start ) )
     if ( all( ev$ev ) == FALSE ) {
       if ( verbose ) {
-        message( substitute( n_events ), ' is not monotonic increasing within ',
-                 substitute( data_key ) )
+        message( cols[[ 2 ]], ' is not monotonic increasing within ',
+                 cols[[ 1 ]] )
         message( 'the corresponding subjects are:' )
         message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
       }
@@ -262,8 +262,8 @@ augment = function( data, data_key, n_events, pattern,
     setkeyv( data, c( cols[[ 1 ]], t_start ) )
     if ( all( ev$ev ) == FALSE ) {
       if ( verbose ) {
-        message( substitute( n_events ), ' is not monotonic increasing within ',
-                 substitute( data_key ) )
+        message( cols[[ 2 ]], ' is not monotonic increasing within ',
+                 cols[[ 1 ]] )
         message( 'the corresponding subjects are:' )
         message( paste( ev[ ev == FALSE ][ , get( cols[[ 1 ]] ) ], collapse = '; ' ) )
       }
@@ -278,7 +278,7 @@ augment = function( data, data_key, n_events, pattern,
   }
   if ( !missing( t_death ) ) {
     t_death = as.character( substitute( list( t_death ) )[ -1L ] )
-    if ( eval( substitute( class( data$t_cens ) ) ) != eval( substitute( class( data$t_death ) ) ) ) {
+    if ( class( data[[ t_cens ]] ) != class( data[[ t_death ]] ) ) {
       stop( 'the censoring and the death event times must be of the same class' )
     }
   }
@@ -315,10 +315,10 @@ augment = function( data, data_key, n_events, pattern,
       stop( 'Please, fix the issues and relaunch augment()' )
     }
   }
-  values = sort( eval( substitute( unique( data$pattern ) ) ) )
+  values = sort( unique( data[[ pattern ]] ) )
 
   if ( verbose ) {
-    message( 'checking ', substitute( pattern ), ' and defining patterns' )
+    message( 'checking ', pattern, ' and defining patterns' )
   }
   if ( length( values ) < 2 ) {
     stop( 'unit identification label must be an integer, a factor or a character
@@ -328,8 +328,8 @@ augment = function( data, data_key, n_events, pattern,
       cat( 'detected only 2 values\n' )
       cat( '---\n' )
     }
-    if ( class( eval( substitute( data$pattern ) ) ) == 'integer' ||
-         class( eval( substitute( data$pattern ) ) ) == 'numeric' ) {
+    if ( class( data[[ pattern ]] ) == 'integer' ||
+         class( data[[ pattern ]] ) == 'numeric' ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
         match3 = data[ data[ get( pattern ) == 1,
@@ -340,7 +340,7 @@ augment = function( data, data_key, n_events, pattern,
                              .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1
                        ][ get( t_end ) != get( t_death ) ]
       }
-    } else if ( class( eval( substitute( data$pattern ) ) ) == 'factor' ) {
+    } else if ( class( data[[ pattern ]] ) == 'factor' ) {
       match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
@@ -352,7 +352,7 @@ augment = function( data, data_key, n_events, pattern,
                              .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1
                        ][ get( t_end ) != get( t_death ) ]
       }
-    } else if ( class( eval( substitute( data$pattern ) ) ) == 'character' ) {
+    } else if ( class( data[[ pattern ]] ) == 'character' ) {
       match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       if ( missing( t_death ) ) {
         match3 = data[ data[ get( pattern ) == values[ 2 ],
@@ -369,16 +369,16 @@ augment = function( data, data_key, n_events, pattern,
       cat( 'Ok, detected 3 values\n' )
       cat( '---\n' )
     }
-    if ( class( eval( substitute( data$pattern ) ) ) == 'integer' ||
-         class( eval( substitute( data$pattern ) ) ) == 'numeric' ) {
+    if ( class( data[[ pattern ]] ) == 'integer' ||
+         class( data[[ pattern ]] ) == 'numeric' ) {
       match1 = data[ data[ get( pattern ) == 0, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ get( pattern ) == 2, .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
-    } else if ( class( eval( substitute( data$pattern ) ) ) == 'factor' ) {
+    } else if ( class( data[[ pattern ]] ) == 'factor' ) {
       match1 = data[ data[ as.integer( get( pattern ) ) - 1 == 0,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ as.integer( get( pattern ) ) - 1 == 2,
                            .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
-    } else if ( class( eval( substitute( data$pattern ) ) ) == 'character' ) {
+    } else if ( class( data[[ pattern ]] ) == 'character' ) {
       match1 = data[ data[ get( pattern ) == values[ 1 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
       match3 = data[ data[ get( pattern ) == values[ 3 ], .I[ .N ], by = eval( cols[[ 1 ]] ) ]$V1 ]
     }
@@ -454,8 +454,8 @@ augment = function( data, data_key, n_events, pattern,
     }
     dinrow  = nrow( din )
     doutrow = nrow( dout )
-    temp1 = din[ , .SD, .SDcols = substitute( cols )[[ 1 ]] ]
-    temp2 = dout[ , .SD, .SDcols = substitute( cols )[[ 1 ]] ]
+    temp1 = din[ , .SD, .SDcols = cols[[ 1 ]] ]
+    temp2 = dout[ , .SD, .SDcols = cols[[ 1 ]] ]
     setkeyv( temp1, cols[[ 1 ]] )
     setkeyv( temp2, cols[[ 1 ]] )
     setkeyv( final, cols[[ 1 ]] )
@@ -612,45 +612,45 @@ augment = function( data, data_key, n_events, pattern,
     t_augmented = as.character( substitute( t_augmented ) )
   }
   if ( verbose ) {
-    message( 'adding variable ', substitute( t_augmented ), ' as new time variable' )
+    message( 'adding variable ', t_augmented, ' as new time variable' )
   }
-  final[ status == state[[ 1 ]], substitute( t_augmented ) := get( t_start ) ]
-  final[ status == state[[ 2 ]], substitute( t_augmented ) := get( t_end ) ]
+  final[ status == state[[ 1 ]], ( t_augmented ) := get( t_start ) ]
+  final[ status == state[[ 2 ]], ( t_augmented ) := get( t_end ) ]
   if ( missing( t_death ) ) {
-    final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_cens ) ]
+    final[ status == state[[ 3 ]], ( t_augmented ) := get( t_cens ) ]
   } else {
-    final[ status == state[[ 3 ]], substitute( t_augmented ) := get( t_death ) ]
+    final[ status == state[[ 3 ]], ( t_augmented ) := get( t_death ) ]
   }
-  if ( inherits( eval( substitute( data$t_start ) ), 'Date' ) ) {
+  if ( inherits( data[[ t_start ]], 'Date' ) ) {
     final[ , paste0( t_augmented, '_int' ) := as.integer( get( t_augmented ) ) ]
-    id_col = which( names( data ) == substitute( t_start ) )
+    id_col = which( names( data ) == t_start )
     setcolorder( final, c( 1:( id_col - 1 ), ( dim( final )[ 2 ] - 1 ), dim( final )[ 2 ],
                            id_col:( dim( final )[ 2 ] - 2 ) ) )
     if ( verbose ) {
-      cat( 'variables \"', substitute( t_augmented ), '\" and \"',
-           paste( substitute( t_augmented ), '_int', sep = '' ),
+      cat( 'variables \"', t_augmented, '\" and \"',
+           paste0( t_augmented, '_int' ),
            '\" successfully added and repositioned\n', sep = '' )
       cat( '---\n' )
     }
-  } else if ( inherits( eval( substitute( data$t_start ) ), 'difftime' ) ) {
-    final[ , paste( substitute( t_augmented ), '_num', sep = '' ) := as.numeric( get( t_augmented ) ) ]
-    id_col = which( names( data ) == substitute( t_start ) )
+  } else if ( inherits( data[[ t_start ]], 'difftime' ) ) {
+    final[ , paste0( t_augmented, '_num' ) := as.numeric( get( t_augmented ) ) ]
+    id_col = which( names( data ) == t_start )
     setcolorder( final, c( 1:( id_col - 1 ), ( dim( final )[ 2 ] - 1 ), dim( final )[ 2 ],
                            id_col:( dim( final )[ 2 ] - 2 ) ) )
     if ( verbose ) {
-      cat( 'variables \"', substitute( t_augmented ), '\" and \"',
-           paste( substitute( t_augmented ), '_num', sep = '' ),
+      cat( 'variables \"', t_augmented, '\" and \"',
+           paste0( t_augmented, '_num' ),
            '\" successfully added and repositioned\n', sep = '' )
       cat( '---\n' )
     }
-  } else if ( inherits( eval( substitute( data$t_start ) ), 'integer' ) ||
-              inherits( eval( substitute( data$t_start ) ), 'numeric' ) ) {
+  } else if ( inherits( data[[ t_start ]], 'integer' ) ||
+              inherits( data[[ t_start ]], 'numeric' ) ) {
 
-    id_col = which( names( data ) == substitute( t_start ) )
+    id_col = which( names( data ) == t_start )
     setcolorder( final, c( 1:( id_col - 1 ), dim( final )[ 2 ],
                            id_col:( dim( final )[ 2 ] - 1 ) ) )
     if ( verbose ) {
-      cat( 'variable \"', substitute( t_augmented ),
+      cat( 'variable \"', t_augmented,
            '\" successfully added and repositioned\n', sep = '' )
       cat( '---\n' )
     }
@@ -659,12 +659,12 @@ augment = function( data, data_key, n_events, pattern,
   if ( !missing( more_status ) ) {
     if ( verbose ) {
       message( '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' )
-      message( 'detected a more complex status given by variable ', substitute( more_status ),
+      message( 'detected a more complex status given by variable ', more_status,
                '. Processing...')
       message( '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' )
       cat( '---\n' )
     }
-    values = eval( substitute( unique( data$more_status ) ) )
+    values = unique( data[[ more_status ]] )
     if ( verbose ) {
       message( 'adding expanded status flag' )
     }
