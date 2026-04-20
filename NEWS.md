@@ -1,3 +1,27 @@
+# msmtools 2.0.2
+***
+
+This is a maintenance release addressing compatibility issues that caused the package to be
+removed from CRAN. No user-facing behaviour has changed.
+
+### Bug fixes
+
+* Removed all uses of `substitute()` on the left-hand side of `:=` in **data.table** operations
+  inside `augment()` and `polish()`. This pattern was deprecated by **data.table** and produced
+  errors on current CRAN versions. Column assignment now uses the recommended `(var) :=` idiom.
+
+* Replaced every remaining `eval(substitute(data$var))` and `eval(substitute(class(data$var)))`
+  construct with direct `data[[var]]` and `class(data[[var]])` equivalents across `augment()` and
+  `polish()`. The previous forms were fragile and harder to reason about.
+
+* Replaced `class(...) == "type"` comparisons with `inherits()` throughout `augment()`, as
+  required by current `R CMD CHECK`.
+
+### Documentation
+
+* Replaced the deprecated `@docType "package"` / `NULL` pattern in `msmtools.R` with the
+  current `"_PACKAGE"` sentinel required by **roxygen2** >= 7.2.
+
 # msmtools 2.0.1
 ***
 
