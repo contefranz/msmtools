@@ -1,5 +1,5 @@
 if ( getRversion() >= "2.15.1" ) {
-  utils::globalVariables( c( "index" ) )
+  utils::globalVariables( c( ":=", ".I", ".N", "index" ) )
 }
 #' Remove observations with different states occurring at the same time
 #'
@@ -36,7 +36,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' hosp_aug_clean = polish( data = hosp_aug, data_key = subj, pattern = label_3 )
 #'
 #' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
-#' @import data.table
+#' @importFrom data.table setDT setDF setkey setkeyv rbindlist uniqueN
 #' @export
 
 polish = function( data, data_key, pattern, time,

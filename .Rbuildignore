@@ -4,3 +4,9 @@
 ^\.travis\.yml$
 ^appveyor\.yml$
 ^CRAN-RELEASE$
+^\.github$
+^CONTRIBUTING\.md$
+^Rplots\.pdf$
+^.*\.Rcheck$
+^coverage\.xml$
+^cobertura\.xml$

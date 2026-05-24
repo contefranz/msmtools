@@ -1,7 +1,7 @@
 if ( getRversion() >= "2.15.1" ) {
   utils::globalVariables( c( "status", "status_num", "n_status",
                              "status_exp", "status_exp_num", "n_status_exp",
-                             ".", "V2" ) )
+                             ":=", ".", ".I", ".N", ".SD", "N", "V2" ) )
 }
 #' A fast and general method for building augmented data
 #'
@@ -162,6 +162,7 @@ if ( getRversion() >= "2.15.1" ) {
 #'
 #' @seealso \code{\link[data.table]{data.table}} \code{\link[data.table]{setkey}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
+#' @importFrom data.table setDT setDF setkey setkeyv rbindlist uniqueN setcolorder
 #' @export
 
 augment = function( data, data_key, n_events, pattern,

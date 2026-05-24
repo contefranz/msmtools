@@ -1,61 +1,86 @@
 # Building augmented data for multi-state models: the `msmtools` package
 
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![release](https://img.shields.io/badge/dev.%20version-2.0.4-blue)](https://github.com/contefranz/msmtools)
+[![release](https://img.shields.io/badge/dev.%20version-2.0.7-blue)](https://github.com/contefranz/msmtools)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 
 ***
 
-**msmtools** introduces a fast and general method for restructuring classical 
-longitudinal datasets into *augmented* ones. The reason for this is to 
-facilitate the modeling of longitudinal data under a multi-state framework 
-using the **msm** package.
+**msmtools** restructures longitudinal data into augmented transition data for
+multi-state models fitted with **msm**. The package focuses on the common
+workflow where each subject has repeated observations with exact start and end
+times, and the analyst needs transition-level rows, numeric state indicators,
+and diagnostic plots.
+
+From version 2.0.4, **msmtools** targets a modern CRAN baseline: R 4.1 or newer
+and current releases of **data.table**, **msm**, **survival**, **ggplot2**,
+**patchwork**, and **scales**.
 
 ## Installation
 
-``` r
-# Install the released version from CRAN:
+```r
 install.packages("msmtools")
 
-# Install the development version from GitHub:
-devtools::install_github("contefranz/msmtools")
+# development version
+remotes::install_github("contefranz/msmtools")
 ```
 
-## Overview
+## Core Workflow
 
-**msmtools** comes with 4 functions: 
+```r
+library(msmtools)
+library(data.table)
 
-* `augment()`: the main function of the package. This is the workhorse which 
-takes care of the data reshaping. It is very efficient and fast so highly 
-dimensional datasets can be processed with ease;
+data(hosp)
 
-* `polish()`: it helps in find and remove those transition which occur at the 
-same time but lead to different states within a given subject;
+hosp_augmented <- augment(
+  data = copy(hosp),
+  data_key = subj,
+  n_events = adm_number,
+  pattern = label_3,
+  t_start = dateIN,
+  t_end = dateOUT,
+  t_cens = dateCENS,
+  verbose = FALSE
+)
 
-* `prevplot()`: this is a plotting function which mimics the usage of `msm()` 
-function `plot.prevalence.msm()`, but with more things. Once you ran a 
-multi-state model, use this function to plot a comparison between observed and 
-expected prevalences;
+hosp_augmented[
+  1:6,
+  .(subj, adm_number, label_3, augmented, augmented_int, status, status_num)
+]
+```
 
-* `survplot()`: the aims of this function are double. You can use `survplot()` 
-as a plotting tool for comparing the empirical and the fitted survival curves. 
-Or you can use it to build and get the datasets used for the plot. 
-The function is based on **msm** `plot.survfit.msm()`, but does more things and 
-it is considerably faster.
+`augment()` returns a `data.table` by default. Set `convert = TRUE` to return a
+plain `data.frame`.
 
-For more information about **msmtools**, please check out the vignette with 
-`vignette( "msmtools" )`.
+## Functions
+
+* `augment()` builds the augmented transition data used by multi-state models.
+* `polish()` removes subjects with conflicting transitions at the same time.
+* `survplot()` compares fitted and empirical survival curves from an `msm`
+  model.
+* `prevplot()` compares observed and expected prevalences from an `msm` model.
+
+## Duplicate Transition Cleanup
+
+```r
+hosp_clean <- polish(
+  data = copy(hosp_augmented),
+  data_key = subj,
+  pattern = label_3,
+  verbose = FALSE
+)
+```
+
+## Diagnostic Plots
+
+`survplot()` and `prevplot()` operate on fitted **msm** objects. See the vignette
+for a compact end-to-end example that augments the bundled data, fits a small
+model, and builds both diagnostic plots.
+
+```r
+vignette("msmtools")
+```
 
 Bugs and issues can be reported at
 [https://github.com/contefranz/msmtools/issues](https://github.com/contefranz/msmtools/issues).
-
-## Breaking changes from version 2.0.0
-
-**msmtools** has received a lot of improvements in the plotting functions. In particular, from
-version 2.0.0 both `survplot()` and `prevplot()` support [**ggplot2**](https://ggplot2.tidyverse.org). 
-This inevitably introduces
-several breaking changes. Overall, both functions have been greatly simplified, but I encourage
-to go over each function's documentation and the vignette to get a correct understanding on how they
-work.
-
-***

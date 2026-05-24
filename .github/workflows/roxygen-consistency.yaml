@@ -1,0 +1,49 @@
+name: Roxygen consistency
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  roxygen-consistency:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::roxygen2
+          needs: check
+
+      - name: Check roxygen2 version
+        run: |
+          version <- packageVersion("roxygen2")
+          if (version < "8.0.0") {
+            stop("roxygen2 >= 8.0.0 is required; found ", version, call. = FALSE)
+          }
+        shell: Rscript {0}
+
+      - name: Regenerate documentation
+        run: roxygen2::roxygenise()
+        shell: Rscript {0}
+
+      - name: Check generated documentation is current
+        run: |
+          git diff -- NAMESPACE man
+          git diff --quiet -- NAMESPACE man
+          test -z "$(git status --short -- NAMESPACE man)"

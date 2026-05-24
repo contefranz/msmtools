@@ -1,5 +1,5 @@
 if ( getRversion() >= "2.15.1" ) {
-  utils::globalVariables( c( "obs", "hat" ) )
+  utils::globalVariables( c( ":=", "obs", "hat" ) )
 }
 #' Plot observed and expected prevalences for a multi-state model
 #'
@@ -46,8 +46,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
 #' URL \url{https://www.jstatsoft.org/v38/i08/}.
 #' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
-#' @examples
-#' \dontrun{
+#' @examplesIf interactive()
 #' data( hosp )
 #'
 #' # augmenting the data
@@ -82,7 +81,6 @@ if ( getRversion() >= "2.15.1" ) {
 #'
 #' # and plotting them using prevplot()
 #' gof = prevplot( x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE )
-#' }
 #'
 #' @importFrom data.table as.data.table setnames setcolorder melt
 #' @importFrom stats model.extract time
@@ -210,5 +208,3 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE ) {
     return( p )
   }
 }
-
-
