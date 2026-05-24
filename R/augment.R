@@ -198,7 +198,7 @@ augment = function( data, data_key, n_events, pattern,
     stop( 'a censoring time must be provided' )
   }
   if ( missing( t_death ) ) {
-    warning( 'no t_death has been passed. Assuming that ', substitute( t_cens ),
+    warning( 'no t_death has been passed. Assuming that ', deparse( substitute( t_cens ) ),
              ' contains both censoring and death times' )
   }
   if ( inherits( data, 'data.frame' ) ) {
@@ -209,10 +209,10 @@ augment = function( data, data_key, n_events, pattern,
     cat( '# # # # setting everything up # # # #\n' )
     cat( '-------------------------------------\n' )
   }
-  pattern = as.character( substitute( list( pattern ) )[ -1L ] )
-  t_start = as.character( substitute( list( t_start ) )[ -1L ] )
-  t_end   = as.character( substitute( list( t_end ) )[ -1L ] )
-  t_cens  = as.character( substitute( list( t_cens ) )[ -1L ] )
+  pattern = as.character( substitute( pattern ) )
+  t_start = as.character( substitute( t_start ) )
+  t_end   = as.character( substitute( t_end ) )
+  t_cens  = as.character( substitute( t_cens ) )
 
   if ( class( data[[ t_start ]] ) != class( data[[ t_end ]] ) ) {
     stop( 'the starting and the ending event times must be of the same class' )
@@ -221,7 +221,7 @@ augment = function( data, data_key, n_events, pattern,
   }
   setkey( data, NULL )
   if ( !missing( n_events ) ) {
-    cols = as.character( substitute( list( data_key, n_events ) )[ -1L ] )
+    cols = c( as.character( substitute( data_key ) ), as.character( substitute( n_events ) ) )
     if ( !length( cols ) )
       cols = colnames( data )
     if ( !inherits( data[[ cols[[ 2 ]] ]], "integer" ) ) {
@@ -249,7 +249,7 @@ augment = function( data, data_key, n_events, pattern,
     }
     setkeyv( data, cols )
   } else {
-    cols = as.character( substitute( list( data_key ) )[ -1L ] )
+    cols = as.character( substitute( data_key ) )
     if ( !length( cols ) )
       cols = colnames( data )
     setkeyv( data, c( cols, t_start ) )
@@ -278,7 +278,7 @@ augment = function( data, data_key, n_events, pattern,
     setkeyv( data, cols )
   }
   if ( !missing( t_death ) ) {
-    t_death = as.character( substitute( list( t_death ) )[ -1L ] )
+    t_death = as.character( substitute( t_death ) )
     if ( class( data[[ t_cens ]] ) != class( data[[ t_death ]] ) ) {
       stop( 'the censoring and the death event times must be of the same class' )
     }
@@ -304,7 +304,7 @@ augment = function( data, data_key, n_events, pattern,
     }
   }
   if ( !missing( more_status ) ) {
-    more_status = as.character( substitute( list( more_status )  )[ -1L ] )
+    more_status = as.character( substitute( more_status ) )
     test = apply( data[ , more_status, with = FALSE ], 2,
                   function( x ) any( sum( is.na( x ) ) > 0 ) )
     if ( any ( test ) ) {

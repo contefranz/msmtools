@@ -66,12 +66,12 @@ polish = function( data, data_key, pattern, time,
   }
 
   setkey( data, NULL )
-  cols = as.character( substitute( list( data_key ) )[ -1L ] )
+  cols = as.character( substitute( data_key ) )
   if ( !length( cols ) ) {
     cols = colnames( data )
   }
   setkeyv( data, cols )
-  pattern = as.character( substitute( list( pattern ) )[ -1L ] )
+  pattern = as.character( substitute( pattern ) )
   if ( missing( time ) ) {
     if ( "augmented_int" %in% names( data ) ) {
       if ( verbose ) {
@@ -87,7 +87,7 @@ polish = function( data, data_key, pattern, time,
       time = 'augmented_num'
     }
   } else {
-    time = as.character( substitute( list( time ) )[ -1L ] )
+    time = as.character( substitute( time ) )
   }
 
   if ( check_NA == TRUE ) {
