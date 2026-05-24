@@ -1,3 +1,38 @@
+# msmtools 2.0.3
+
+### Release summary
+
+This is a CRAN resubmission after msmtools was archived on 2024-09-27 because
+compatibility issues were not corrected despite reminders. The release addresses
+deprecated data.table assignment patterns and does not introduce user-facing
+behaviour changes.
+
+### Package development
+
+* macOS Tahoe 26.5 with R 4.5.1
+
+### R CMD build
+
+* local macOS build with R CMD build
+* vignette build completed with pandoc discovered through Quarto
+* win-builder submission for R-release completed on 2026-05-24; results are
+  pending by e-mail
+* rhub submission was not completed locally because no GitHub personal access
+  token was available to `rhub::rhub_check()`
+
+### R CMD check results
+
+* Local `R CMD check --no-manual --as-cran` completed with no ERRORs and no
+  WARNINGs.
+* Local check reported NOTEs caused by the restricted local environment:
+  unavailable CRAN/Bioconductor/GitHub/ORCID URL checks, inability to verify the
+  current time, and pandoc not being visible inside one subprocess for top-level
+  README/NEWS checks.
+* Re-run checks in a networked CRAN-like environment before submission and
+  replace this section with the final results.
+
+***
+
 # msmtools 2.0.1
 
 ### Release summary
@@ -130,4 +165,3 @@ There was 1 NOTE:
 Maintainer: 'Francesco Grossetti <francesco.grossetti@polimi.it>'
 
 New submission
-
