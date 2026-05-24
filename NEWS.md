@@ -1,3 +1,51 @@
+# msmtools 2.0.7
+***
+
+### DOCUMENTATION
+
+* Refreshed the README and vignette around the current 2.x workflow and modern
+  dependency baseline.
+
+* Replaced heavier multi-state model examples with guarded examples so CRAN
+  checks do not execute model-fitting workflows.
+
+### CHANGES
+
+* Standardized recent NEWS headings around explicit maintenance categories.
+
+# msmtools 2.0.6
+***
+
+### TESTS
+
+* Reworked the existing tests so expected warnings are asserted inside
+  `test_that()` blocks instead of being emitted during test setup.
+
+* Added regression coverage for `augment()` across two-state and three-state
+  patterns, date, numeric, and difftime time columns, supplied `t_death`,
+  expanded statuses, conversion behavior, and generated augmented time columns.
+
+* Added regression coverage for `polish()` duplicate-removal and no-duplicate
+  behavior.
+
+# msmtools 2.0.5
+***
+
+### CI
+
+* Added GitHub Actions for R CMD check across Windows, macOS, and Ubuntu, plus
+  roxygen consistency and informational coverage workflows.
+
+### CHANGES
+
+* Replaced broad **data.table** namespace imports with explicit imports for the
+  functions used by **msmtools**.
+
+### DOCUMENTATION
+
+* Added contributor notes describing the local test, documentation, coverage,
+  and package-check workflow.
+
 # msmtools 2.0.4
 ***
 

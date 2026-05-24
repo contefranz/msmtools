@@ -106,7 +106,7 @@ it by \code{grid}. The higher it is, the finer the grid will be so that computin
 the fitted survival will take longer, but will be more precise.
 }
 \examples{
-\dontrun{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 data( hosp )
 
 # augmenting the data
@@ -134,11 +134,9 @@ msm_model = msm( status_num ~ augmented_int, subject = subj,
 theplot = survplot( x = msm_model, km = TRUE )
 
 # plotting the fitted and empirical survival from state = 2 and
-and returning both the fitted and the empirical curve
+# returning both the fitted and the empirical curve
 out_all = survplot( msm_model, from = 2, km = TRUE, out = "all" )
-
-}
-
+\dontshow{\}) # examplesIf}
 }
 \references{
 Titman, A. and Sharples, L.D. (2010). Model diagnostics for

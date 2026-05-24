@@ -1,6 +1,6 @@
 if ( getRversion() >= "2.15.1" ) {
   utils::globalVariables( c( "state", "status", "subject", "time_exact", ".",
-                             "surv", "lwr", "upr") )
+                             ":=", "rowid", "surv", "lwr", "upr") )
 }
 #' Plot and get survival data from a multi-state model
 #'
@@ -69,8 +69,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' the estimated survival data with \code{$fitted}. If \code{out = "all"}, the plot, the Kaplan-Meier
 #' and the estimated curve are returned.
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf interactive()
 #' data( hosp )
 #'
 #' # augmenting the data
@@ -98,10 +97,8 @@ if ( getRversion() >= "2.15.1" ) {
 #' theplot = survplot( x = msm_model, km = TRUE )
 #'
 #' # plotting the fitted and empirical survival from state = 2 and
-#' and returning both the fitted and the empirical curve
+#' # returning both the fitted and the empirical curve
 #' out_all = survplot( msm_model, from = 2, km = TRUE, out = "all" )
-#'
-#' }
 #'
 #' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for
 #' multi-state models, \emph{Statistical Methods in Medical Research}, 19,
@@ -117,7 +114,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' @seealso \code{\link[msm]{plot.survfit.msm}} \code{\link[msm]{msm}},
 #' \code{\link[msm]{pmatrix.msm}}, \code{\link[data.table]{setDF}}
 #' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
-#' @importFrom data.table data.table set setnames setorder
+#' @importFrom data.table data.table set setcolorder setnames setorder
 #' @importFrom ggplot2 ggplot aes scale_y_continuous scale_color_manual geom_line theme xlab ylab theme_bw ggtitle
 #' @importFrom msm absorbing.msm
 #' @importFrom msm pmatrix.msm

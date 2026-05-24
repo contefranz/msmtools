@@ -9,3 +9,7 @@ inst/doc
 vignettes/msmtools.R
 vignettes/msmtools.html
 /*.tar.gz
+/*.Rcheck
+Rplots.pdf
+coverage.xml
+cobertura.xml

@@ -1,482 +1,154 @@
 ---
-title: "Building augmented data for multi-state models: the msmtools package"
-subtitle: "*version 2.0.0*"
+title: "Building augmented data for multi-state models"
+subtitle: "The msmtools workflow"
 author: |
   | Francesco Grossetti
   | francesco.grossetti@unibocconi.it
 date: "`r Sys.Date()`"
-fontsize: 12pt
-output: 
+output:
   rmarkdown::html_vignette:
     number_sections: yes
     toc: yes
-    toc_depth: 4
+    toc_depth: 3
 bibliography: references.bib
 vignette: >
-  %\VignetteIndexEntry{Building augmented data for multi-state models: the msmtools package}
+  %\VignetteIndexEntry{Building augmented data for multi-state models}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown_notangle}
 ---
 
-```{r ninja, echo = FALSE }
-library( msmtools )
-library( ggplot2 )
+```{r setup, message = FALSE}
+library(msmtools)
+library(data.table)
+library(msm)
 ```
 
-***
-# Introduction
+# Overview
 
-Package **msmtools** is an `R` package which has been conceived to facilitate 
-the workflow with longitudinal datasets which need to be analyzed in the context 
-of multi-state models. In particular, **msmtools** acts as the **msm** package 
-companion [@jackson2011multi; @msm_cran]. Moreover, **msmtools** is 
-focused on efficiency and speed, also thanks to package `data.table` [@data.table].
+**msmtools** prepares longitudinal data for multi-state models fitted with
+**msm** [@jackson2011multi; @msm_cran]. The package is built around four public
+functions:
 
-## Longitudinal Dataset
+* `augment()` builds transition-level data from repeated observations;
+* `polish()` removes subjects with incompatible transitions at the same time;
+* `survplot()` compares fitted and empirical survival curves;
+* `prevplot()` compares observed and expected state prevalences.
 
-Everytime we observe a given subject multiple times, we come up with a 
-longitudinal dataset. This means that measures are repeated $n$ times in a 
-sequence which, in general, may not be equal for all the subjects. Moreover, a 
-longitudinal dataset could be viewed as a multilevel dataset: a first level is 
-given by the subject, and a second level is given by the single observation carried
-out on that subject. A very common case of longitudinal dataset deals with 
-hospital admissions. A patient, our subject, can have a series of entries which 
-correspond to hospital admissions. Each hospital admission is recorded in a 
-single row of the dataset. Let's consider a simplified version of the `hosp` 
-dataset which comes with **msmtools** package and represents synthetic
-hospital admissions for 10 patients. For a detailed description of the dataset, 
-please run `?hosp`. For demonstration purposes, we extract only the first 2 
-patients, reducing the `hosp` dataset to a test sample of 17 rows per 8 
-variables as you can see below.
+The examples below use the bundled `hosp` dataset. It contains synthetic
+hospital admissions for 10 subjects.
 
-```{r long_example, collapse = TRUE}
-data( hosp )
-hosp[ 1:17, .( subj, adm_number, gender, age, label_2, 
-               dateIN, dateOUT, dateCENS ) ]
+```{r data-preview}
+data(hosp)
+hosp[1:6, .(subj, adm_number, gender, age, label_3, dateIN, dateOUT, dateCENS)]
 ```
 
-So, these two patients are 'observed' 11 and 6 times through years, respectively.
+# Data Augmentation
 
-These data format are very common when dealing with observational studies, or 
-with chronic disease monitoring and with hospital admissions recording.
-In general, they are a well stabilized system to collect information.
+`augment()` adds one row per transition endpoint and creates status variables
+that can be used directly in an **msm** model.
 
+```{r augment}
+hosp_augmented <- augment(
+  data = copy(hosp),
+  data_key = subj,
+  n_events = adm_number,
+  pattern = label_3,
+  t_start = dateIN,
+  t_end = dateOUT,
+  t_cens = dateCENS,
+  verbose = FALSE
+)
 
-## Enhancing the Longitudinal Structure with `augment()`
-
-Why the standard longitudinal structure is not enough if a multi-state model 
-has to be run? A first observation could be that we are not able to infer 
-anything about the state in which a given subject (i.e. a patient) is at a 
-particular point in time (i.e. hospital admission).
-The function `augment()` comes into play for this reason: to take advantage of 
-the longitudinal structure in order to extract usable information to fuel a 
-multi-state model. `augment()` takes a longitudinal dataset with exact starting 
-and ending times and reshape it to produce an *augmented* version. 
-For instance, if you apply `augment()` to the dataset above, you get what 
-follows:
-
-
-```{r running_augment, collapse = TRUE}
-hosp_augmented = augment( data = hosp, data_key = subj, 
-                          n_events = adm_number, pattern = label_2,
-                          t_start = dateIN, t_end = dateOUT, 
-                          t_cens = dateCENS, verbose = FALSE )
-
-hosp_augmented[ 1:35, .( subj, adm_number, gender, age, label_2, 
-                         augmented, status, n_status ) ]
+hosp_augmented[
+  1:8,
+  .(subj, adm_number, label_3, augmented, augmented_int, status, status_num)
+]
 ```
 
-Despite the fact that not the same variables have been reported because of 
-layout concerns, two things come up at first sight. In the first place, the 
-number of rows is more than doubled. We now have 35 observations against the 
-initial 17. In the second place, new variables have been created. We will 
-describe them in a minute.
+When the input time columns are `Date` values, `augment()` keeps the date-valued
+transition time and adds an integer version. This is useful because **msm** works
+with numeric time scales.
 
-Given the complexity of the data, which can be very high, building a subject 
-specific status flag which marks a its condition at given time steps, could be 
-tricky and computationally intensive. At the end of the study, so at the 
-censoring time, a subject, in general, can be alive, dead inside a given 
-transition if death occurs within `t_start` and `t_end`, or outside a given 
-transition if death occurs otherwise. After $n$ events, the corresponding flag 
-sequence is given by $2n + 1$ for subjects alive and dead outside the transition, 
-while it is just $2n$ for subjects who died inside of it. Let us consider an 
-individual with 3 events. His/her status combinations will be as follows:
-
-* **ALIVE**: IN-OUT | IN-OUT | IN-OUT | OUT 
-
-* **DEAD OUT**: IN-OUT | IN-OUT | IN-OUT | DEAD
-
-* **DEAD IN**: IN-OUT | IN-OUT | IN-DEAD.
-
-This operation produces a dataset in the augmented long format which allows 
-to neatly model transitions between the given states.
-
-From now on, we refer to each row as a transition for which we define a state 
-in which the subject lies. `augment()` automatically creates 4 new variables 
-(if argument `more_status` is missing):
-
-* *augmented*: the new timing variable for the process when looking at transitions. If
-`t_augmented` is missing, then `augment()` creates *augmented* by default.
-The function looks directly to `t_start` and `t_end` to build it and thus it 
-inherits their class. In particular, if `t_start` is a date format, then 
-`augment()` computes a new variable cast as integer and names it *augmented_int*. 
-If `t_start` is a difftime format, then `augment()` computes a new variable 
-cast as a numeric and names it *augmented_num*;
-
-* *status*: a status flag which looks at `state`. `augment()` automatically 
-checks whether argument `pattern` has 2 or 3 unique values and computes the 
-correct structure of a given subject. The variable is cast as character;
-
-* *status_num*: the corresponding integer version of *status*;
-
-* *n_status*: a mix of *status* and `n_events` cast as character. *n_status* 
-comes into play when a model on the progression of the process is intended.
-
-### Working correctly with `augment()`
-
-The main and only aim of `augment()` is data wrangling. When dealing with 
-complex structures as longitudinal data are, it is really important to introduce 
-some rules which help the user to not fail when using the function. Here we 
-discuss some of these rules which are mandatory in order to get a correct 
-workflow with `augment()`.
-
-There are some arguments which are fundamental. They are `pattern` and `state`. 
-`pattern` must contains the condition of a given subject at the end of the study. 
-That is, how the subject is found at the censoring time. Because this peculiar 
-structure is very common when dealing with hospital admission, the algorithm of 
-`augment()` takes this framework as a reference. So, what does this mean? 
-`pattern` can be either an integer, a factor or a character. Suppose we have it as 
-an integer. `augment()` accepts only a pattern variable which have 2 or 3 unique 
-values (i.e. running `length( unique( pattern ) )` must return 2 or 3). 
-Now, suppose we provide a variable with 3 unique values. 
-They must be 0, 1, and 3, nothing different than that. The coding for this is as
-follows: 
-
-1. Case 1. *integer*:
-
-    + `pattern = 0`: subject is alive at the censoring time;
-    + `pattern = 1`: subject is dead during a transition;
-    + `pattern = 2`: subject is dead out of a transition.
-    
-1. Case 2. *factor*:
-
-    + `pattern = 'alive'`: this is the first level of the factor and corresponds 
-    to `pattern = 0` when integer;
-    + `pattern = 'dead in'`: this is the second level of the factor and 
-    corresponds to `pattern = 1` when integer;
-    + `pattern = 'dead out'`: this is the third level of the factor and 
-    corresponds to `pattern = 2` when integer;
-    
-1. Case 3. *character*:
-
-    + the unique values must be in alphabetical order to resemble the pattern 
-    of the integer and factor case.
-
-In case one passes to `pattern` a variable which contains only two unique values, 
-`augment()` automatically detects if the unit has an absorbing state occurred 
-inside or outside a given transition. We suggest to always provide a variable 
-with three unique values because of efficiency and speed.  
-Everything else different from what described above will inevitably produce 
-wrong behavior of `augment()` with and wrong results.
-
-The second important argument is `state`. This is passed as a list and contains 
-the status flags which will be used to compute all the status variables for the 
-process. The length of `state` is 3, no less, no more and comes with a default 
-given by: `state = list( 'IN', 'OUT', 'DEAD' )`. The order is important here too. 
-The status flags must be passed such that the first one (`'IN'`)
-represents the first state (in `hosp`, being inside a hospital), the second one 
-represents the second state (in `hosp`, being outside a hospital), and the 
-third one represents the absorbing state (in `hosp`, being dead inside or 
-outside a hospital). As you can tell, this peculiar structure is typical of 
-hospital admissions, where a patient can enter a hospital, can be discharged
-from it, or can die. As we have already see, the `'DEAD'` status is reached no 
-matter if the subject has died inside or outside a transition (i.e. in our case, 
-inside or outside the hospital). One can change the flags in `state`, but they 
-must be exactly 3. One may need a higher level of complexity when specifying 
-the states of subjects. This will be discussed in the next section where `state` 
-acts as the main indicator of states.
-
-From version 1.2, `augment()` no longer checks the presence of missing data in 
-the arguments passed to it. In fact, the new argument `check_NA` has been 
-introduced and set to `FALSE` by default. Again, this is due because `augment()` 
-has been developed just for restructuring data. The search for 
-missing data is computationally intensive and could cause memory overheads. 
-When dealing with very highly dimensional dataset, this becomes very unfeasible.
-We then suggest to perform all these types of checks before running `augment()`. 
-If one really wants to run this procedure, can set `check_NA = TRUE` and 
-detection will be performed over `data_key`, `n_events`, `pattern`, `t_start` 
-and `t_end`. Beware, that no missing imputation or deletion is carried out. 
-If any missing value is found, then `augment()` throws an error asking 
-you to fix the problem.
-
-## What if a more complex status structure is needed?
-
-`augment()` by default takes a very simple status structure given by 3 different 
-values. In general, this is enough to define a multi-state model. But what if 
-we needed a more complex structure. Let’s consider again the dataset `hosp` for 
-the 3rd, 4th, 5th, and 6th patient with the following variables:
-
-```{r subsetting, collapse = TRUE }
-hosp[ 18:28, .( subj, adm_number, rehab, it, rehab_it,
-                dateIN, dateOUT, dateCENS ) ]
+```{r augmented-columns}
+names(hosp_augmented)
 ```
 
-As you can see, we have two variables which take into account the type of 
-hospital admission. *rehab* marks a rehabilitation admission while *it* marks 
-an intensive therapy one. They are both binary and integer variables, so one can 
-compose them to get something which is informative and, at the same time, 
-usable in the context of ‘making a status’. We then created the variable 
-*rehab_it* which marks all the information in one place and it is a character.
-You can pass *rehab_it* to the argument `more_status` to tell `augment()` to 
-add these information into a new structure. Now, it is important to remember 
-that `augment()` introduces some rules when you require to compute a more 
-complex status structure. As you can see from the dataset, many values of 
-*rehab_it* are set to `df`. This stands for ‘default’ and when `augment()` 
-finds it, it just compute the default status you already passed to argument 
-state (i.e. in this case, it can be ‘IN’, ‘OUT’, or ‘DEAD’). The argument 
-`more_status` always looks for the value `df`, hence whenever you need to
-specify a default transition make sure to label it with this value. 
-So, if we run `augment()` on this sample, we obtain the following:
+# Duplicate Transition Cleanup
 
-```{r complex_status, collapse = TRUE }
-hosp_augmented_more = augment( data = hosp, data_key = subj,
-                               n_events = adm_number, pattern = label_2,
-                               t_start = dateIN, t_end = dateOUT,
-                               t_cens = dateCENS, more_status = rehab_it,
-                               verbose = FALSE )
+`polish()` removes entire subjects when different transitions occur at the same
+time. The bundled data do not contain such conflicts, so this call leaves the row
+data unchanged.
 
-hosp_augmented_more[ 36:60, .( subj, adm_number, rehab_it,
-                               augmented, status, status_exp, n_status_exp ) ]
+```{r polish}
+hosp_clean <- polish(
+  data = copy(hosp_augmented),
+  data_key = subj,
+  pattern = label_3,
+  verbose = FALSE
+)
+
+nrow(hosp_augmented)
+nrow(hosp_clean)
 ```
 
-Beside the usual status variables, of which we reported only status, `augment()` 
-computed two more:
+# Survival Plot
 
-* *status_exp*: is the direct expansion of status and the variable you passed 
-to `more_status`, which in this case is *rehab_it*. The function composes them 
-by pasting a `_` in between. This is the main reason why it is worth to build a 
-character variable if you know you need to fuel it in as an indicator of a more 
-complex status structure;
+The plotting helpers work on fitted **msm** objects. This example uses a compact
+three-state transition matrix matching the default `augment()` state labels.
 
-* *status_exp_num*: the corresponding integer version of *status_exp*;
-* *n_status_exp*: similar to what has been done before, `augment()` mixes 
-information coming from the current expanded status and the number of admission 
-to give you the time evolution of the process.
+```{r fit-model}
+Qmat <- matrix(0, nrow = 3, ncol = 3, byrow = TRUE)
+Qmat[1, 1:3] <- 1
+Qmat[2, 1:3] <- 1
+colnames(Qmat) <- c("IN", "OUT", "DEAD")
+rownames(Qmat) <- c("IN", "OUT", "DEAD")
 
-## Polishing the augmented data
-
-From version 1.3, **msmtools** gained the new function `polish()` which adds
-support in the preprocessing phase. The function detects whether there are 
-transitions which occur at the same time but land on different states within a
-subject as specified by `data_key`. `polish()` needs to be run on an augmented 
-dataset as computed by `augment()`. It then checks the presence of duplicates
-trough the `time` parameter which refers to the new time variable for the process.
-By default, `polish()` searches for either `augmented_int` or `augmented_num` 
-depending on what `augment()` detected during the reshaping procedure.
-
-***
-# Graphical Assessment of a Multi-state Model
-
-**msmtools** has been mainly developed to easily manage and work with 
-longitudinal datasets that need to be restructured in order to get `msm()` to work 
-properly. This is the main goal of the function `augment()`.
-
-However, **msmtools** comes with two additional functions which try to graphically evaluate
-the Goodness-of-Fit (GoF) of a multi-state model estimated via `msm()`. 
-In this framework, GoF is always a tough quest. Furthermore, up to now, no formal statistical tests are defined 
-when a multi-state model is computed within an exact time framework
-[@titman2009model; @titman2008general].
-
-## Comparing fitted and empirical survival with `survplot()`
-
-One of the most common graphical method to assess whether a multi-state model 
-is behaving properly, compares the empirical survival probability, as given by the Kaplan-Meier estimator,
-with the estimated one. The function `survplot()` helps in this regards and does few more things.
-The function is primarily a wrapper of the already known `plot.survfit.msm()` from the package **msm**.
-
-Suppose we run a multi-state model on the included dataset `hosp` with the following code:
-
-```{r multistate_model, collapse = TRUE }
-# let's define the initial transition matrix for our model
-Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
-Qmat[ 1, 1:3 ] = 1
-Qmat[ 2, 1:3 ] = 1
-colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-Qmat
-
-# attaching the msm package and running the model using
-# gender and age as covariates
-library( msm )
-msm_model = msm( status_num ~ augmented_int,
-                 subject = subj, data = hosp_augmented,
-                 covariates = ~ gender + age,
-                 exacttimes = TRUE, gen.inits = TRUE,
-                 qmatrix = Qmat, method = 'BFGS',
-                 control = list( fnscale = 6e+05, trace = 0,
-                                 REPORT = 1, maxit = 10000 ) )
+msm_model <- msm(
+  status_num ~ augmented_int,
+  subject = subj,
+  data = hosp_augmented,
+  exacttimes = TRUE,
+  gen.inits = TRUE,
+  qmatrix = Qmat,
+  method = "BFGS",
+  control = list(fnscale = 6e+05, trace = 0, REPORT = 1, maxit = 10000)
+)
 ```
 
-To run a comparison between the estimated and the empirical survival curves, we run the following
-simple code:
-
-```{r survplot_1, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
-gof1 = survplot( x = msm_model, km = TRUE )
+```{r survival-plot, fig.width = 7, fig.height = 4}
+surv_out <- survplot(msm_model, km = TRUE, out = "all", grid = 10)
+surv_out$p
 ```
 
-No surprise here, the plot is not very satisfying due to the really small dataset we used for
-estimation. The workflow of `survplot()` has been greatly simplified and from version 2.0.0 it takes
-fewer parameters. It also supports **ggplot2**. By default, `survplot()` returns a `gg/ggplot` 
-object and always renders the plot requested. This allows the user to further manipulate the 
-plot itself. I recommend to always assign the output to something, in this case `gof1`.  
+The fitted and Kaplan-Meier data used by the plot are also available.
 
-`survplot()` can plot the survival probability for any valid transition as defined in the transition
-matrix passed to `msm()`. For instance, the previous plot shows the survival curves for the transition 
-(IN - DEAD). We can use the argument `from` and `to` to specify other transitions. 
-If `to` is missing, `survplot()` checks what is the higher value in the
-corresponding `msm` object and grabs it. Let's now plot the survival comparison for the transition 
-(OUT - DEAD):
-
-```{r survplot_2, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
-gof2 = survplot( x = msm_model, km = TRUE, from = 2 )
+```{r survival-data}
+surv_out$fitted[1:6]
+surv_out$km[1:6]
 ```
 
-If we do not want to show the Kaplan-Meier, just set `km = FALSE` to go back to the default behavior.
+# Prevalence Plot
 
-### Defining a custom time sequence
+`prevplot()` uses the output of `msm::prevalence.msm()` and returns a `ggplot`
+object.
 
-By default `survplot()` computes the estimated survival on a given grid. 
-The number of grid points is given by `grid`. In some cases, one would like to 
-explicitly pass a custom time sequence. This can be achieved by passing to the argument 
-`times` a numeric vector. Now `grid` is ignored.
+```{r prevalence-plot, fig.width = 7, fig.height = 4}
+prev <- prevalence.msm(
+  msm_model,
+  covariates = "mean",
+  ci = "normal",
+  times = seq(
+    min(hosp_augmented$augmented_int),
+    max(hosp_augmented$augmented_int),
+    length.out = 6
+  )
+)
 
-Consider our dataset and suppose we want to compute an estimated survival only for 
-specific points in time. The following code addresses this request.
-
-```{r custom_time_seq, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
-time_seq = seq( 300, 800, by = 30 )
-custom_time = survplot( x = msm_model, times = time_seq )
+prevplot(msm_model, prev, ci = TRUE, M = FALSE)
 ```
 
-### Obtaining the dataset for the Kaplan-Meier
+# Notes
 
-In addition to plotting, `survplot()` can return the desired data structure associated with a 
-specific survival curve. For instance, by specifying `out = "km"` the data used to draw the 
-Kaplan-Meier curve is returned. The code below shows how this works.
-
-<!-- It is possible to tell `survplot()` to return the associated Kaplan-Meier  -->
-<!-- dataset by setting `return.km = TRUE`. This fastly computes the data through  -->
-<!-- `data.table`. Passing only `km = TRUE` won't return any data, even if they must  -->
-<!-- be computed anyway to plot results. -->
-
-```{r returnKM, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
-km_out = survplot( x = msm_model, km = TRUE, out = "km")
-```
-
-There are a couple of things to note. First, if one wants to get the data associated with the 
-Kaplan-Meier, `km` must be set to `TRUE`. There is no possibility to get the data without plotting
-the related empirical curve. Second, if `out` is not set to `"none"`, `survplot()` returns a named list.
-In the first position there is always the plot identified by the element `$p`. In this case, the 
-second element is the Kaplan-Meier idenfied by `$km`. You can see the `head()` below.
-
-```{r}
-head(km_out$km)
-```
-
-As you can see, the structure of the data is consistent. `survplot()` always returns a dataset 
-with the following columns ordered by either `time` or `time_exact`.
-
-* *subject*: the subject ID as passed to `msm()` function;
-
-* *time*: the time at which the event occurred;
-
-* *time_exact*: the relative time at which the event occurred. This is defined when `exacttimes = TRUE`;
-
-* *anystate*: transition indicator to compute the Kaplan-Meier;
-
-* *km*: the value of the empirical survival probability.
-
-
-### Obtaining the dataset for the estimated survival
-
-Similarly to what has been done for the Kaplan-Meier, it is possible to obtain the data 
-used to compute the estimated survival as well. This can be achieve by setting 
-`out = "fitted"`. When `times` is passed, the resulting dataset will have 
-as many rows as the elements in `times`. If `times` is missing, then `survplot()` 
-uses `grid` to know how many time points are requested. An example is shown in the next snippet.
-
-```{r returnP, collapse = TRUE, fig.align='center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
-fitted = survplot( x = msm_model, grid = 10, out = "fitted" )
-```
-
-As before, we have a named list with two elements, the first one is the plot and the second one
-is the desired data structure which can be accessed with `$fitted`. You can see the `head()` below.
-
-```{r}
-head(fitted$fitted)
-```
-
-The structure of the data is consistent here too. `survplot()` always computes 
-a dataset with two columns and it is ordered by time.
-
-* *time*: time at which to compute the estimated survival. It can be obtained 
-either by `grid` or by `times` so that the cardinality of the data depends on them;
-
-* *surv*: the value of the estimated survival probability.
-
-### Obtaining all the data
-
-Of course, you can request `survplot()` to return both the datasets by specifying `out = "all"`.
-In this case, a named list with three elements is returned. The mechanism to access the elements is
-the same described above. The snippet below reports an example.
-
-```{r return_all, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
-# just running survplot()
-out_all = survplot( x = msm_model, km = TRUE, out = "all")
-```
-
-## Comparing expected and observed prevalences with `prevplot()`
-
-A second graphical tool which helps us in the attempt to understand the 
-goodness of the model is given by comparing the expected and observed prevalences [@gentleman1994multi]. `prevplot()` is a wrapper of the `plot.prevalence.msm()` 
-function inside the **msm** package but, again, it does more things.
-
-Consider the multi-state model we have built above. We can compute the 
-prevalences using `prevalence.msm()` function. This produces a named list which 
-will be used inside `prevplot()`. For instance, running the following code 
-builds a plot of prevalences for each state of the model.
-
-```{r prev, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=6, fig.fullwidth = TRUE}
-# defining the times at which compute the prevalences
-t_min = min( hosp_augmented$augmented_int )
-t_max = max( hosp_augmented$augmented_int )
-steps = 100L
-
-# computing prevalences
-prev = prevalence.msm( x = msm_model, covariates = 'mean', ci = 'normal',
-                            times = seq( t_min, t_max, steps ) )
-
-# and plotting them using prevplot()
-prev_plot = prevplot( x = msm_model, prev.obj = prev, exacttimes = TRUE, M = FALSE, ci = TRUE )
-```
-
-It is mandatory for `prevplot()` to work with a `msm` object and a list 
-computed by `prevalence.msm` are passed.
-
-It is also possible to plot the following statistic:
-
-$$
-M = \frac{(O_{is} - E_{is})^2} {E_{is}}
-$$
-This gives an idea of the deviance from the Markov model and is computed 
-according to Titman and Sharples (2008). The following code addresses this request.
-
-```{r plot_M, collapse = TRUE, fig.align = 'center', fig.width=7, fig.height=9, fig.fullwidth = TRUE, warning = F}
-gof = prevplot( x = msm_model, prev.obj = prev, exacttimes = TRUE, M = TRUE, ci = TRUE )
-```
-
-
-
-# References
-
-
+The current 2.x series keeps the public API stable while modernizing
+dependencies, documentation, tests, and CI. Larger internal changes to
+`augment()` are intentionally deferred until after the maintenance releases.

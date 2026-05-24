@@ -40,7 +40,7 @@ The plot of the deviance M is returned together with the standard prevalence plo
 row. This is not editable by the user.
 }
 \examples{
-\dontrun{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 data( hosp )
 
 # augmenting the data
@@ -75,8 +75,7 @@ prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
 
 # and plotting them using prevplot()
 gof = prevplot( x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE )
-}
-
+\dontshow{\}) # examplesIf}
 }
 \references{
 Titman, A. and Sharples, L.D. (2010). Model diagnostics for
