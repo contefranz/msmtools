@@ -8,3 +8,4 @@ inst/doc
 *.dll
 vignettes/msmtools.R
 vignettes/msmtools.html
+/*.tar.gz
