@@ -1,3 +1,23 @@
+# msmtools 2.0.3
+***
+
+This is a CRAN resubmission after **msmtools** was archived because compatibility
+issues with newer **data.table** releases were not corrected in time. No
+user-facing behaviour has changed.
+
+### Bug fixes
+
+* Kept the compatibility fixes for current **data.table** releases by avoiding
+  deprecated `substitute()` calls on the left-hand side of `:=` assignments.
+
+* Retained the focused non-standard evaluation cleanup in `augment()` and
+  `polish()` needed for CRAN checks, without introducing the broader refactor
+  attempted on the historical `substitute_fix` branch.
+
+### Documentation
+
+* Updated release metadata for the CRAN resubmission.
+
 # msmtools 2.0.2
 ***
 
