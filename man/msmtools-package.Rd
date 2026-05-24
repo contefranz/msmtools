@@ -26,5 +26,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Francesco Grossetti \email{francesco.grossetti@unibocconi.it} (\href{https://orcid.org/0000-0002-5130-7745}{ORCID})
 
+Authors:
+\itemize{
+  \item Francesco Grossetti \email{francesco.grossetti@unibocconi.it} (\href{https://orcid.org/0000-0002-5130-7745}{ORCID})
+}
+
 }
 \keyword{internal}
