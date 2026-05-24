@@ -1,3 +1,24 @@
+# msmtools 2.0.4
+***
+
+### CHANGES
+
+* Raised the supported baseline to R 4.1 and current CRAN releases of the main
+  runtime dependencies used by **msmtools**.
+
+* Removed the unused development helper **usethis** from `Suggests`.
+
+### DOCUMENTATION
+
+* Migrated package documentation metadata to **roxygen2** 8.0.0 with markdown
+  documentation enabled.
+
+### TESTS
+
+* Replaced deprecated `testthat::expect_is()` calls with
+  `testthat::expect_s3_class()` for compatibility with **testthat** 3rd
+  edition.
+
 # msmtools 2.0.3
 ***
 

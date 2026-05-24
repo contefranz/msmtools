@@ -45,11 +45,10 @@ aug.df = augment( hosp, subj, adm_number, label_3,
                   verbose = F, convert = F )
 
 test_that( "returning a data.table when convert = FALSE",
-           expect_is( aug.dt, "data.table" ) )
+           expect_s3_class( aug.dt, "data.table" ) )
 test_that( "returning a data.frame when convert = TRUE",
-           expect_is( aug.df, "data.frame" ) )
+           expect_s3_class( aug.df, "data.frame" ) )
 
 test_that( "objects are identical",
            expect_identical( aug.df, aug.dt ) )
-
 
