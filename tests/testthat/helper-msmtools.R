@@ -10,13 +10,13 @@ augment_hosp = function( data = test_hosp(), pattern = c( "label_3", "label_2" )
     suppressWarnings(
       augment( data = data, data_key = subj, n_events = adm_number,
                pattern = label_3, t_start = dateIN, t_end = dateOUT,
-               t_cens = dateCENS, verbose = FALSE, ... )
+               t_cens = dateCENS, ... )
     )
   } else {
     suppressWarnings(
       augment( data = data, data_key = subj, n_events = adm_number,
                pattern = label_2, t_start = dateIN, t_end = dateOUT,
-               t_cens = dateCENS, verbose = FALSE, ... )
+               t_cens = dateCENS, ... )
     )
   }
 }
