@@ -3,130 +3,108 @@ if ( getRversion() >= "2.15.1" ) {
                              "status_exp", "status_exp_num", "n_status_exp",
                              ":=", ".", ".I", ".N", ".SD", "N", "V2" ) )
 }
-#' A fast and general method for building augmented data
+#' Build augmented transition data
 #'
-#' A fast and general method for reshaping standard longitudinal data into a new
-#' structure called augmented'. This format is suitable under a multi-state
-#' framework using the \code{\link[msm]{msm}} package.
+#' Reshape standard longitudinal data into augmented transition data suitable
+#' for multi-state models fitted with **msm**.
 #'
-#' @param data A \code{data.table} or \code{data.frame} object in longitudinal
-#' format where each row represents an observation in which the exact starting
-#' and ending time of the process are known and recorded. If \code{data} is a
-#' \code{data.frame}, then \code{augment} internally casts it to a \code{data.table}.
-#' @param data_key A keying variable which \code{augment} uses to define a key
-#' for \code{data}. This represents the subject ID (see
-#' \code{\link[data.table]{setkey}}).
+#' @param data A `data.table` or `data.frame` object in longitudinal
+#' format where each row represents an observation with known start and end
+#' times. If `data` is a `data.frame`, `augment()` internally casts it to a
+#' `data.table`.
+#' @param data_key A keying variable used to identify subjects and define a key
+#' for `data` (see [data.table::setkey()]).
 #' @param n_events An integer variable indicating the progressive (monotonic)
-#' event number of a given ID. \code{augment} always checks whether
-#' \code{n_events} is monotonic increasing within the provided \code{data_key}
-#' and stops the execution in case the check fails (see 'Details').
-#' If missing, \code{augment} fastly creates a variable named \code{"n_events"}.
+#' event number for each subject. `augment()` checks whether `n_events` is
+#' monotonically increasing within each `data_key` and stops if the check fails
+#' (see Details). If missing, `augment()` creates a variable named `"n_events"`.
 #' @param pattern Either an integer, a factor or a character with 2 or 3 unique
-#' values which provides the ID status at the end of the study. \code{pattern}
+#' values that gives each subject's status at the end of the study. `pattern`
 #' has a predefined structure. When 2 values are detected, they must be in the
 #' format: 0 = "alive", 1 = "dead". When 3 values are detected, then the format
 #' must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
-#' transition has ended" (see 'Details').
-#' @param state A list of three and exactly three possible states which a
-#' subject can reach. \code{state} has a predefined structure as follows:
-#' IN, OUT, DEAD (see 'Details').
+#' transition has ended" (see Details).
+#' @param state A list of exactly three possible states that a subject can
+#' reach. `state` has a predefined structure: `IN`, `OUT`, `DEAD`
+#' (see Details).
 #' @param t_start The starting time of an observation. It can be passed as date,
 #' integer, or numeric format.
 #' @param t_end The ending time of an observation. It can be passed as date,
 #' integer, or numeric format.
 #' @param t_cens The censoring time of the study. This is the date until each
 #' ID is observed, if still active in the cohort.
-#' @param t_death The exact death time of a subject ID. If \code{t_death} is
-#' missing, \code{t_cens} is assumed to contain both censoring and death times
+#' @param t_death The exact death time of a subject ID. If `t_death` is
+#' missing, `t_cens` is assumed to contain both censoring and death times
 #' and a warning is raised.
 #' @param t_augmented A variable indicating the name of the new time variable
-#' of the process in the augmented format. If \code{t_augmented} is missing,
-#' then the default name 'augmented' is assumed and the corresponding new
-#' variable is added to \code{data}. \code{t_augmented} is cast to integer
-#' or to numeric depending whether \code{t_start} is a date or a difftime,
-#' respectively. The suffix '_int' or '_num' is pasted to \code{t_augmented}
-#' and a new variable is computed accordingly.
-#' This is done because \code{\link[msm]{msm}} can't correctly deal with date
-#' or difftime variables. Both variables are positioned before \code{t_start}.
-#' @param more_status A variable which marks further transitions beside the
-#' default ones given by \code{state}. \code{more_status} can be a factor or a
-#' character (see 'Details'). If missing, \code{augment} ignores it.
-#' @param check_NA If \code{TRUE}, then arguments \code{data_key},
-#' \code{n_events}, \code{pattern}, \code{t_start} and \code{t_end} are looked
-#' up for any missing data and if the function finds any, it stops with error.
-#' Default is \code{FALSE} because \code{augment} is not intended for
-#' running consistency checks, beside what is mandatory, and because the
-#' procedure is computationally onerous and could cause memory overhead for
-#' very large datasets. Argument \code{more_status} is the only one for which
-#' \code{augment} always checks for the presence of missing data and, again,
-#' if it finds any it just stops with error.
-#' @param convert If \code{TRUE}, then the returned object is automatically
-#' converted to the class \code{data.frame}. This is done in place and comes
-#' at very low cost both from running time and memory consumption
-#' (see \code{\link[data.table]{setDF}}).
-#' @param verbose If \code{FALSE}, all information produced by \code{print},
-#' \code{cat} and \code{message} are suppressed. Default is \code{TRUE}.
-#' @details In order to get the data processed, a monotonic increasing process
-#' needs to be ensured. In the first place, \code{augment} checks this both in
-#' case \code{n_events} is missing or not. The data are efficiently ordered through
-#' \code{\link[data.table]{setkey}} function with \code{data_key} as the primary
-#' key and \code{t_start} as the secondary key. In the second place, it checks
-#' the monotonicity of \code{n_events} and if it fails, it stops with error and
-#' returns the subjects given by \code{data_key} for whom the condition is not
-#' met. If \code{n_events} is missing, then \code{augment} internally computes
-#' the progression number with the name \emph{n_events} and runs the same
-#' procedure.
+#' in the augmented format. If `t_augmented` is missing, the default name
+#' `"augmented"` is used and the new variable is added to `data`. When
+#' `t_start` is a date or difftime, `augment()` also creates an integer or
+#' numeric companion variable. The suffix `"_int"` or `"_num"` is added to
+#' `t_augmented` accordingly. This is needed because **msm** does not handle
+#' date or difftime variables directly. Both variables are positioned before
+#' `t_start`.
+#' @param more_status A variable that marks further transitions beyond the
+#' default ones given by `state`. `more_status` can be a factor or character
+#' (see Details). If missing, `augment()` ignores it.
+#' @param check_NA If `TRUE`, `data_key`, `n_events`, `pattern`, `t_start`, and
+#' `t_end` are checked for missing values. If any missing values are found, the
+#' function stops with an error. Default is `FALSE` because `augment()` is not
+#' intended for general consistency checks and the scan can add memory overhead
+#' on very large datasets. `more_status` is always checked for missing values
+#' when supplied.
+#' @param convert If `TRUE`, the returned object is automatically
+#' converted to the class `data.frame`. This is done in place and comes
+#' at very low runtime and memory cost (see [data.table::setDF()]).
+#' @param verbose If `FALSE`, output produced by `print()`, `cat()`, and
+#' `message()` is suppressed. Default is `TRUE`.
+#' @details `augment()` requires a monotonic event sequence within each subject.
+#' The data are ordered with [data.table::setkey()] using `data_key` as the
+#' primary key and `t_start` as the secondary key. The function then checks the
+#' monotonicity of `n_events`; if the check fails, it stops and reports the
+#' subjects that violate the condition. If `n_events` is missing, `augment()`
+#' first computes a progression number named *n_events* and then runs the same
+#' check.
 #'
-#' Attention needs to be payed to argument \code{pattern}. Integer values can
-#' be 0 and 1 if only two status are defined and they must correspond to the
-#' status 'alive' and 'dead'. If three values are defined, then they must be 0,
-#' 1 and 2 if \code{pattern} is an integer, or 'alive', 'dead inside a
-#' transition' and dead outside a transition' if \code{pattern} is either a
-#' character or a factor. The order matters: it is not possible to specify
-#' 0 as 'dead' for instance.
+#' Argument `pattern` must follow the expected ordering. With two statuses,
+#' values must correspond to `0 = "alive"` and `1 = "dead"`. With three
+#' statuses, integer values must correspond to `0 = "alive"`,
+#' `1 = "dead inside a transition"`, and
+#' `2 = "dead outside a transition"`. Character and factor values must follow
+#' the same order. For example, `0` cannot be used to indicate death.
 #'
-#' When passing a list of states, the order is important so that the first
-#' element must be the state corresponding to the starting time
-#' (i.e. 'IN', inside the hospital), the second element must correspond
-#' to the ending time (i.e. 'OUT', outside the hospital), and the third state
-#' is the absorbing state (i.e. 'DEAD').
+#' The order of `state` also matters. The first element is the state at
+#' `t_start` (for example, `"IN"`), the second element is the state at `t_end`
+#' (for example, `"OUT"`), and the third element is the absorbing state (for
+#' example, `"DEAD"`).
 #'
-#' \code{more_status} allows to manage multiple transitions beside what already
-#' specified in \code{state}. In particular, if the corresponding observation
-#' is a standard admission which adds no other information than what is inside
-#' \code{state}, then \code{more_status} must be set to 'df' which stands for
-#' 'Default' (see 'Examples' or run ?hosp and look at the variable 'rehab_it').
-#' In general, it is always a good practice to fully specify the transition
-#' with a bunch of self-explanatory characters in order to quickly understand
-#' which is the current transition.
+#' `more_status` lets `augment()` represent transitions beyond the defaults in
+#' `state`. Standard admissions that add no extra information should use `"df"`
+#' for "default" (see Examples, or run `?hosp` and inspect `rehab_it`). More
+#' complex transitions should use concise, self-explanatory labels.
 #'
-#' @return An augmented format dataset of class \code{data.table}, or
-#' \code{data.frame} when \code{convert} is \code{TRUE}, where each row
-#' represents a specific transition for a given subject. \code{augment} returns
-#' them after some important variables have been computed:\cr
+#' @return An augmented dataset of class `data.table`, or `data.frame` when
+#' `convert = TRUE`. Each row represents a specific transition for a given
+#' subject. `augment()` computes the following key variables:
 #'
-#' \item{\code{augmented}}{The new timing variable for the process when looking
-#' at transitions. If \code{t_augmented} is missing, then \code{augment} creates
-#' \emph{augmented} by default. \emph{augmented}. The function looks directly
-#' to \code{t_start} and \code{t_end} to build it and thus it inherits their class.
-#' In particular, if \code{t_start} is a date format, then \code{augment}
-#' computes a new variable cast as integer and names it \emph{augmented_int}.
-#' If \code{t_start} is a difftime format, then \code{augment} computes a new
-#' variable cast as a numeric and names it \emph{augmented_num.}}
-#' \item{\code{status}}{A status flag which contains the states as specified
-#' in \code{state}. \code{augment} automatically checks whether argument
-#' \code{pattern} has 2 or 3 unique values and computes the correct structure
-#' of a given subject as reported in the vignette. The variable is cast as
-#' character.}
-#' \item{\code{status_num}}{The corresponding integer version of \emph{status}.}
-#' \item{\code{n_status}}{A mix of \code{status} and \code{n_events} cast as
-#' character. This becomes useful when a multi-state model on the progression
-#' of the process needs to be implemented.}
+#' * `augmented`: The transition time variable. If `t_augmented` is missing,
+#'   `augment()` creates *augmented* by default. The variable is built from
+#'   `t_start` and `t_end` and inherits their class. If `t_start` is a date,
+#'   `augment()` also creates an integer variable named *augmented_int*. If
+#'   `t_start` is a difftime, it creates a numeric variable named
+#'   *augmented_num*.
+#' * `status`: A status flag that contains the states as specified in `state`.
+#'   `augment()` automatically checks whether argument `pattern` has 2 or 3
+#'   unique values and computes the correct structure of a given subject as
+#'   reported in the vignette. The variable is cast as character.
+#' * `status_num`: The corresponding integer version of *status*.
+#' * `n_status`: A mix of `status` and `n_events` cast as character. This is
+#'   useful when modelling process progression.
 #'
-#' If \code{more_status} is passed, then \code{augment} computes some more
-#' variables. They mimic the meaning of \emph{status}, \emph{status_num},
-#' and \emph{n_status} but they account for the more complex structure defined.
-#' They are: \code{status_exp}, \code{status_exp_num}, and \code{n_status_exp}.
+#' If `more_status` is passed, `augment()` computes additional variables.
+#' They mirror the meaning of *status*, *status_num*, and *n_status* but they
+#' account for the more complex structure defined. They are: `status_exp`,
+#' `status_exp_num`, and `n_status_exp`.
 #'
 #' @examples
 #' # loading data
@@ -151,17 +129,16 @@ if ( getRversion() >= "2.15.1" ) {
 #'                           t_cens = dateCENS, convert = TRUE )
 #' class( hosp_augmented )
 #'
-#' @references Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
-#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
-#' URL \url{https://www.jstatsoft.org/v38/i08/}.
+#' @references Jackson, C.H. (2011). Multi-State Models for Panel Data: The
+#' **msm** Package for R. Journal of Statistical Software, 38(8), 1-29.
+#' <https://www.jstatsoft.org/v38/i08/>.
 #'
 #' M. Dowle, A. Srinivasan, T. Short, S. Lianoglou with contributions from
-#' R. Saporta and E. Antonyan (2016):\cr
-#' \emph{data.table}: Extension of \emph{data.frame}. R package version 1.9.6\cr
-#' URL \url{https://github.com/Rdatatable/data.table/wiki}
+#' R. Saporta and E. Antonyan (2016): **data.table**: Extension of `data.frame`.
+#' R package version 1.9.6. <https://github.com/Rdatatable/data.table/wiki>
 #'
-#' @seealso \code{\link[data.table]{data.table}} \code{\link[data.table]{setkey}}
-#' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
+#' @seealso [data.table::data.table()], [data.table::setkey()]
+#' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
 #' @importFrom data.table setDT setDF setkey setkeyv rbindlist uniqueN setcolorder
 #' @export
 
@@ -396,7 +373,7 @@ augment = function( data, data_key, n_events, pattern,
 
   if ( length( values ) == 2 ) {
     if ( verbose ) {
-      message( 'defining dimesions' )
+      message( 'defining dimensions' )
     }
     if ( missing( t_death ) ) {
       t1 = data[ , .( .N,
@@ -425,7 +402,7 @@ augment = function( data, data_key, n_events, pattern,
     }
   } else if ( length( values ) == 3 ) {
     if ( verbose ) {
-      message( 'defining dimesions' )
+      message( 'defining dimensions' )
     }
     t1 = data[ , .N, by = eval( cols[[ 1 ]] ) ]
     setkeyv( data, c( cols[[ 1 ]], pattern ) )

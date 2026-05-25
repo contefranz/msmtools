@@ -1,28 +1,29 @@
 #' Synthetic Hospital Admissions
 #'
-#' A dataset containing synthetic hospital admissions in the classic longitudinal format.
-#' The dataset counts imaginary 10 patients who undergo different (re)admission into a hospital.
-#' Some demographic and clinical variables are also included.
+#' A synthetic longitudinal dataset of hospital admissions for 10 subjects.
+#' It includes repeated admissions, admission-level clinical flags, demographic
+#' variables, and end-of-study status labels.
 #'
-#' @format A \code{data.table} with 53 rows and 12 variables:
-#' \describe{
-#'   \item{subj}{Subject ID (integer)}
-#'   \item{adm_number}{Hospital admissions counter (integer)}
-#'   \item{gender}{Gender of patient (factor with 2 levels: "F" = females, "M" = males)}
-#'   \item{age}{Age of patient in years at the given observation (integer)}
-#'   \item{rehab}{Rehabilitation flag: if the admission has been in rehabilitation,
-#'   then rehab = 1, else = 0 (integer)}
-#'   \item{it}{Intensive Therapy flag: if the admission has been in intensive therapy,
-#'   then it = 1, else = 0 (integer)}
-#'   \item{rehab_it}{String which in one place marks the hospital admission types based on
-#'   rehab and it. The standard admission is coded as "df" (default). If admission was in
-#'   rehabilitation or in intensive therapy, rehab_it = "rehab" or "it", respectively (character)}
-#'   \item{label_2}{Subject status at the end of the study. It takes 2 values: "alive" and "dead"
-#'   (character)}
-#'   \item{label_3}{Subject status at the end of the study. It takes 3 values: "alive" and "dead_in"
-#'   and "dead_out" (character)}
-#'   \item{dateIN}{Exact admission date (date)}
-#'   \item{dateOUT}{Exact discharge date (date)}
-#'   \item{dateCENS}{Either censoring time or exact death time (date)}
-#' }
+#' @format A `data.table` with 53 rows and 12 variables:
+#'
+#' * `subj`: Subject ID (integer).
+#' * `adm_number`: Hospital admissions counter (integer).
+#' * `gender`: Gender of patient (factor with 2 levels: `"F"` = females,
+#'   `"M"` = males).
+#' * `age`: Age of patient in years at the given observation (integer).
+#' * `rehab`: Rehabilitation flag. If the admission has been in rehabilitation,
+#'   then `rehab = 1`; otherwise `rehab = 0` (integer).
+#' * `it`: Intensive Therapy flag. If the admission has been in intensive
+#'   therapy, then `it = 1`; otherwise `it = 0` (integer).
+#' * `rehab_it`: String marking the admission type based on `rehab`
+#'   and `it`. The standard admission is coded as `"df"` (default). Admissions
+#'   in rehabilitation or intensive therapy are coded as `"rehab"` or `"it"`
+#'   (character).
+#' * `label_2`: Subject status at the end of the study. It takes 2 values:
+#'   `"alive"` and `"dead"` (character).
+#' * `label_3`: Subject status at the end of the study. It takes 3 values:
+#'   `"alive"`, `"dead_in"`, and `"dead_out"` (character).
+#' * `dateIN`: Exact admission date (date).
+#' * `dateOUT`: Exact discharge date (date).
+#' * `dateCENS`: Either censoring time or exact death time (date).
 "hosp"

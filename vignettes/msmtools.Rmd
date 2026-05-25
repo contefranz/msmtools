@@ -1,6 +1,6 @@
 ---
 title: "Building augmented data for multi-state models"
-subtitle: "The msmtools workflow"
+subtitle: "The **msmtools** workflow"
 author: |
   | Francesco Grossetti
   | francesco.grossetti@unibocconi.it
@@ -26,7 +26,7 @@ library(msm)
 # Overview
 
 **msmtools** prepares longitudinal data for multi-state models fitted with
-**msm** [@jackson2011multi; @msm_cran]. The package is built around four public
+**msm** [@jackson2011multi; @msm_cran]. The package exposes four public
 functions:
 
 * `augment()` builds transition-level data from repeated observations;
@@ -76,7 +76,7 @@ names(hosp_augmented)
 # Duplicate Transition Cleanup
 
 `polish()` removes entire subjects when different transitions occur at the same
-time. The bundled data do not contain such conflicts, so this call leaves the row
+time. The bundled data do not contain such conflicts, so this call leaves the
 data unchanged.
 
 ```{r polish}
@@ -120,7 +120,7 @@ surv_out <- survplot(msm_model, km = TRUE, out = "all", grid = 10)
 surv_out$p
 ```
 
-The fitted and Kaplan-Meier data used by the plot are also available.
+The fitted and Kaplan-Meier data used by the plot are also returned.
 
 ```{r survival-data}
 surv_out$fitted[1:6]

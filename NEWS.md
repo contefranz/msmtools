@@ -1,3 +1,13 @@
+# msmtools 2.0.8
+***
+
+### DOCUMENTATION
+
+* Converted package documentation sources to **roxygen2** markdown style.
+
+* Kept the vignette on the lightweight HTML vignette workflow while cleaning
+  old LaTeX-style bibliography markup.
+
 # msmtools 2.0.7
 ***
 
@@ -114,8 +124,8 @@ removed from CRAN. No user-facing behaviour has changed.
 # msmtools 2.0.1
 ***
 
-This is a maintenance update. There are no major updates worth of notice besides few tweaks in 
-the vignette which was not rendered appropriately.
+This is a maintenance update. There are no major updates worth noting apart
+from a few tweaks to the vignette, which was not rendered appropriately.
 
 ### Minor changes
 
@@ -220,13 +230,13 @@ francesco.grossetti@unibocconi.it.
 
 ### Bug fixes
 
-* After `augment()` has been run, results are now visible at the very 
+* After `augment()` has been run, results are now visible at the very
 first call. This means that you can finally print on console the augmented dataset
 right away.
 
-* `pandoc` versions prior 1.17 does not fully support spaces in file names and 
-caused a warning when compiling `msmtools` under Fedora using both `clang` 
-and `gcc`. Now all file names are without spaces. `msmtools` 1.3 has been built
+* `pandoc` versions prior to 1.17 do not fully support spaces in file names and
+caused a warning when compiling **msmtools** under Fedora using both `clang`
+and `gcc`. Now all file names are without spaces. **msmtools** 1.3 has been built
 using `pandoc` 1.19.2 and `pandoc-citeproc` 0.10.4.1
 
 *** ***
@@ -236,7 +246,7 @@ using `pandoc` 1.19.2 and `pandoc-citeproc` 0.10.4.1
 
 ### Major changes
 
-* `msmtools` can now run with R 3.0.0 and above for retro compatibility reasons.
+* **msmtools** can now run with R 3.0.0 and above for retro compatibility reasons.
 
 * `augment()` gains the new argument `check_NA` which allows the user to decide 
 if the function should run some checks to find missing data in the following 
