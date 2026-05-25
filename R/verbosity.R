@@ -15,7 +15,7 @@
 
 .msmtools_cli_info = function( verbosity, text ) {
   if ( .msmtools_is_summary( verbosity ) ) {
-    cli::cli_inform( text )
+    cli::cli_alert_info( text )
   }
 }
 
