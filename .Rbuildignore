@@ -10,3 +10,4 @@
 ^.*\.Rcheck$
 ^coverage\.xml$
 ^cobertura\.xml$
+^dev$

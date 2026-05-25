@@ -1,7 +1,7 @@
 Package: msmtools
 Type: Package
 Title: Building Augmented Data to Run Multi-State Models with 'msm' Package
-Version: 2.0.8
+Version: 2.0.9
 Date: 2026-05-25
 Authors@R: person("Francesco", "Grossetti",
     email = "francesco.grossetti@unibocconi.it",

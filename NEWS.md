@@ -1,3 +1,16 @@
+# msmtools 2.0.9
+***
+
+### CHANGES
+
+* Added dev-only performance baselines for `augment()` and `polish()` ahead of
+  the planned internal refactor.
+
+### TESTS
+
+* Added invariant tests for output structure, by-reference behavior, and
+  generated columns that future refactors must preserve.
+
 # msmtools 2.0.8
 ***
 
