@@ -1,4 +1,4 @@
-# Building augmented data for multi-state models: the **msmtools** package
+# **msmtools**: Augmented Data for Multi-State Models
 
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![R-CMD-check](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml)
@@ -85,8 +85,6 @@ model, and builds both diagnostic plots.
 vignette("msmtools")
 ```
 
-
----
 
 ### Author
 
