@@ -18,38 +18,37 @@ polish(
 \item{data}{A \code{data.table} or \code{data.frame} object in longitudinal
 format where each row represents an observation in which the exact starting
 and ending time of the process are known and recorded. If \code{data} is a
-\code{data.frame}, then \code{augment} internally casts it to a \code{data.table}.}
+\code{data.frame}, then \code{augment()} internally casts it to a \code{data.table}.}
 
-\item{data_key}{A keying variable which \code{augment} uses to define a key
-for \code{data}. This represents the subject ID (see
-\code{\link[data.table]{setkey}}).}
+\item{data_key}{A keying variable which \code{augment()} uses to define a key
+for \code{data}. This represents the subject ID (see \code{\link[data.table:setkey]{data.table::setkey()}}).}
 
 \item{pattern}{Either an integer, a factor or a character with 2 or 3 unique
 values which provides the ID status at the end of the study. \code{pattern}
 has a predefined structure. When 2 values are detected, they must be in the
 format: 0 = "alive", 1 = "dead". When 3 values are detected, then the format
 must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
-transition has ended" (see 'Details').}
+transition has ended" (see Details).}
 
 \item{time}{The target time variable to check duplicates. By default it is set
-to 'augmented_int'.}
+to \code{"augmented_int"}.}
 
-\item{check_NA}{If \code{TRUE}, then arguments \code{data_key},
-\code{pattern}, and \code{time} are looked up for any missing data and if
-the function finds any, it stops with error. Default is \code{FALSE}.}
+\item{check_NA}{If \code{TRUE}, then arguments \code{data_key}, \code{pattern}, and \code{time}
+are looked up for any missing data and if the function finds any, it stops
+with error. Default is \code{FALSE}.}
 
 \item{convert}{If \code{TRUE}, then the returned object is automatically
 converted to the class \code{data.frame}. This is done in place and comes
 at very low cost both from running time and memory consumption
-(see \code{\link[data.table]{setDF}}).}
+(see \code{\link[data.table:setDF]{data.table::setDF()}}).}
 
-\item{verbose}{If \code{FALSE}, all information produced by \code{print},
-\code{cat} and \code{message} are suppressed. Default is \code{TRUE}.}
+\item{verbose}{If \code{FALSE}, all information produced by \code{print()},
+\code{cat()} and \code{message()} are suppressed. Default is \code{TRUE}.}
 }
 \description{
 Fast algorithm to get rid of transitions to different states occurring at
 the same exact time in an augmented data structure as computed by
-\code{augment} (see 'Details').
+\code{augment()} (see Details).
 }
 \details{
 The function finds all those cases where two subsequent events for
@@ -73,8 +72,8 @@ hosp_aug_clean = polish( data = hosp_aug, data_key = subj, pattern = label_3 )
 
 }
 \seealso{
-\code{\link[msmtools]{augment}}
+\code{\link[=augment]{augment()}}
 }
 \author{
-Francesco Grossetti \email{francesco.grossetti@unibocconi.it}.
+Francesco Grossetti \href{mailto:francesco.grossetti@unibocconi.it}{francesco.grossetti@unibocconi.it}.
 }

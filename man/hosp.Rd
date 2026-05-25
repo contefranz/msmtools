@@ -6,25 +6,27 @@
 \title{Synthetic Hospital Admissions}
 \format{
 A \code{data.table} with 53 rows and 12 variables:
-\describe{
-\item{subj}{Subject ID (integer)}
-\item{adm_number}{Hospital admissions counter (integer)}
-\item{gender}{Gender of patient (factor with 2 levels: "F" = females, "M" = males)}
-\item{age}{Age of patient in years at the given observation (integer)}
-\item{rehab}{Rehabilitation flag: if the admission has been in rehabilitation,
-then rehab = 1, else = 0 (integer)}
-\item{it}{Intensive Therapy flag: if the admission has been in intensive therapy,
-then it = 1, else = 0 (integer)}
-\item{rehab_it}{String which in one place marks the hospital admission types based on
-rehab and it. The standard admission is coded as "df" (default). If admission was in
-rehabilitation or in intensive therapy, rehab_it = "rehab" or "it", respectively (character)}
-\item{label_2}{Subject status at the end of the study. It takes 2 values: "alive" and "dead"
-(character)}
-\item{label_3}{Subject status at the end of the study. It takes 3 values: "alive" and "dead_in"
-and "dead_out" (character)}
-\item{dateIN}{Exact admission date (date)}
-\item{dateOUT}{Exact discharge date (date)}
-\item{dateCENS}{Either censoring time or exact death time (date)}
+\itemize{
+\item \code{subj}: Subject ID (integer).
+\item \code{adm_number}: Hospital admissions counter (integer).
+\item \code{gender}: Gender of patient (factor with 2 levels: \code{"F"} = females,
+\code{"M"} = males).
+\item \code{age}: Age of patient in years at the given observation (integer).
+\item \code{rehab}: Rehabilitation flag. If the admission has been in rehabilitation,
+then \code{rehab = 1}; otherwise \code{rehab = 0} (integer).
+\item \code{it}: Intensive Therapy flag. If the admission has been in intensive
+therapy, then \code{it = 1}; otherwise \code{it = 0} (integer).
+\item \code{rehab_it}: String marking the hospital admission type based on \code{rehab}
+and \code{it}. The standard admission is coded as \code{"df"} (default). Admissions
+in rehabilitation or intensive therapy are coded as \code{"rehab"} or \code{"it"}
+(character).
+\item \code{label_2}: Subject status at the end of the study. It takes 2 values:
+\code{"alive"} and \code{"dead"} (character).
+\item \code{label_3}: Subject status at the end of the study. It takes 3 values:
+\code{"alive"}, \code{"dead_in"}, and \code{"dead_out"} (character).
+\item \code{dateIN}: Exact admission date (date).
+\item \code{dateOUT}: Exact discharge date (date).
+\item \code{dateCENS}: Either censoring time or exact death time (date).
 }
 }
 \usage{
