@@ -1,3 +1,13 @@
+# msmtools 2.0.8
+***
+
+### DOCUMENTATION
+
+* Converted package documentation sources to roxygen markdown style.
+
+* Kept the vignette on the lightweight HTML vignette workflow while cleaning
+  old LaTeX-style bibliography markup.
+
 # msmtools 2.0.7
 ***
 
