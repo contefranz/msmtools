@@ -18,6 +18,9 @@ if ( getRversion() >= "2.15.1" ) {
 #' happens, the whole subject, as identified by `data_key`, is removed from the
 #' data. The function reports how many subjects were removed.
 #'
+#' The function always returns a `data.table`. Use [as.data.frame()] on the
+#' result if a plain `data.frame` is needed by downstream code.
+#'
 #' @seealso [augment()]
 #'
 #' @examples
@@ -34,13 +37,15 @@ if ( getRversion() >= "2.15.1" ) {
 #' hosp_aug_clean = polish( data = hosp_aug, data_key = subj, pattern = label_3 )
 #'
 #' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
-#' @importFrom data.table setDT setDF setkey setkeyv rbindlist uniqueN
+#' @importFrom data.table setDT setkey setkeyv rbindlist uniqueN
 #' @export
 
 polish = function( data, data_key, pattern, time,
-                   check_NA = FALSE, convert = FALSE, verbose = TRUE ) {
+                   check_NA = FALSE,
+                   verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
 
   tic = proc.time()
+  verbosity = .msmtools_verbosity( verbosity )
 
   if ( missing( data ) ) {
     stop( 'a dataset of class data.table or data.frame must be provided' )
@@ -57,7 +62,7 @@ polish = function( data, data_key, pattern, time,
   if ( inherits( data, 'data.frame' ) ) {
     setDT( data )
   }
-  if ( verbose ) {
+  if ( .msmtools_is_summary( verbosity ) ) {
     cat( '-------------------------------------\n' )
     cat( '# # # # setting everything up # # # #\n' )
     cat( '-------------------------------------\n' )
@@ -72,13 +77,13 @@ polish = function( data, data_key, pattern, time,
   pattern = as.character( substitute( pattern ) )
   if ( missing( time ) ) {
     if ( "augmented_int" %in% names( data ) ) {
-      if ( verbose ) {
+      if ( .msmtools_is_summary( verbosity ) ) {
         cat( "augmented_int set as time variable\n" )
         cat( "---\n" )
       }
       time = 'augmented_int'
     } else if ( "augmented_num" %in% names( data ) ) {
-      if ( verbose ) {
+      if ( .msmtools_is_summary( verbosity ) ) {
         cat( "augmented_num set as time variable\n" )
         cat( "---\n" )
       }
@@ -89,23 +94,24 @@ polish = function( data, data_key, pattern, time,
   }
 
   if ( check_NA == TRUE ) {
-    if ( verbose ) {
+    if ( .msmtools_is_summary( verbosity ) ) {
       message( 'checking for any missing values in function arguments' )
     }
     checks = c( cols, pattern, time )
     test = apply( data[ , checks, with = FALSE ], 2,
                   function( x ) any( sum( is.na( x ) ) > 0 ) )
     if ( any ( test ) ) {
-      cat( '---\n' )
-      if ( verbose ) {
+      if ( .msmtools_is_summary( verbosity ) ) {
         message( 'detected missing values in the following variables:' )
+        invisible( sapply( names( test[ test == TRUE ] ),
+                           function( x ) cat( x, '\n' ) ) )
       }
-      invisible( sapply( names( test[ test == TRUE ] ),
-                         function( x ) cat( x, '\n' ) ) )
-      stop( 'Please, fix the issues and relaunch shiver()' )
+      stop( 'Please, fix the issues and relaunch polish()' )
     } else {
-      cat( 'Ok, no missing values detected\n')
-      cat( '---\n' )
+      if ( .msmtools_is_summary( verbosity ) ) {
+        cat( 'Ok, no missing values detected\n')
+        cat( '---\n' )
+      }
     }
   }
 
@@ -123,17 +129,17 @@ polish = function( data, data_key, pattern, time,
   setkey( alive, index )
   alive.no.last = alive[ !alive.last ]
 
-  if ( verbose ) {
+  if ( .msmtools_is_summary( verbosity ) ) {
     message( 'checking ', pattern, ' and defining patterns' )
   }
   if ( length( values ) == 2 ) {
-    if ( verbose ) {
+    if ( .msmtools_is_summary( verbosity ) ) {
       cat( 'detected only 2 values\n' )
       cat( '---\n' )
     }
     dead = data[ get( pattern ) == values[ 2 ] ]
   } else if ( length( values ) == 3 ) {
-    if ( verbose ) {
+    if ( .msmtools_is_summary( verbosity ) ) {
       cat( 'Ok, detected 3 values\n' )
       cat( '---\n' )
     }
@@ -149,19 +155,19 @@ polish = function( data, data_key, pattern, time,
   setkeyv( duplicated, cols )
 
   if ( n_duplicated == 0 ) {
-    if ( verbose ) {
+    if ( .msmtools_is_summary( verbosity ) ) {
       cat( 'Hurray! No duplicated occurrences have been found according to variable ',
            time, "\n", sep = "" )
     }
   } else {
-    if ( verbose ) {
+    if ( .msmtools_is_summary( verbosity ) ) {
       message( 'Spotted ', n_duplicated,
                ' patients with at least a duplicated occurrence according to variable ',
                time )
     }
     data.clean = data[ !duplicated ]
     n_patients.to.keep = uniqueN( data.clean[[ cols[[ 1 ]] ]] )
-    if ( verbose ) {
+    if ( .msmtools_is_summary( verbosity ) ) {
       cat( n_patients.to.keep, ' patients have been reained corresponding to ',
            round( 100 * ( n_patients.to.keep / n_patients ), 2 ), '%\n', sep = '' )
       cat( 'Duplicated patients have been successfully removed\n' )
@@ -174,25 +180,16 @@ polish = function( data, data_key, pattern, time,
   }
   toc = proc.time()
   time = toc - tic
-  if ( verbose ) {
+  if ( .msmtools_is_summary( verbosity ) ) {
     cat( '---------------------------\n' )
     cat( 'polish() took:', time[ 3 ], 'sec. \n', sep = ' ' )
     cat( '---------------------------\n' )
   }
 
   if ( n_duplicated == 0 ) {
-    if ( convert == TRUE ) {
-      setDF( data )
-      return( data )
-    }
     data[]
     return( data )
-  } else {
-    if ( convert == TRUE ) {
-      setDF( data.clean )
-      return( data.clean )
-    }
-    data.clean[]
-    return( data.clean )
   }
+  data.clean[]
+  return( data.clean )
 }

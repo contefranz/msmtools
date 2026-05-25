@@ -10,8 +10,7 @@ polish(
   pattern,
   time,
   check_NA = FALSE,
-  convert = FALSE,
-  verbose = TRUE
+  verbosity = getOption("msmtools.verbosity", "quiet")
 )
 }
 \arguments{
@@ -23,10 +22,10 @@ times. If \code{data} is a \code{data.frame}, \code{augment()} internally casts 
 \item{data_key}{A keying variable used to identify subjects and define a key
 for \code{data} (see \code{\link[data.table:setkey]{data.table::setkey()}}).}
 
-\item{pattern}{Either an integer, a factor or a character with 2 or 3 unique
-values that gives each subject's status at the end of the study. \code{pattern}
-has a predefined structure. When 2 values are detected, they must be in the
-format: 0 = "alive", 1 = "dead". When 3 values are detected, then the format
+\item{pattern}{Either an integer, a factor, or a character variable with 2 or
+3 unique values that gives each subject's status at the end of the study.
+\code{pattern} has a predefined structure. When 2 values are detected, they must
+be in the format: 0 = "alive", 1 = "dead". When 3 values are detected, they
 must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
 transition has ended" (see Details).}
 
@@ -37,12 +36,10 @@ By default it is set to \code{"augmented_int"}.}
 missing values. If any missing values are found, the function stops with an
 error. Default is \code{FALSE}.}
 
-\item{convert}{If \code{TRUE}, the returned object is automatically
-converted to the class \code{data.frame}. This is done in place and comes
-at very low runtime and memory cost (see \code{\link[data.table:setDF]{data.table::setDF()}}).}
-
-\item{verbose}{If \code{FALSE}, output produced by \code{print()}, \code{cat()}, and
-\code{message()} is suppressed. Default is \code{TRUE}.}
+\item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
+status messages, \code{"summary"} for high-level phase messages and timing, and
+\code{"progress"} for phase messages plus progress bars in long status-building
+loops. The default is \code{getOption("msmtools.verbosity", "quiet")}.}
 }
 \description{
 Remove subjects with transitions to different states occurring at the same
@@ -53,6 +50,9 @@ The function searches for cases where two subsequent events for the
 same subject land on different states but occur at the same time. When this
 happens, the whole subject, as identified by \code{data_key}, is removed from the
 data. The function reports how many subjects were removed.
+
+The function always returns a \code{data.table}. Use \code{\link[=as.data.frame]{as.data.frame()}} on the
+result if a plain \code{data.frame} is needed by downstream code.
 }
 \examples{
 

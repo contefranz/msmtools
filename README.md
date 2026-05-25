@@ -3,7 +3,7 @@
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![R-CMD-check](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/contefranz/msmtools/branch/main/graph/badge.svg?token=wDcJP6mRRY)](https://codecov.io/gh/contefranz/msmtools)
-[![release](https://img.shields.io/badge/dev.%20version-2.0.9-blue)](https://github.com/contefranz/msmtools)
+[![release](https://img.shields.io/badge/dev.%20version-2.0.10-blue)](https://github.com/contefranz/msmtools)
 [![CRAN Status Badge](https://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 [![license](https://img.shields.io/badge/license-GPL--3-blue.svg)](https://en.wikipedia.org/wiki/GNU_General_Public_License)
 
@@ -16,7 +16,7 @@ plots.
 
 From version 2.0.4, **msmtools** targets a modern CRAN baseline: R 4.1 or newer
 and current releases of **data.table**, **msm**, **survival**, **ggplot2**,
-**patchwork**, and **scales**.
+**patchwork**, **scales**, and **cli**.
 
 ### Installation
 
@@ -50,8 +50,7 @@ hosp_augmented <- augment(
   pattern = label_3,
   t_start = dateIN,
   t_end = dateOUT,
-  t_cens = dateCENS,
-  verbose = FALSE
+  t_cens = dateCENS
 )
 
 hosp_augmented[
@@ -60,8 +59,8 @@ hosp_augmented[
 ]
 ```
 
-`augment()` returns a `data.table` by default. Set `convert = TRUE` to return a
-plain `data.frame`.
+`augment()` returns a `data.table`. Use `as.data.frame()` explicitly if a
+downstream workflow requires a plain `data.frame`.
 
 
 #### Duplicate Transition Cleanup
@@ -70,8 +69,7 @@ plain `data.frame`.
 hosp_clean <- polish(
   data = copy(hosp_augmented),
   data_key = subj,
-  pattern = label_3,
-  verbose = FALSE
+  pattern = label_3
 )
 ```
 
