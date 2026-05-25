@@ -10,6 +10,7 @@ polish(
   pattern,
   time,
   check_NA = FALSE,
+  copy = FALSE,
   verbosity = getOption("msmtools.verbosity", "quiet")
 )
 }
@@ -36,6 +37,11 @@ By default it is set to \code{"augmented_int"}.}
 missing values. If any missing values are found, the function stops with an
 error. Default is \code{FALSE}.}
 
+\item{copy}{If \code{FALSE} (default), \code{polish()} keeps the historical
+memory-efficient behavior and may modify caller-owned \code{data} by reference.
+If \code{TRUE}, \code{data} is copied before any \code{data.table} operation so the input
+object remains unchanged.}
+
 \item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
 status messages, \code{"summary"} for high-level phase messages and timing, and
 \code{"progress"} for phase messages plus progress bars in long status-building
@@ -50,6 +56,11 @@ The function searches for cases where two subsequent events for the
 same subject land on different states but occur at the same time. When this
 happens, the whole subject, as identified by \code{data_key}, is removed from the
 data. The function reports how many subjects were removed.
+
+By default, \code{polish()} follows \strong{data.table} by-reference semantics to avoid
+unnecessary copies of large augmented datasets. This means the input may have
+its key changed while duplicate subjects are identified. Set \code{copy = TRUE}
+when the original input object must remain unchanged.
 
 The function always returns a \code{data.table}. Use \code{\link[=as.data.frame]{as.data.frame()}} on the
 result if a plain \code{data.frame} is needed by downstream code.

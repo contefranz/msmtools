@@ -17,6 +17,7 @@ augment(
   t_augmented,
   more_status,
   check_NA = FALSE,
+  copy = FALSE,
   verbosity = getOption("msmtools.verbosity", "quiet")
 )
 }
@@ -78,6 +79,11 @@ intended for general consistency checks and the scan can add memory overhead
 on very large datasets. \code{more_status} is always checked for missing values
 when supplied.}
 
+\item{copy}{If \code{FALSE} (default), \code{augment()} keeps the historical
+memory-efficient behavior and may modify caller-owned \code{data} by reference.
+If \code{TRUE}, \code{data} is copied before any \code{data.table} operation so the input
+object remains unchanged.}
+
 \item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
 status messages, \code{"summary"} for high-level phase messages and timing, and
 \code{"progress"} for phase messages plus progress bars in long status-building
@@ -137,6 +143,12 @@ example, \code{"DEAD"}).
 \code{state}. Standard admissions that add no extra information should use \code{"df"}
 for "default" (see Examples, or run \code{?hosp} and inspect \code{rehab_it}). More
 complex transitions should use concise, self-explanatory labels.
+
+By default, \code{augment()} follows \strong{data.table} by-reference semantics to avoid
+unnecessary copies of large longitudinal datasets. This means the input may
+have its key changed, and \code{n_events} may be added when the argument is
+omitted. Set \code{copy = TRUE} when the original input object must remain
+unchanged.
 
 The function always returns a \code{data.table}. Use \code{\link[=as.data.frame]{as.data.frame()}} on the
 result if a plain \code{data.frame} is needed by downstream code.

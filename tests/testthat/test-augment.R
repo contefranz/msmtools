@@ -129,6 +129,21 @@ test_that( "verbosity controls informational output", {
   )
 } )
 
+test_that( "copy validates logical flags", {
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS,
+             copy = "yes" ),
+    "copy must be either TRUE or FALSE"
+  )
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS,
+             check_NA = NA ),
+    "check_NA must be either TRUE or FALSE"
+  )
+} )
+
 test_that( "Date inputs create integer augmented time", {
   hosp_aug = augment_hosp( t_augmented = event_time )
 

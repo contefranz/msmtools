@@ -75,6 +75,39 @@ test_that( "augment current by-reference behavior is documented by tests", {
   expect_identical( data.table::key( input ), "subj" )
 } )
 
+test_that( "augment copy protects caller-owned data", {
+  input = test_hosp()
+  before_names = data.table::copy( names( input ) )
+  before_key = data.table::copy( data.table::key( input ) )
+
+  out = suppressWarnings(
+    augment( input, subj, pattern = label_3, t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, copy = TRUE )
+  )
+
+  expect_identical( names( input ), before_names )
+  expect_identical( data.table::key( input ), before_key )
+  expect_false( "n_events" %in% names( input ) )
+  expect_true( "n_events" %in% names( out ) )
+  expect_s3_class( out, "data.table" )
+} )
+
+test_that( "augment copy protects data.frame inputs", {
+  input = as.data.frame( test_hosp() )
+  before_names = names( input )
+  before_class = class( input )
+
+  out = suppressWarnings(
+    augment( input, subj, adm_number, label_3, t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, copy = TRUE )
+  )
+
+  expect_identical( names( input ), before_names )
+  expect_identical( class( input ), before_class )
+  expect_false( inherits( input, "data.table" ) )
+  expect_s3_class( out, "data.table" )
+} )
+
 test_that( "polish current by-reference behavior is documented by tests", {
   input = augment_hosp()
   before_names = data.table::copy( names( input ) )
@@ -85,4 +118,17 @@ test_that( "polish current by-reference behavior is documented by tests", {
   expect_identical( names( input ), before_names )
   expect_false( identical( before_key, data.table::key( input ) ) )
   expect_identical( data.table::key( input ), "subj" )
+} )
+
+test_that( "polish copy protects caller-owned data", {
+  input = augment_hosp()
+  before_names = data.table::copy( names( input ) )
+  before_key = data.table::copy( data.table::key( input ) )
+
+  out = polish( input, subj, label_3, copy = TRUE )
+
+  expect_identical( names( input ), before_names )
+  expect_identical( data.table::key( input ), before_key )
+  expect_false( "index" %in% names( input ) )
+  expect_s3_class( out, "data.table" )
 } )

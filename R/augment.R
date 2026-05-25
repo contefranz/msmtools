@@ -54,6 +54,10 @@ if ( getRversion() >= "2.15.1" ) {
 #' intended for general consistency checks and the scan can add memory overhead
 #' on very large datasets. `more_status` is always checked for missing values
 #' when supplied.
+#' @param copy If `FALSE` (default), `augment()` keeps the historical
+#' memory-efficient behavior and may modify caller-owned `data` by reference.
+#' If `TRUE`, `data` is copied before any `data.table` operation so the input
+#' object remains unchanged.
 #' @param verbosity Controls informational output. Use `"quiet"` to suppress
 #' status messages, `"summary"` for high-level phase messages and timing, and
 #' `"progress"` for phase messages plus progress bars in long status-building
@@ -82,6 +86,12 @@ if ( getRversion() >= "2.15.1" ) {
 #' `state`. Standard admissions that add no extra information should use `"df"`
 #' for "default" (see Examples, or run `?hosp` and inspect `rehab_it`). More
 #' complex transitions should use concise, self-explanatory labels.
+#'
+#' By default, `augment()` follows **data.table** by-reference semantics to avoid
+#' unnecessary copies of large longitudinal datasets. This means the input may
+#' have its key changed, and `n_events` may be added when the argument is
+#' omitted. Set `copy = TRUE` when the original input object must remain
+#' unchanged.
 #'
 #' The function always returns a `data.table`. Use [as.data.frame()] on the
 #' result if a plain `data.frame` is needed by downstream code.
@@ -150,11 +160,13 @@ if ( getRversion() >= "2.15.1" ) {
 augment = function( data, data_key, n_events, pattern,
                     state = list ( "IN", "OUT", "DEAD" ),
                     t_start, t_end, t_cens, t_death, t_augmented,
-                    more_status, check_NA = FALSE,
+                    more_status, check_NA = FALSE, copy = FALSE,
                     verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
 
   tic = proc.time()
   verbosity = .msmtools_verbosity( verbosity )
+  .msmtools_validate_flag( copy, "copy" )
+  .msmtools_validate_flag( check_NA, "check_NA" )
   .msmtools_cli_rule( verbosity, "setting everything up" )
 
   .augment_validate_inputs(
@@ -168,6 +180,9 @@ augment = function( data, data_key, n_events, pattern,
     missing_t_cens = missing( t_cens )
   )
 
+  if ( copy ) {
+    data = data.table::copy( data )
+  }
   if ( inherits( data, "data.frame" ) ) {
     setDT( data )
   }
