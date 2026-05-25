@@ -1,3 +1,30 @@
+# msmtools 2.1.0
+***
+
+### CHANGES
+
+* Added a `copy` argument to `augment()` and `polish()`. The default
+  `copy = FALSE` preserves the historical memory-efficient by-reference
+  behavior, while `copy = TRUE` protects caller-owned data before preprocessing.
+
+* Clarified the preprocessing contract around **data.table** by-reference
+  semantics. `augment()` may add `n_events` and change the input key when
+  `copy = FALSE`; `polish()` may change the input key while identifying
+  duplicate transitions.
+
+* Added shared validation for scalar logical flags used by preprocessing
+  functions.
+
+### DOCUMENTATION
+
+* Documented the performance and safety tradeoff behind `copy = FALSE` and
+  `copy = TRUE` in the function help, README, and vignette.
+
+### TESTS
+
+* Added tests covering by-reference preservation with `copy = FALSE`, input
+  protection with `copy = TRUE`, and validation of logical flags.
+
 # msmtools 2.0.10
 ***
 

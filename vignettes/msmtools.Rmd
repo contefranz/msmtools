@@ -72,11 +72,19 @@ with numeric time scales.
 names(hosp_augmented)
 ```
 
+By default, `augment()` uses `copy = FALSE` and follows **data.table**
+by-reference semantics. This avoids unnecessary memory use on large longitudinal
+datasets, but the input object can have its key changed and `n_events` can be
+created when the argument is omitted. Use `copy = TRUE` when the original input
+must remain unchanged.
+
 # Duplicate Transition Cleanup
 
 `polish()` removes entire subjects when different transitions occur at the same
 time. The bundled data do not contain such conflicts, so this call leaves the
-data unchanged.
+data unchanged. It also uses `copy = FALSE` by default; set `copy = TRUE` when
+the original augmented data should not be keyed or otherwise touched by
+reference.
 
 ```{r polish}
 hosp_clean <- polish(
