@@ -1,3 +1,26 @@
+# msmtools 2.0.10
+***
+
+### CHANGES
+
+* Split `augment()` into private helpers for validation, event preparation,
+  pattern matching, status construction, time-column creation, and expanded
+  status handling.
+
+* Replaced the `verbose` flag in `augment()` and `polish()` with a
+  `verbosity` argument. The accepted levels are `"quiet"`, `"summary"`, and
+  `"progress"`, with a global default available through
+  `options(msmtools.verbosity = ...)`.
+
+* `augment()` and `polish()` now always return `data.table` objects. The
+  previous `convert` argument has been removed; use `as.data.frame()` on the
+  result when a plain `data.frame` is required.
+
+### TESTS
+
+* Updated preprocessing tests for the `data.table`-only return contract and
+  added coverage for the new `verbosity` argument.
+
 # msmtools 2.0.9
 ***
 

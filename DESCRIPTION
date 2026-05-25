@@ -1,7 +1,7 @@
 Package: msmtools
 Type: Package
 Title: Building Augmented Data to Run Multi-State Models with 'msm' Package
-Version: 2.0.9
+Version: 2.0.10
 Date: 2026-05-25
 Authors@R: person("Francesco", "Grossetti",
     email = "francesco.grossetti@unibocconi.it",
@@ -17,6 +17,7 @@ Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.0.0
 Depends: R (>= 4.1)
 Imports: data.table (>= 1.18.4),
+    cli (>= 3.6.0),
     msm (>= 1.8.2),
     survival (>= 3.8-6),
     ggplot2 (>= 4.0.3),
