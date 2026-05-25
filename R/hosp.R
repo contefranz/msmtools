@@ -1,8 +1,8 @@
 #' Synthetic Hospital Admissions
 #'
-#' A dataset containing synthetic hospital admissions in the classic longitudinal format.
-#' The dataset counts imaginary 10 patients who undergo different (re)admission into a hospital.
-#' Some demographic and clinical variables are also included.
+#' A synthetic longitudinal dataset of hospital admissions for 10 subjects.
+#' It includes repeated admissions, admission-level clinical flags, demographic
+#' variables, and end-of-study status labels.
 #'
 #' @format A `data.table` with 53 rows and 12 variables:
 #'
@@ -15,7 +15,7 @@
 #'   then `rehab = 1`; otherwise `rehab = 0` (integer).
 #' * `it`: Intensive Therapy flag. If the admission has been in intensive
 #'   therapy, then `it = 1`; otherwise `it = 0` (integer).
-#' * `rehab_it`: String marking the hospital admission type based on `rehab`
+#' * `rehab_it`: String marking the admission type based on `rehab`
 #'   and `it`. The standard admission is coded as `"df"` (default). Admissions
 #'   in rehabilitation or intensive therapy are coded as `"rehab"` or `"it"`
 #'   (character).

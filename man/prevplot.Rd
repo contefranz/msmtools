@@ -7,26 +7,24 @@
 prevplot(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE)
 }
 \arguments{
-\item{x}{An \code{msm} object.}
+\item{x}{A fitted \strong{msm} model object.}
 
 \item{prev.obj}{A list computed by \code{\link[msm:prevalence.msm]{msm::prevalence.msm()}}.
-It can be with or without confidence intervals. \code{prevplot()} will behave
-accordingly.}
+It may include confidence intervals; \code{prevplot()} adapts automatically.}
 
-\item{exacttimes}{If \code{TRUE} (default) then transition times are known
-and exact. This is inherited from \code{msm} and should be set the same way.}
+\item{exacttimes}{If \code{TRUE} (default), transition times are known and exact.
+This should match the value used when fitting the model with \strong{msm}.}
 
-\item{M}{If \code{TRUE}, then a rough indicator of deviance from the model is
+\item{M}{If \code{TRUE}, a rough indicator of deviance from the model is
 computed (see Details). Default is \code{FALSE}.}
 
-\item{ci}{If \code{TRUE}, then confidence intervals, if they exist, are plotted.
+\item{ci}{If \code{TRUE}, confidence intervals are plotted when available.
 Default is \code{FALSE}.}
 }
 \description{
-Provides a graphical indication of goodness of fit of a multi-state model
-computed by \code{\link[msm:msm]{msm::msm()}} using observed and expected prevalences.
-It also computes a rough indicator of where the data depart from the estimated
-Markov model.
+Plot observed and expected state prevalences from a fitted multi-state model.
+The function can also compute a rough diagnostic for where the data depart
+from the estimated Markov model.
 }
 \details{
 When \code{M = TRUE}, a rough indicator of the deviance from the
@@ -35,8 +33,8 @@ A comparison at a given time \code{t_i} of a patient \code{k} in the state \code
 observed counts \code{O_is} and expected counts \code{E_is} is built as
 \code{M_is = (O_is - E_is)^2 / E_is}.
 
-The plot of the deviance \code{M} is returned together with the standard
-prevalence plot in the second row. This is not editable by the user.
+The deviance \code{M} plot is returned together with the standard prevalence plot
+in the second row. This layout is fixed.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -54,7 +52,7 @@ Qmat[ 2, 1:3 ] = 1
 colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
 rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
 
-# attaching the msm package and running the model using
+# fitting the model using
 # gender and age as covariates
 library( msm )
 msm_model = msm( status_num ~ augmented_int, subject = subj,
@@ -87,7 +85,7 @@ Gentleman RC, Lawless JF, Lindsey JC, Yan P. (1994). Multi-state Markov
 models for analysing incomplete disease data with illustrations for HIV
 disease. \emph{Statistics in Medicine}, 13:805-821.
 
-Jackson, C.H. (2011). Multi-State Models for Panel Data: The \emph{msm} Package
+Jackson, C.H. (2011). Multi-State Models for Panel Data: The \strong{msm} Package
 for R. Journal of Statistical Software, 38(8), 1-29.
 \url{https://www.jstatsoft.org/v38/i08/}.
 }

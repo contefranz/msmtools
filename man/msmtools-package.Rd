@@ -4,15 +4,15 @@
 \name{msmtools-package}
 \alias{msmtools}
 \alias{msmtools-package}
-\title{Building augmented data for multi-state models: the \code{msmtools} package}
+\title{Building augmented data for multi-state models: the \strong{msmtools} package}
 \description{
-\code{msmtools} introduces a fast and general method for restructuring classical longitudinal datasets
-into \emph{augmented} ones. Augmented data enhances longitudinal datasets and allow to model each
-transition under a multi-state framework. \code{msmtools} works in symbiosis with the
-\code{\link[msm:msm]{msm::msm()}} package.
-It also provides two graphical goodness-of-fit tools to inspect the model performances using
-survival curves and prevalences under the Markov assumption.
-\code{msmtools} comes with 4 functions: \code{augment()}, \code{polish()},
+\strong{msmtools} restructures standard longitudinal datasets into \emph{augmented}
+transition data for multi-state models fitted with \strong{msm}. It also provides
+graphical goodness-of-fit tools for survival curves and state prevalences
+under the Markov assumption.
+}
+\details{
+The package exposes four public functions: \code{augment()}, \code{polish()},
 \code{prevplot()}, and \code{survplot()}.
 }
 \seealso{

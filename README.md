@@ -1,4 +1,4 @@
-# Building augmented data for multi-state models: the `msmtools` package
+# Building augmented data for multi-state models: the **msmtools** package
 
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![R-CMD-check](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml)
@@ -10,10 +10,10 @@
 ***
 
 **msmtools** restructures longitudinal data into augmented transition data for
-multi-state models fitted with **msm**. The package focuses on the common
-workflow where each subject has repeated observations with exact start and end
-times, and the analyst needs transition-level rows, numeric state indicators,
-and diagnostic plots.
+multi-state models fitted with **msm**. It focuses on workflows where each
+subject has repeated observations with exact start and end times, and the
+analyst needs transition-level rows, numeric state indicators, and diagnostic
+plots.
 
 From version 2.0.4, **msmtools** targets a modern CRAN baseline: R 4.1 or newer
 and current releases of **data.table**, **msm**, **survival**, **ggplot2**,
@@ -60,9 +60,10 @@ plain `data.frame`.
 
 * `augment()` builds the augmented transition data used by multi-state models.
 * `polish()` removes subjects with conflicting transitions at the same time.
-* `survplot()` compares fitted and empirical survival curves from an `msm`
-  model.
-* `prevplot()` compares observed and expected prevalences from an `msm` model.
+* `survplot()` compares fitted and empirical survival curves from a fitted
+  **msm** model.
+* `prevplot()` compares observed and expected prevalences from a fitted
+  **msm** model.
 
 ## Duplicate Transition Cleanup
 

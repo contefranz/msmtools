@@ -2,46 +2,46 @@ if ( getRversion() >= "2.15.1" ) {
   utils::globalVariables( c( "state", "status", "subject", "time_exact", ".",
                              ":=", "rowid", "surv", "lwr", "upr") )
 }
-#' Plot and get survival data from a multi-state model
+#' Plot fitted survival and Kaplan-Meier curves from a multi-state model
 #'
-#' Plot the fitted survival probability computed over an [msm::msm()] model and
-#' compare it with the Kaplan-Meier. Fast build and return the underlying data structures.
+#' Plot fitted survival probabilities from an [msm::msm()] model and compare
+#' them with Kaplan-Meier estimates. The function can also return the data used
+#' to build each curve.
 #'
-#' @param x An `msm` object.
+#' @param x A fitted **msm** model object.
 #' @param from State from which to compute the estimated survival.
-#' Default to state 1.
+#' Defaults to state 1.
 #' @param to The absorbing state to which compute the estimated survival.
-#' Default to the highest state found by [msm::absorbing.msm()].
-#' @param range A numeric vector of two elements which gives the time range of
-#' the plot.
+#' Defaults to the highest state found by [msm::absorbing.msm()].
+#' @param range A numeric vector of two elements giving the time range of the
+#' plot.
 #' @param covariates Covariate values for which to evaluate the expected
-#' probabilities. These can either be: the string `"mean"`, denoting the
-#' means of the covariates in the data (default), the number 0,
-#' indicating that all the covariates should be set to zero, or a list of values,
-#' with optional names. For example:
+#' probabilities. These can be `"mean"`, denoting the means of the covariates in
+#' the data (default); the number 0, indicating that all covariates should be
+#' set to zero; or a list of values, with optional names. For example:
 #'
 #' `list(75, 1)`
 #'
-#' where the order of the list follows the order of the covariates originally
-#' given in the model formula, or a named list:
+#' The unnamed list must follow the order of the covariates in the original
+#' model formula. A named list is also accepted:
 #'
 #' `list(age = 75, gender = "M")`.
-#' @param exacttimes If `TRUE` (default) then transition times are known
-#' and exact. This is inherited from `msm` and should be set the same way.
+#' @param exacttimes If `TRUE` (default), transition times are known and exact.
+#' This should match the value used when fitting the model with **msm**.
 #' @param times An optional numeric vector giving the times at which to compute
 #' the fitted survival.
-#' @param grid An integer specifying the grid points at which to compute the fitted
-#' survival (see Details).
-#' If `times` is passed, `grid` is ignored. Default to 100 points.
-#' @param km If `TRUE`, then the Kaplan-Meier curve is plotted. Default is
-#' `FALSE`.
-#' @param out A character vector specifying what the function has to return. Accepted values are
-#' `"none"` (default) to return just the plot, `"fitted"` to return the fitted survival
-#' curve only, `"km"` to return the Kaplan-Meier only, `"all"` to return all of the above.
+#' @param grid An integer specifying the grid points at which to compute the
+#' fitted survival curve (see Details). If `times` is passed, `grid` is ignored.
+#' Defaults to 100 points.
+#' @param km If `TRUE`, the Kaplan-Meier curve is plotted. Default is `FALSE`.
+#' @param out A character vector specifying what the function returns. Accepted
+#' values are `"none"` (default) to return just the plot, `"fitted"` to return
+#' the fitted survival curve only, `"km"` to return the Kaplan-Meier curve only,
+#' and `"all"` to return all of them.
 #' @param ci A character vector with the type of confidence intervals to compute for the fitted
 #' survival curve. Specify either `"none"` (default), for no confidence intervals,
 #' `"normal"` or `"bootstrap"`, for confidence intervals computed with the respective
-#' method in [msm::pmatrix.msm()]. This is very computationally-intensive,
+#' method in [msm::pmatrix.msm()]. This is computationally intensive,
 #' since intervals must be computed at a series of times.
 #' @param interp If `"start"` (default), then the entry time into the
 #' absorbing state is assumed to be the time it is first observed in the data.
@@ -55,18 +55,13 @@ if ( getRversion() >= "2.15.1" ) {
 #' @param ci_km A character vector with the type of confidence intervals to compute for the
 #' Kaplan-Meier curve. Specify either `"none"`, `"plain"`, `"log"`, `"log-log"`,
 #' `"logit"`, or `"arcsin"`, as coded in [survival::survfit()].
-#' @details The function is a wrapper of [msm::plot.survfit.msm()]
-#' and does more things. `survplot()` manages correctly the plot of a fitted
-#' survival in an exact times framework (when `exacttimes = TRUE`) by just
-#' resetting the time scale and looking at the follow-up time. It can quickly
-#' build and return to the user the data structures used to compute the Kaplan-Meier
-#' and the fitted survival probability by specifying `out = "all"`.
+#' @details The function wraps [msm::plot.survfit.msm()] and adds support for
+#' exact-time plots by resetting the time scale to follow-up time. It can return
+#' the fitted survival and Kaplan-Meier data by setting `out = "all"`.
 #'
-#' The user can defined custom times (through `times`) or let
-#' `survplot()` choose them on its own (through `grid`).
-#' In the latter case, `survplot()` looks for the follow-up time and divides
-#' it by `grid`. The higher it is, the finer the grid will be so that computing
-#' the fitted survival will take longer, but will be more precise.
+#' You can pass custom evaluation times through `times`, or let `survplot()`
+#' define them from `grid`. Larger `grid` values produce a finer grid and
+#' increase computation time.
 #' @return When `out = "none"`, a `gg/ggplot` object is returned. If `out` is
 #' anything else, then a named list is returned. The Kaplan-Meier data can be
 #' accessed with `$km` while the estimated survival data can be accessed with
@@ -88,7 +83,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
 #' rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
 #'
-#' # attaching the msm package and running the model using
+#' # fitting the model using
 #' # gender and age as covariates
 #' library( msm )
 #' msm_model = msm( status_num ~ augmented_int, subject = subj,
@@ -110,7 +105,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for
 #' Markov and hidden Markov models, *Statistics in Medicine*, 27, 2177-2195.
 #'
-#' Jackson, C.H. (2011). Multi-State Models for Panel Data: The *msm* Package
+#' Jackson, C.H. (2011). Multi-State Models for Panel Data: The **msm** Package
 #' for R. Journal of Statistical Software, 38(8), 1-29.
 #' <https://www.jstatsoft.org/v38/i08/>.
 #' @seealso [msm::plot.survfit.msm()], [msm::msm()],

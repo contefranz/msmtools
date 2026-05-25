@@ -16,7 +16,7 @@ A \code{data.table} with 53 rows and 12 variables:
 then \code{rehab = 1}; otherwise \code{rehab = 0} (integer).
 \item \code{it}: Intensive Therapy flag. If the admission has been in intensive
 therapy, then \code{it = 1}; otherwise \code{it = 0} (integer).
-\item \code{rehab_it}: String marking the hospital admission type based on \code{rehab}
+\item \code{rehab_it}: String marking the admission type based on \code{rehab}
 and \code{it}. The standard admission is coded as \code{"df"} (default). Admissions
 in rehabilitation or intensive therapy are coded as \code{"rehab"} or \code{"it"}
 (character).
@@ -33,8 +33,8 @@ in rehabilitation or intensive therapy are coded as \code{"rehab"} or \code{"it"
 data(hosp)
 }
 \description{
-A dataset containing synthetic hospital admissions in the classic longitudinal format.
-The dataset counts imaginary 10 patients who undergo different (re)admission into a hospital.
-Some demographic and clinical variables are also included.
+A synthetic longitudinal dataset of hospital admissions for 10 subjects.
+It includes repeated admissions, admission-level clinical flags, demographic
+variables, and end-of-study status labels.
 }
 \keyword{datasets}

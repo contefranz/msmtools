@@ -3,22 +3,20 @@ if ( getRversion() >= "2.15.1" ) {
 }
 #' Remove observations with different states occurring at the same time
 #'
-#' Fast algorithm to get rid of transitions to different states occurring at
-#' the same exact time in an augmented data structure as computed by
-#' `augment()` (see Details).
+#' Remove subjects with transitions to different states occurring at the same
+#' exact time in an augmented dataset produced by `augment()`.
 #'
 #' @inheritParams augment
-#' @param time The target time variable to check duplicates. By default it is set
-#' to `"augmented_int"`.
-#' @param check_NA If `TRUE`, then arguments `data_key`, `pattern`, and `time`
-#' are looked up for any missing data and if the function finds any, it stops
-#' with error. Default is `FALSE`.
+#' @param time The time variable used to identify duplicate transition times.
+#' By default it is set to `"augmented_int"`.
+#' @param check_NA If `TRUE`, `data_key`, `pattern`, and `time` are checked for
+#' missing values. If any missing values are found, the function stops with an
+#' error. Default is `FALSE`.
 #'
-#' @details The function finds all those cases where two subsequent events for
-#' a given subject land on different states but occur at the same time.
-#' When this happens, the whole subject, as identified by `data_key`, is
-#' removed from the data. The total number of subjects to be removed is
-#' printed out in order to be more informative.
+#' @details The function searches for cases where two subsequent events for the
+#' same subject land on different states but occur at the same time. When this
+#' happens, the whole subject, as identified by `data_key`, is removed from the
+#' data. The function reports how many subjects were removed.
 #'
 #' @seealso [augment()]
 #'
@@ -32,7 +30,7 @@ if ( getRversion() >= "2.15.1" ) {
 #'                     pattern = label_3, t_start = dateIN, t_end = dateOUT,
 #'                     t_cens = dateCENS )
 #'
-#' # cleaning any targeted occurrence
+#' # cleaning targeted duplicate transitions
 #' hosp_aug_clean = polish( data = hosp_aug, data_key = subj, pattern = label_3 )
 #'
 #' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
@@ -166,7 +164,7 @@ polish = function( data, data_key, pattern, time,
     if ( verbose ) {
       cat( n_patients.to.keep, ' patients have been reained corresponding to ',
            round( 100 * ( n_patients.to.keep / n_patients ), 2 ), '%\n', sep = '' )
-      cat( 'Duplicated patients have been sucessfully removed\n' )
+      cat( 'Duplicated patients have been successfully removed\n' )
     }
   }
 

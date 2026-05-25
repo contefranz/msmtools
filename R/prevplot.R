@@ -3,20 +3,18 @@ if ( getRversion() >= "2.15.1" ) {
 }
 #' Plot observed and expected prevalences for a multi-state model
 #'
-#' Provides a graphical indication of goodness of fit of a multi-state model
-#' computed by [msm::msm()] using observed and expected prevalences.
-#' It also computes a rough indicator of where the data depart from the estimated
-#' Markov model.
+#' Plot observed and expected state prevalences from a fitted multi-state model.
+#' The function can also compute a rough diagnostic for where the data depart
+#' from the estimated Markov model.
 #'
-#' @param x An `msm` object.
+#' @param x A fitted **msm** model object.
 #' @param prev.obj A list computed by [msm::prevalence.msm()].
-#' It can be with or without confidence intervals. `prevplot()` will behave
-#' accordingly.
-#' @param exacttimes If `TRUE` (default) then transition times are known
-#' and exact. This is inherited from `msm` and should be set the same way.
-#' @param M If `TRUE`, then a rough indicator of deviance from the model is
+#' It may include confidence intervals; `prevplot()` adapts automatically.
+#' @param exacttimes If `TRUE` (default), transition times are known and exact.
+#' This should match the value used when fitting the model with **msm**.
+#' @param M If `TRUE`, a rough indicator of deviance from the model is
 #' computed (see Details). Default is `FALSE`.
-#' @param ci If `TRUE`, then confidence intervals, if they exist, are plotted.
+#' @param ci If `TRUE`, confidence intervals are plotted when available.
 #' Default is `FALSE`.
 #' @details When `M = TRUE`, a rough indicator of the deviance from the
 #' Markov model is computed according to Titman and Sharples (2008).
@@ -24,8 +22,8 @@ if ( getRversion() >= "2.15.1" ) {
 #' observed counts `O_is` and expected counts `E_is` is built as
 #' `M_is = (O_is - E_is)^2 / E_is`.
 #'
-#' The plot of the deviance `M` is returned together with the standard
-#' prevalence plot in the second row. This is not editable by the user.
+#' The deviance `M` plot is returned together with the standard prevalence plot
+#' in the second row. This layout is fixed.
 #'
 #' @seealso [msm::plot.prevalence.msm()], [msm::msm()],
 #' [msm::prevalence.msm()]
@@ -39,7 +37,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' models for analysing incomplete disease data with illustrations for HIV
 #' disease. *Statistics in Medicine*, 13:805-821.
 #'
-#' Jackson, C.H. (2011). Multi-State Models for Panel Data: The *msm* Package
+#' Jackson, C.H. (2011). Multi-State Models for Panel Data: The **msm** Package
 #' for R. Journal of Statistical Software, 38(8), 1-29.
 #' <https://www.jstatsoft.org/v38/i08/>.
 #' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
@@ -58,7 +56,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
 #' rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
 #'
-#' # attaching the msm package and running the model using
+#' # fitting the model using
 #' # gender and age as covariates
 #' library( msm )
 #' msm_model = msm( status_num ~ augmented_int, subject = subj,
