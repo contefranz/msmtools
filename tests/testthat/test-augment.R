@@ -111,6 +111,16 @@ test_that( "verbosity controls informational output", {
   expect_s3_class( aug, "data.table" )
   expect_true( any( grepl( "setting everything up", messages ) ) )
 
+  progress_messages = utils::capture.output(
+    aug_progress <- augment( test_hosp(), subj, adm_number, label_3,
+                             t_start = dateIN, t_end = dateOUT,
+                             t_cens = dateCENS, t_death = dateCENS,
+                             verbosity = "progress" ),
+    type = "message"
+  )
+  expect_s3_class( aug_progress, "data.table" )
+  expect_true( any( grepl( "adding status flag", progress_messages ) ) )
+
   expect_error(
     augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
              t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS,

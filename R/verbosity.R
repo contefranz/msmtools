@@ -27,7 +27,14 @@
 
 .msmtools_cli_progress = function( verbosity, name, total ) {
   if ( identical( verbosity, "progress" ) && total > 0 ) {
-    return( cli::cli_progress_bar( name, total = total ) )
+    return(
+      cli::cli_progress_bar(
+        name,
+        total = total,
+        auto_terminate = FALSE,
+        .envir = parent.frame()
+      )
+    )
   }
   NULL
 }
