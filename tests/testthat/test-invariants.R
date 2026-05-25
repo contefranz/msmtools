@@ -18,7 +18,7 @@ test_that( "augment preserves core output structure across time classes", {
   numeric_data[ , dateCENS := as.numeric( dateCENS ) ]
   numeric_aug = suppressWarnings(
     augment( numeric_data, subj, adm_number, label_3, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, verbose = FALSE )
+             t_end = dateOUT, t_cens = dateCENS )
   )
 
   diff_data = test_hosp()
@@ -31,7 +31,7 @@ test_that( "augment preserves core output structure across time classes", {
                                         units = "days" ) ]
   diff_aug = suppressWarnings(
     augment( diff_data, subj, adm_number, label_3, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, verbose = FALSE )
+             t_end = dateOUT, t_cens = dateCENS )
   )
 
   core_columns = c( "status", "status_num", "n_status", "augmented" )
@@ -66,7 +66,7 @@ test_that( "augment current by-reference behavior is documented by tests", {
 
   suppressWarnings(
     augment( input, subj, pattern = label_3, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, verbose = FALSE )
+             t_end = dateOUT, t_cens = dateCENS )
   )
 
   expect_false( "n_events" %in% before_names )
@@ -80,7 +80,7 @@ test_that( "polish current by-reference behavior is documented by tests", {
   before_names = data.table::copy( names( input ) )
   before_key = data.table::copy( data.table::key( input ) )
 
-  polish( input, subj, label_3, verbose = FALSE )
+  polish( input, subj, label_3 )
 
   expect_identical( names( input ), before_names )
   expect_false( identical( before_key, data.table::key( input ) ) )

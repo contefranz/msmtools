@@ -1,7 +1,7 @@
 test_that( "augment warns when t_cens is used as death time", {
   expect_warning(
     augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, verbose = FALSE ),
+             t_end = dateOUT, t_cens = dateCENS ),
     "no t_death has been passed"
   )
 } )
@@ -10,7 +10,7 @@ test_that( "n_events must be an integer", {
   expect_error(
     augment( test_hosp(), subj, !as.integer( adm_number ), label_3,
              t_start = dateIN, t_end = dateOUT, t_cens = dateCENS,
-             t_death = dateCENS, verbose = FALSE ),
+             t_death = dateCENS ),
     "n_events must be an integer"
   )
 } )
@@ -21,18 +21,17 @@ test_that( "augment validates required inputs and state shape", {
   expect_error( augment( test_hosp(), subj ), "pattern" )
   expect_error(
     augment( test_hosp(), subj, adm_number, label_3, state = list( "IN" ),
-             t_start = dateIN, t_end = dateOUT, t_cens = dateCENS,
-             verbose = FALSE ),
+             t_start = dateIN, t_end = dateOUT, t_cens = dateCENS ),
     "state pattern"
   )
   expect_error(
     augment( test_hosp(), subj, adm_number, label_3, t_end = dateOUT,
-             t_cens = dateCENS, verbose = FALSE ),
+             t_cens = dateCENS ),
     "starting and an ending"
   )
   expect_error(
     augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
-             t_end = dateOUT, verbose = FALSE ),
+             t_end = dateOUT ),
     "censoring time"
   )
 } )
@@ -44,15 +43,14 @@ test_that( "augment validates time classes", {
   expect_warning(
     expect_error(
       augment( hosp_bad, subj, adm_number, label_3, t_start = dateIN,
-               t_end = dateOUT_num, t_cens = dateCENS, verbose = FALSE ),
+               t_end = dateOUT_num, t_cens = dateCENS ),
       "same class"
     ),
     "no t_death has been passed"
   )
   expect_error(
     augment( hosp_bad, subj, adm_number, label_3, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, t_death = dateOUT_num,
-             verbose = FALSE ),
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateOUT_num ),
     "same class"
   )
 } )
@@ -68,7 +66,7 @@ test_that( "missing n_events is reconstructed from subject order", {
   hosp_aug = augment_hosp()
   hosp_aug_no_events = suppressWarnings(
     augment( test_hosp(), subj, pattern = label_3, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, verbose = FALSE )
+             t_end = dateOUT, t_cens = dateCENS )
   )
 
   expect_identical( hosp_aug$adm_number, hosp_aug_no_events$n_events )
@@ -78,8 +76,7 @@ test_that( "check_NA catches missing values and passes clean data", {
   expect_warning(
     expect_no_error(
       augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
-               t_end = dateOUT, t_cens = dateCENS, check_NA = TRUE,
-               verbose = FALSE )
+               t_end = dateOUT, t_cens = dateCENS, check_NA = TRUE )
     ),
     "no t_death has been passed"
   )
@@ -87,28 +84,49 @@ test_that( "check_NA catches missing values and passes clean data", {
   hosp_missing = test_hosp()
   hosp_missing[ 1, dateIN := as.Date( NA ) ]
 
-  expect_output(
-    expect_warning(
-      expect_error(
-        augment( hosp_missing, subj, adm_number, label_3, t_start = dateIN,
-                 t_end = dateOUT, t_cens = dateCENS, check_NA = TRUE,
-                 verbose = FALSE ),
-        "Please, fix"
-      ),
-      "no t_death has been passed"
+  expect_warning(
+    expect_error(
+      augment( hosp_missing, subj, adm_number, label_3, t_start = dateIN,
+               t_end = dateOUT, t_cens = dateCENS, check_NA = TRUE ),
+      "dateIN"
     ),
-    "dateIN"
+    "no t_death has been passed"
   )
 } )
 
-test_that( "convert controls the returned data class", {
+test_that( "augment returns a data.table", {
   aug_dt = augment_hosp()
-  aug_df = augment_hosp( convert = TRUE )
 
   expect_s3_class( aug_dt, "data.table" )
-  expect_s3_class( aug_df, "data.frame" )
-  expect_false( inherits( aug_df, "data.table" ) )
-  expect_identical( as.data.frame( aug_dt ), aug_df )
+  expect_s3_class( as.data.frame( aug_dt ), "data.frame" )
+} )
+
+test_that( "verbosity controls informational output", {
+  messages = utils::capture.output(
+    aug <- augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
+                    t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS,
+                    verbosity = "summary" ),
+    type = "message"
+  )
+  expect_s3_class( aug, "data.table" )
+  expect_true( any( grepl( "setting everything up", messages ) ) )
+
+  progress_messages = utils::capture.output(
+    aug_progress <- augment( test_hosp(), subj, adm_number, label_3,
+                             t_start = dateIN, t_end = dateOUT,
+                             t_cens = dateCENS, t_death = dateCENS,
+                             verbosity = "progress" ),
+    type = "message"
+  )
+  expect_s3_class( aug_progress, "data.table" )
+  expect_true( any( grepl( "adding status flag", progress_messages ) ) )
+
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS,
+             verbosity = "loud" ),
+    "arg"
+  )
 } )
 
 test_that( "Date inputs create integer augmented time", {
@@ -128,7 +146,7 @@ test_that( "numeric time inputs keep numeric augmented time", {
 
   hosp_aug = suppressWarnings(
     augment( hosp_num, subj, adm_number, label_3, t_start = dateIN_num,
-             t_end = dateOUT_num, t_cens = dateCENS_num, verbose = FALSE )
+             t_end = dateOUT_num, t_cens = dateCENS_num )
   )
 
   expect_true( "augmented" %in% names( hosp_aug ) )
@@ -148,11 +166,11 @@ test_that( "integer and factor patterns are accepted", {
 
   int_aug = suppressWarnings(
     augment( hosp_int, subj, adm_number, label_int, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, verbose = FALSE )
+             t_end = dateOUT, t_cens = dateCENS )
   )
   factor_aug = suppressWarnings(
     augment( hosp_factor, subj, adm_number, label_factor, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, verbose = FALSE )
+             t_end = dateOUT, t_cens = dateCENS )
   )
 
   expect_equal( nrow( int_aug ), nrow( factor_aug ) )
@@ -171,7 +189,7 @@ test_that( "difftime inputs create numeric augmented time", {
 
   hosp_aug = suppressWarnings(
     augment( hosp_diff, subj, adm_number, label_3, t_start = dateIN_diff,
-             t_end = dateOUT_diff, t_cens = dateCENS_diff, verbose = FALSE )
+             t_end = dateOUT_diff, t_cens = dateCENS_diff )
   )
 
   expect_true( "augmented_num" %in% names( hosp_aug ) )
@@ -182,8 +200,7 @@ test_that( "difftime inputs create numeric augmented time", {
 test_that( "supplied t_death avoids the censoring warning", {
   expect_warning(
     augment( test_hosp(), subj, adm_number, label_3, t_start = dateIN,
-             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS,
-             verbose = FALSE ),
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS ),
     NA
   )
 } )

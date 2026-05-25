@@ -55,8 +55,7 @@ hosp_augmented <- augment(
   pattern = label_3,
   t_start = dateIN,
   t_end = dateOUT,
-  t_cens = dateCENS,
-  verbose = FALSE
+  t_cens = dateCENS
 )
 
 hosp_augmented[
@@ -83,8 +82,7 @@ data unchanged.
 hosp_clean <- polish(
   data = copy(hosp_augmented),
   data_key = subj,
-  pattern = label_3,
-  verbose = FALSE
+  pattern = label_3
 )
 
 nrow(hosp_augmented)

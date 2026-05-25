@@ -17,8 +17,7 @@ augment(
   t_augmented,
   more_status,
   check_NA = FALSE,
-  convert = FALSE,
-  verbose = TRUE
+  verbosity = getOption("msmtools.verbosity", "quiet")
 )
 }
 \arguments{
@@ -35,10 +34,10 @@ event number for each subject. \code{augment()} checks whether \code{n_events} i
 monotonically increasing within each \code{data_key} and stops if the check fails
 (see Details). If missing, \code{augment()} creates a variable named \code{"n_events"}.}
 
-\item{pattern}{Either an integer, a factor or a character with 2 or 3 unique
-values that gives each subject's status at the end of the study. \code{pattern}
-has a predefined structure. When 2 values are detected, they must be in the
-format: 0 = "alive", 1 = "dead". When 3 values are detected, then the format
+\item{pattern}{Either an integer, a factor, or a character variable with 2 or
+3 unique values that gives each subject's status at the end of the study.
+\code{pattern} has a predefined structure. When 2 values are detected, they must
+be in the format: 0 = "alive", 1 = "dead". When 3 values are detected, they
 must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
 transition has ended" (see Details).}
 
@@ -79,17 +78,15 @@ intended for general consistency checks and the scan can add memory overhead
 on very large datasets. \code{more_status} is always checked for missing values
 when supplied.}
 
-\item{convert}{If \code{TRUE}, the returned object is automatically
-converted to the class \code{data.frame}. This is done in place and comes
-at very low runtime and memory cost (see \code{\link[data.table:setDF]{data.table::setDF()}}).}
-
-\item{verbose}{If \code{FALSE}, output produced by \code{print()}, \code{cat()}, and
-\code{message()} is suppressed. Default is \code{TRUE}.}
+\item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
+status messages, \code{"summary"} for high-level phase messages and timing, and
+\code{"progress"} for phase messages plus progress bars in long status-building
+loops. The default is \code{getOption("msmtools.verbosity", "quiet")}.}
 }
 \value{
-An augmented dataset of class \code{data.table}, or \code{data.frame} when
-\code{convert = TRUE}. Each row represents a specific transition for a given
-subject. \code{augment()} computes the following key variables:
+An augmented dataset of class \code{data.table}. Each row represents a
+specific transition for a given subject. \code{augment()} computes the following
+key variables:
 \itemize{
 \item \code{augmented}: The transition time variable. If \code{t_augmented} is missing,
 \code{augment()} creates \emph{augmented} by default. The variable is built from
@@ -140,32 +137,37 @@ example, \code{"DEAD"}).
 \code{state}. Standard admissions that add no extra information should use \code{"df"}
 for "default" (see Examples, or run \code{?hosp} and inspect \code{rehab_it}). More
 complex transitions should use concise, self-explanatory labels.
+
+The function always returns a \code{data.table}. Use \code{\link[=as.data.frame]{as.data.frame()}} on the
+result if a plain \code{data.frame} is needed by downstream code.
 }
 \examples{
 # loading data
 data( hosp )
 
-# 1.
 # augmenting hosp
 hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
                           t_cens = dateCENS )
 
-# 2.
 # augmenting hosp by passing more information regarding transitions
 # with argument more_status
 hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
                                pattern = label_3, t_start = dateIN, t_end = dateOUT,
                                t_cens = dateCENS, more_status = rehab_it )
-# 3.
-# augmenting hosp and returning a data.frame
+
+# requesting progress output
 hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS, convert = TRUE )
-class( hosp_augmented )
+                          t_cens = dateCENS, verbosity = "summary" )
 
 }
 \references{
+Grossetti, F., Ieva, F., and Paganoni, A.M. (2018).
+A multi-state approach to patients affected by chronic heart failure.
+\emph{Health Care Management Science}, 21, 281-291.
+\url{https://doi.org/10.1007/s10729-017-9400-z}.
+
 Jackson, C.H. (2011). Multi-State Models for Panel Data: The
 \strong{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
 \url{https://www.jstatsoft.org/v38/i08/}.
