@@ -178,7 +178,7 @@ hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
 Grossetti, F., Ieva, F., and Paganoni, A.M. (2018).
 A multi-state approach to patients affected by chronic heart failure.
 \emph{Health Care Management Science}, 21, 281-291.
-\url{https://doi.org/10.1007/s10729-017-9400-z}.
+\doi{10.1007/s10729-017-9400-z}.
 
 Jackson, C.H. (2011). Multi-State Models for Panel Data: The
 \strong{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.
