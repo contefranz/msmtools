@@ -4,48 +4,45 @@ if ( getRversion() >= "2.15.1" ) {
 #' Plot observed and expected prevalences for a multi-state model
 #'
 #' Provides a graphical indication of goodness of fit of a multi-state model
-#' computed by \code{\link[msm]{msm}} using observed and expected prevalences.
+#' computed by [msm::msm()] using observed and expected prevalences.
 #' It also computes a rough indicator of where the data depart from the estimated
 #' Markov model.
 #'
-#' @param x A \code{msm} object.
-#' @param prev.obj A list computed by \code{\link[msm]{prevalence.msm}}.
-#' It can be with or without confidence intervals. \code{prevplot} will behaves
+#' @param x An `msm` object.
+#' @param prev.obj A list computed by [msm::prevalence.msm()].
+#' It can be with or without confidence intervals. `prevplot()` will behave
 #' accordingly.
-#' @param exacttimes If \code{TRUE} (default) then transition times are known
-#' and exact. This is inherited from \code{msm} and should be set the same way.
-#' @param M If \code{TRUE}, then a rough indicator of deviance from the model is
-#' computed (see 'Details'). Default is \code{FALSE}.
-#' @param ci If \code{TRUE}, then confidence intervals, if they exist, are plotted.
-#' Default is \code{FALSE}.
-#' @details When \code{M = TRUE}, a rough indicator of the deviance from the
+#' @param exacttimes If `TRUE` (default) then transition times are known
+#' and exact. This is inherited from `msm` and should be set the same way.
+#' @param M If `TRUE`, then a rough indicator of deviance from the model is
+#' computed (see Details). Default is `FALSE`.
+#' @param ci If `TRUE`, then confidence intervals, if they exist, are plotted.
+#' Default is `FALSE`.
+#' @details When `M = TRUE`, a rough indicator of the deviance from the
 #' Markov model is computed according to Titman and Sharples (2008).
-#' A comparison at a given time \eqn{t_i} of a patient \emph{k} in the state
-#' \emph{s} between observed counts \eqn{O_{is}} with expected ones \eqn{E_{is}}
-#' is build as follows:
-#' \deqn{M_{is} = \frac{(O_{is} - E_{is})^2}{E_{is}}}{ (O_{is} - E_{is})^2 / E_{is}}
+#' A comparison at a given time `t_i` of a patient `k` in the state `s` between
+#' observed counts `O_is` and expected counts `E_is` is built as
+#' `M_is = (O_is - E_is)^2 / E_is`.
 #'
-#' The plot of the deviance M is returned together with the standard prevalence plot in the second
-#' row. This is not editable by the user.
+#' The plot of the deviance `M` is returned together with the standard
+#' prevalence plot in the second row. This is not editable by the user.
 #'
-#' @seealso \code{\link[msm]{plot.prevalence.msm}} \code{\link[msm]{msm}}
-#' \code{\link[msm]{prevalence.msm}}
+#' @seealso [msm::plot.prevalence.msm()], [msm::msm()],
+#' [msm::prevalence.msm()]
 #' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for
-#' multi-state models, \emph{Statistical Methods in Medical Research}, 19,
-#' 621-651.\cr
+#' multi-state models, *Statistical Methods in Medical Research*, 19, 621-651.
 #'
 #' Titman, A. and Sharples, L.D. (2008). A general goodness-of-fit test for
-#' Markov and hidden Markov models, \emph{Statistics in Medicine}, 27,
-#' 2177-2195. \cr
+#' Markov and hidden Markov models, *Statistics in Medicine*, 27, 2177-2195.
 #'
 #' Gentleman RC, Lawless JF, Lindsey JC, Yan P. (1994). Multi-state Markov
 #' models for analysing incomplete disease data with illustrations for HIV
-#' disease. \emph{Statistics in Medicine}, 13:805-821. \cr
+#' disease. *Statistics in Medicine*, 13:805-821.
 #'
-#' Jackson, C.H. (2011). Multi-State Models for Panel Data:\cr
-#' The \emph{msm} Package for R. Journal of Statistical Software, 38(8), 1-29.\cr
-#' URL \url{https://www.jstatsoft.org/v38/i08/}.
-#' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
+#' Jackson, C.H. (2011). Multi-State Models for Panel Data: The *msm* Package
+#' for R. Journal of Statistical Software, 38(8), 1-29.
+#' <https://www.jstatsoft.org/v38/i08/>.
+#' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
 #' @examplesIf interactive()
 #' data( hosp )
 #'

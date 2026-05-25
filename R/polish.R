@@ -5,22 +5,22 @@ if ( getRversion() >= "2.15.1" ) {
 #'
 #' Fast algorithm to get rid of transitions to different states occurring at
 #' the same exact time in an augmented data structure as computed by
-#' \code{augment} (see 'Details').
+#' `augment()` (see Details).
 #'
 #' @inheritParams augment
 #' @param time The target time variable to check duplicates. By default it is set
-#' to 'augmented_int'.
-#' @param check_NA If \code{TRUE}, then arguments \code{data_key},
-#' \code{pattern}, and \code{time} are looked up for any missing data and if
-#' the function finds any, it stops with error. Default is \code{FALSE}.
+#' to `"augmented_int"`.
+#' @param check_NA If `TRUE`, then arguments `data_key`, `pattern`, and `time`
+#' are looked up for any missing data and if the function finds any, it stops
+#' with error. Default is `FALSE`.
 #'
 #' @details The function finds all those cases where two subsequent events for
 #' a given subject land on different states but occur at the same time.
-#' When this happens, the whole subject, as identified by \code{data_key}, is
+#' When this happens, the whole subject, as identified by `data_key`, is
 #' removed from the data. The total number of subjects to be removed is
 #' printed out in order to be more informative.
 #'
-#' @seealso \code{\link[msmtools]{augment}}
+#' @seealso [augment()]
 #'
 #' @examples
 #'
@@ -35,7 +35,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' # cleaning any targeted occurrence
 #' hosp_aug_clean = polish( data = hosp_aug, data_key = subj, pattern = label_3 )
 #'
-#' @author Francesco Grossetti \email{francesco.grossetti@@unibocconi.it}.
+#' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
 #' @importFrom data.table setDT setDF setkey setkeyv rbindlist uniqueN
 #' @export
 
