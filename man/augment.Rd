@@ -9,13 +9,13 @@ augment(
   data_key,
   n_events,
   pattern,
-  state = list("IN", "OUT", "DEAD"),
+  state = c("IN", "OUT", "DEAD"),
   t_start,
   t_end,
   t_cens,
   t_death,
   t_augmented,
-  more_status,
+  more_status = NULL,
   check_NA = FALSE,
   copy = FALSE,
   verbosity = getOption("msmtools.verbosity", "quiet")
@@ -36,15 +36,15 @@ monotonically increasing within each \code{data_key} and stops if the check fail
 (see Details). If missing, \code{augment()} creates a variable named \code{"n_events"}.}
 
 \item{pattern}{Either an integer, a factor, or a character variable with 2 or
-3 unique values that gives each subject's status at the end of the study.
-\code{pattern} has a predefined structure. When 2 values are detected, they must
-be in the format: 0 = "alive", 1 = "dead". When 3 values are detected, they
-must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
-transition has ended" (see Details).}
-
-\item{state}{A list of exactly three possible states that a subject can
-reach. \code{state} has a predefined structure: \code{IN}, \code{OUT}, \code{DEAD}
+3 unique values that gives each subject's terminal outcome schema. When 2
+values are detected, they must be in the format: 0 = "alive", 1 = "dead".
+When 3 values are detected, they must be: 0 = "alive",
+1 = "dead during a transition", 2 = "dead after a transition has ended"
 (see Details).}
+
+\item{state}{A character vector of exactly three unique, non-missing,
+non-empty labels used as the generated transition-state vocabulary.
+Defaults to \code{c("IN", "OUT", "DEAD")} (see Details).}
 
 \item{t_start}{The starting time of an observation. It can be passed as date,
 integer, or numeric format.}
@@ -70,7 +70,7 @@ date or difftime variables directly. Both variables are positioned before
 
 \item{more_status}{A variable that marks further transitions beyond the
 default ones given by \code{state}. \code{more_status} can be a factor or character
-(see Details). If missing, \code{augment()} ignores it.}
+(see Details). If \code{NULL} (default), \code{augment()} ignores it.}
 
 \item{check_NA}{If \code{TRUE}, \code{data_key}, \code{n_events}, \code{pattern}, \code{t_start}, and
 \code{t_end} are checked for missing values. If any missing values are found, the
@@ -127,17 +127,20 @@ subjects that violate the condition. If \code{n_events} is missing, \code{augmen
 first computes a progression number named \emph{n_events} and then runs the same
 check.
 
-Argument \code{pattern} must follow the expected ordering. With two statuses,
-values must correspond to \code{0 = "alive"} and \code{1 = "dead"}. With three
-statuses, integer values must correspond to \code{0 = "alive"},
-\code{1 = "dead inside a transition"}, and
+Argument \code{pattern} describes the terminal outcome schema and must follow the
+expected ordering. With two statuses, values must correspond to
+\code{0 = "alive"} and \code{1 = "dead"}. With three statuses, integer values must
+correspond to \code{0 = "alive"}, \code{1 = "dead inside a transition"}, and
 \code{2 = "dead outside a transition"}. Character and factor values must follow
 the same order. For example, \code{0} cannot be used to indicate death.
 
-The order of \code{state} also matters. The first element is the state at
-\code{t_start} (for example, \code{"IN"}), the second element is the state at \code{t_end}
-(for example, \code{"OUT"}), and the third element is the absorbing state (for
-example, \code{"DEAD"}).
+Argument \code{state} describes the generated transition-state vocabulary. Its
+order also matters. The first element is the state at \code{t_start} (for example,
+\code{"IN"}), the second element is the state at \code{t_end} (for example, \code{"OUT"}),
+and the third element is the absorbing state (for example, \code{"DEAD"}). A
+two-value \code{pattern} still requires three \code{state} labels because \code{augment()}
+infers whether death maps to the absorbing state inside or outside the
+transition window.
 
 \code{more_status} lets \code{augment()} represent transitions beyond the defaults in
 \code{state}. Standard admissions that add no extra information should use \code{"df"}

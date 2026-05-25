@@ -72,6 +72,19 @@ with numeric time scales.
 names(hosp_augmented)
 ```
 
+# Outcome Schema And Generated States
+
+`pattern` and `state` describe different parts of the augmentation. `pattern`
+is the terminal outcome schema observed in the input data. It can have two
+values, alive and dead, or three values, alive, dead during a transition, and
+dead after a transition.
+
+`state` is the generated transition-state vocabulary. It must always contain
+three labels: the state at `t_start`, the state at `t_end`, and the absorbing
+state. This is why a two-value `pattern` still needs three `state` labels:
+`augment()` uses the event times to infer whether death maps to the absorbing
+state inside or outside the transition window.
+
 By default, `augment()` uses `copy = FALSE` and follows **data.table**
 by-reference semantics. This avoids unnecessary memory use on large longitudinal
 datasets, but the input object can have its key changed and `n_events` can be

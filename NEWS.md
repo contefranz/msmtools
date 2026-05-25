@@ -15,15 +15,28 @@
 * Added shared validation for scalar logical flags used by preprocessing
   functions.
 
+* Made the `augment()` state vocabulary stricter and clearer: custom `state`
+  values must now be supplied as a character vector of three unique labels, not
+  as a list.
+
+* Made `more_status = NULL` explicit in `augment()` so the optional expanded
+  status path is visible in the function signature.
+
 ### DOCUMENTATION
 
 * Documented the performance and safety tradeoff behind `copy = FALSE` and
   `copy = TRUE` in the function help, README, and vignette.
 
+* Clarified that `pattern` describes the terminal outcome schema, while `state`
+  describes the generated transition-state labels.
+
 ### TESTS
 
 * Added tests covering by-reference preservation with `copy = FALSE`, input
   protection with `copy = TRUE`, and validation of logical flags.
+
+* Added tests for custom state vectors, invalid state specifications, and
+  explicit `more_status = NULL`.
 
 # msmtools 2.0.10
 ***

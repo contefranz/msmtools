@@ -22,7 +22,7 @@ test_that( "augment validates required inputs and state shape", {
   expect_error(
     augment( test_hosp(), subj, adm_number, label_3, state = list( "IN" ),
              t_start = dateIN, t_end = dateOUT, t_cens = dateCENS ),
-    "state pattern"
+    "state must be a character vector"
   )
   expect_error(
     augment( test_hosp(), subj, adm_number, label_3, t_end = dateOUT,
@@ -70,6 +70,54 @@ test_that( "missing n_events is reconstructed from subject order", {
   )
 
   expect_identical( hosp_aug$adm_number, hosp_aug_no_events$n_events )
+} )
+
+test_that( "state must be a valid character vector", {
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3,
+             state = list( "IN", "OUT", "DEAD" ), t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS ),
+    "state must be a character vector"
+  )
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3,
+             state = c( "IN", "OUT" ), t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS ),
+    "state must be a character vector"
+  )
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3,
+             state = c( "IN", NA, "DEAD" ), t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS ),
+    "state must be a character vector"
+  )
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3,
+             state = c( "IN", "", "DEAD" ), t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS ),
+    "state must be a character vector"
+  )
+  expect_error(
+    augment( test_hosp(), subj, adm_number, label_3,
+             state = c( "IN", "IN", "DEAD" ), t_start = dateIN,
+             t_end = dateOUT, t_cens = dateCENS, t_death = dateCENS ),
+    "state must be a character vector"
+  )
+} )
+
+test_that( "state vector controls generated transition labels", {
+  custom_state = c( "ENTRY", "EXIT", "ABSORBING" )
+  hosp_aug_3 = augment_hosp( state = custom_state, pattern = "label_3" )
+  hosp_aug_2 = augment_hosp( state = custom_state, pattern = "label_2" )
+
+  expect_true( all( hosp_aug_3$status %in% custom_state ) )
+  expect_true( all( hosp_aug_2$status %in% custom_state ) )
+  expect_true( all( custom_state %in% hosp_aug_3$status ) )
+  expect_true( all( custom_state %in% hosp_aug_2$status ) )
+  expect_true( all( hosp_aug_3$n_status[ hosp_aug_3$status == "ABSORBING" ] ==
+                      "ABSORBING" ) )
+  expect_true( all( hosp_aug_2$n_status[ hosp_aug_2$status == "ABSORBING" ] ==
+                      "ABSORBING" ) )
 } )
 
 test_that( "check_NA catches missing values and passes clean data", {
@@ -228,4 +276,8 @@ test_that( "more_status creates expanded status columns", {
   expect_false( anyNA( hosp_aug$status_exp ) )
   expect_false( anyNA( hosp_aug$status_exp_num ) )
   expect_false( anyNA( hosp_aug$n_status_exp ) )
+} )
+
+test_that( "explicit NULL more_status matches omitted more_status", {
+  expect_identical( augment_hosp(), augment_hosp( more_status = NULL ) )
 } )

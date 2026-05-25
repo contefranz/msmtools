@@ -24,11 +24,11 @@ times. If \code{data} is a \code{data.frame}, \code{augment()} internally casts 
 for \code{data} (see \code{\link[data.table:setkey]{data.table::setkey()}}).}
 
 \item{pattern}{Either an integer, a factor, or a character variable with 2 or
-3 unique values that gives each subject's status at the end of the study.
-\code{pattern} has a predefined structure. When 2 values are detected, they must
-be in the format: 0 = "alive", 1 = "dead". When 3 values are detected, they
-must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
-transition has ended" (see Details).}
+3 unique values that gives each subject's terminal outcome schema. When 2
+values are detected, they must be in the format: 0 = "alive", 1 = "dead".
+When 3 values are detected, they must be: 0 = "alive",
+1 = "dead during a transition", 2 = "dead after a transition has ended"
+(see Details).}
 
 \item{time}{The time variable used to identify duplicate transition times.
 By default it is set to \code{"augmented_int"}.}

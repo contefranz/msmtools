@@ -62,6 +62,10 @@ hosp_augmented[
 `augment()` returns a `data.table`. Use `as.data.frame()` explicitly if a
 downstream workflow requires a plain `data.frame`.
 
+`pattern` describes the terminal outcome schema in the input data. `state`
+describes the generated transition-state labels and must contain three labels:
+the state at `t_start`, the state at `t_end`, and the absorbing state.
+
 `augment()` and `polish()` use `copy = FALSE` by default to preserve the
 memory-efficient **data.table** workflow. This means input objects can be
 modified by reference. Set `copy = TRUE` when the original object must remain
