@@ -26,3 +26,16 @@ test_that( "polish returns a data.table", {
   expect_s3_class( hosp_clean, "data.table" )
   expect_s3_class( as.data.frame( hosp_clean ), "data.frame" )
 } )
+
+test_that( "polish validates logical flags", {
+  hosp_aug = augment_hosp()
+
+  expect_error(
+    polish( data.table::copy( hosp_aug ), subj, label_3, copy = "yes" ),
+    "copy must be either TRUE or FALSE"
+  )
+  expect_error(
+    polish( data.table::copy( hosp_aug ), subj, label_3, check_NA = NA ),
+    "check_NA must be either TRUE or FALSE"
+  )
+} )

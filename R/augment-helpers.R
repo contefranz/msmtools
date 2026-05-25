@@ -13,8 +13,9 @@
   if ( missing_pattern ) {
     stop( "a pattern must be provided" )
   }
-  if ( !inherits( state, "list" ) || length( state ) != 3 ) {
-    stop( "state pattern must be a list of 3 elements" )
+  if ( !is.character( state ) || length( state ) != 3 ||
+       anyNA( state ) || any( !nzchar( state ) ) || anyDuplicated( state ) ) {
+    stop( "state must be a character vector of 3 unique non-missing non-empty labels" )
   }
   if ( missing_t_start || missing_t_end ) {
     stop( "a starting and an ending event times must be provided" )

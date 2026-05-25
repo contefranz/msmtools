@@ -3,7 +3,7 @@
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![R-CMD-check](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/contefranz/msmtools/branch/main/graph/badge.svg?token=wDcJP6mRRY)](https://codecov.io/gh/contefranz/msmtools)
-[![release](https://img.shields.io/badge/dev.%20version-2.0.10-blue)](https://github.com/contefranz/msmtools)
+[![release](https://img.shields.io/badge/dev.%20version-2.1.0-blue)](https://github.com/contefranz/msmtools)
 [![CRAN Status Badge](https://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 [![license](https://img.shields.io/badge/license-GPL--3-blue.svg)](https://en.wikipedia.org/wiki/GNU_General_Public_License)
 
@@ -61,6 +61,15 @@ hosp_augmented[
 
 `augment()` returns a `data.table`. Use `as.data.frame()` explicitly if a
 downstream workflow requires a plain `data.frame`.
+
+`pattern` describes the terminal outcome schema in the input data. `state`
+describes the generated transition-state labels and must contain three labels:
+the state at `t_start`, the state at `t_end`, and the absorbing state.
+
+`augment()` and `polish()` use `copy = FALSE` by default to preserve the
+memory-efficient **data.table** workflow. This means input objects can be
+modified by reference. Set `copy = TRUE` when the original object must remain
+unchanged.
 
 
 #### Duplicate Transition Cleanup

@@ -12,11 +12,20 @@ if ( getRversion() >= "2.15.1" ) {
 #' @param check_NA If `TRUE`, `data_key`, `pattern`, and `time` are checked for
 #' missing values. If any missing values are found, the function stops with an
 #' error. Default is `FALSE`.
+#' @param copy If `FALSE` (default), `polish()` keeps the historical
+#' memory-efficient behavior and may modify caller-owned `data` by reference.
+#' If `TRUE`, `data` is copied before any `data.table` operation so the input
+#' object remains unchanged.
 #'
 #' @details The function searches for cases where two subsequent events for the
 #' same subject land on different states but occur at the same time. When this
 #' happens, the whole subject, as identified by `data_key`, is removed from the
 #' data. The function reports how many subjects were removed.
+#'
+#' By default, `polish()` follows **data.table** by-reference semantics to avoid
+#' unnecessary copies of large augmented datasets. This means the input may have
+#' its key changed while duplicate subjects are identified. Set `copy = TRUE`
+#' when the original input object must remain unchanged.
 #'
 #' The function always returns a `data.table`. Use [as.data.frame()] on the
 #' result if a plain `data.frame` is needed by downstream code.
@@ -40,12 +49,14 @@ if ( getRversion() >= "2.15.1" ) {
 #' @importFrom data.table setDT setkey setkeyv rbindlist uniqueN
 #' @export
 
-polish = function( data, data_key, pattern, time,
-                   check_NA = FALSE,
+polish = function( data, data_key, pattern, time, check_NA = FALSE,
+                   copy = FALSE,
                    verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
 
   tic = proc.time()
   verbosity = .msmtools_verbosity( verbosity )
+  .msmtools_validate_flag( copy, "copy" )
+  .msmtools_validate_flag( check_NA, "check_NA" )
 
   if ( missing( data ) ) {
     stop( 'a dataset of class data.table or data.frame must be provided' )
@@ -58,6 +69,9 @@ polish = function( data, data_key, pattern, time,
   }
   if ( missing( pattern ) ) {
     stop( "a pattern must be provided" )
+  }
+  if ( copy ) {
+    data = data.table::copy( data )
   }
   if ( inherits( data, 'data.frame' ) ) {
     setDT( data )

@@ -10,6 +10,7 @@ polish(
   pattern,
   time,
   check_NA = FALSE,
+  copy = FALSE,
   verbosity = getOption("msmtools.verbosity", "quiet")
 )
 }
@@ -23,11 +24,11 @@ times. If \code{data} is a \code{data.frame}, \code{augment()} internally casts 
 for \code{data} (see \code{\link[data.table:setkey]{data.table::setkey()}}).}
 
 \item{pattern}{Either an integer, a factor, or a character variable with 2 or
-3 unique values that gives each subject's status at the end of the study.
-\code{pattern} has a predefined structure. When 2 values are detected, they must
-be in the format: 0 = "alive", 1 = "dead". When 3 values are detected, they
-must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
-transition has ended" (see Details).}
+3 unique values that gives each subject's terminal outcome schema. When 2
+values are detected, they must be in the format: 0 = "alive", 1 = "dead".
+When 3 values are detected, they must be: 0 = "alive",
+1 = "dead during a transition", 2 = "dead after a transition has ended"
+(see Details).}
 
 \item{time}{The time variable used to identify duplicate transition times.
 By default it is set to \code{"augmented_int"}.}
@@ -35,6 +36,11 @@ By default it is set to \code{"augmented_int"}.}
 \item{check_NA}{If \code{TRUE}, \code{data_key}, \code{pattern}, and \code{time} are checked for
 missing values. If any missing values are found, the function stops with an
 error. Default is \code{FALSE}.}
+
+\item{copy}{If \code{FALSE} (default), \code{polish()} keeps the historical
+memory-efficient behavior and may modify caller-owned \code{data} by reference.
+If \code{TRUE}, \code{data} is copied before any \code{data.table} operation so the input
+object remains unchanged.}
 
 \item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
 status messages, \code{"summary"} for high-level phase messages and timing, and
@@ -50,6 +56,11 @@ The function searches for cases where two subsequent events for the
 same subject land on different states but occur at the same time. When this
 happens, the whole subject, as identified by \code{data_key}, is removed from the
 data. The function reports how many subjects were removed.
+
+By default, \code{polish()} follows \strong{data.table} by-reference semantics to avoid
+unnecessary copies of large augmented datasets. This means the input may have
+its key changed while duplicate subjects are identified. Set \code{copy = TRUE}
+when the original input object must remain unchanged.
 
 The function always returns a \code{data.table}. Use \code{\link[=as.data.frame]{as.data.frame()}} on the
 result if a plain \code{data.frame} is needed by downstream code.

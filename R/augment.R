@@ -20,14 +20,14 @@ if ( getRversion() >= "2.15.1" ) {
 #' monotonically increasing within each `data_key` and stops if the check fails
 #' (see Details). If missing, `augment()` creates a variable named `"n_events"`.
 #' @param pattern Either an integer, a factor, or a character variable with 2 or
-#' 3 unique values that gives each subject's status at the end of the study.
-#' `pattern` has a predefined structure. When 2 values are detected, they must
-#' be in the format: 0 = "alive", 1 = "dead". When 3 values are detected, they
-#' must be: 0 = "alive", 1 = "dead during a transition", 2 = "dead after a
-#' transition has ended" (see Details).
-#' @param state A list of exactly three possible states that a subject can
-#' reach. `state` has a predefined structure: `IN`, `OUT`, `DEAD`
+#' 3 unique values that gives each subject's terminal outcome schema. When 2
+#' values are detected, they must be in the format: 0 = "alive", 1 = "dead".
+#' When 3 values are detected, they must be: 0 = "alive",
+#' 1 = "dead during a transition", 2 = "dead after a transition has ended"
 #' (see Details).
+#' @param state A character vector of exactly three unique, non-missing,
+#' non-empty labels used as the generated transition-state vocabulary.
+#' Defaults to `c("IN", "OUT", "DEAD")` (see Details).
 #' @param t_start The starting time of an observation. It can be passed as date,
 #' integer, or numeric format.
 #' @param t_end The ending time of an observation. It can be passed as date,
@@ -47,13 +47,17 @@ if ( getRversion() >= "2.15.1" ) {
 #' `t_start`.
 #' @param more_status A variable that marks further transitions beyond the
 #' default ones given by `state`. `more_status` can be a factor or character
-#' (see Details). If missing, `augment()` ignores it.
+#' (see Details). If `NULL` (default), `augment()` ignores it.
 #' @param check_NA If `TRUE`, `data_key`, `n_events`, `pattern`, `t_start`, and
 #' `t_end` are checked for missing values. If any missing values are found, the
 #' function stops with an error. Default is `FALSE` because `augment()` is not
 #' intended for general consistency checks and the scan can add memory overhead
 #' on very large datasets. `more_status` is always checked for missing values
 #' when supplied.
+#' @param copy If `FALSE` (default), `augment()` keeps the historical
+#' memory-efficient behavior and may modify caller-owned `data` by reference.
+#' If `TRUE`, `data` is copied before any `data.table` operation so the input
+#' object remains unchanged.
 #' @param verbosity Controls informational output. Use `"quiet"` to suppress
 #' status messages, `"summary"` for high-level phase messages and timing, and
 #' `"progress"` for phase messages plus progress bars in long status-building
@@ -66,22 +70,31 @@ if ( getRversion() >= "2.15.1" ) {
 #' first computes a progression number named *n_events* and then runs the same
 #' check.
 #'
-#' Argument `pattern` must follow the expected ordering. With two statuses,
-#' values must correspond to `0 = "alive"` and `1 = "dead"`. With three
-#' statuses, integer values must correspond to `0 = "alive"`,
-#' `1 = "dead inside a transition"`, and
+#' Argument `pattern` describes the terminal outcome schema and must follow the
+#' expected ordering. With two statuses, values must correspond to
+#' `0 = "alive"` and `1 = "dead"`. With three statuses, integer values must
+#' correspond to `0 = "alive"`, `1 = "dead inside a transition"`, and
 #' `2 = "dead outside a transition"`. Character and factor values must follow
 #' the same order. For example, `0` cannot be used to indicate death.
 #'
-#' The order of `state` also matters. The first element is the state at
-#' `t_start` (for example, `"IN"`), the second element is the state at `t_end`
-#' (for example, `"OUT"`), and the third element is the absorbing state (for
-#' example, `"DEAD"`).
+#' Argument `state` describes the generated transition-state vocabulary. Its
+#' order also matters. The first element is the state at `t_start` (for example,
+#' `"IN"`), the second element is the state at `t_end` (for example, `"OUT"`),
+#' and the third element is the absorbing state (for example, `"DEAD"`). A
+#' two-value `pattern` still requires three `state` labels because `augment()`
+#' infers whether death maps to the absorbing state inside or outside the
+#' transition window.
 #'
 #' `more_status` lets `augment()` represent transitions beyond the defaults in
 #' `state`. Standard admissions that add no extra information should use `"df"`
 #' for "default" (see Examples, or run `?hosp` and inspect `rehab_it`). More
 #' complex transitions should use concise, self-explanatory labels.
+#'
+#' By default, `augment()` follows **data.table** by-reference semantics to avoid
+#' unnecessary copies of large longitudinal datasets. This means the input may
+#' have its key changed, and `n_events` may be added when the argument is
+#' omitted. Set `copy = TRUE` when the original input object must remain
+#' unchanged.
 #'
 #' The function always returns a `data.table`. Use [as.data.frame()] on the
 #' result if a plain `data.frame` is needed by downstream code.
@@ -132,7 +145,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' @references Grossetti, F., Ieva, F., and Paganoni, A.M. (2018).
 #' A multi-state approach to patients affected by chronic heart failure.
 #' *Health Care Management Science*, 21, 281-291.
-#' <https://doi.org/10.1007/s10729-017-9400-z>.
+#' \doi{10.1007/s10729-017-9400-z}.
 #'
 #' Jackson, C.H. (2011). Multi-State Models for Panel Data: The
 #' **msm** Package for R. Journal of Statistical Software, 38(8), 1-29.
@@ -148,13 +161,15 @@ if ( getRversion() >= "2.15.1" ) {
 #' @export
 
 augment = function( data, data_key, n_events, pattern,
-                    state = list ( "IN", "OUT", "DEAD" ),
+                    state = c( "IN", "OUT", "DEAD" ),
                     t_start, t_end, t_cens, t_death, t_augmented,
-                    more_status, check_NA = FALSE,
+                    more_status = NULL, check_NA = FALSE, copy = FALSE,
                     verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
 
   tic = proc.time()
   verbosity = .msmtools_verbosity( verbosity )
+  .msmtools_validate_flag( copy, "copy" )
+  .msmtools_validate_flag( check_NA, "check_NA" )
   .msmtools_cli_rule( verbosity, "setting everything up" )
 
   .augment_validate_inputs(
@@ -168,6 +183,9 @@ augment = function( data, data_key, n_events, pattern,
     missing_t_cens = missing( t_cens )
   )
 
+  if ( copy ) {
+    data = data.table::copy( data )
+  }
   if ( inherits( data, "data.frame" ) ) {
     setDT( data )
   }
@@ -184,10 +202,11 @@ augment = function( data, data_key, n_events, pattern,
   } else {
     as.character( substitute( t_augmented ) )
   }
-  more_status = if ( missing( more_status ) ) {
+  more_status_arg = substitute( more_status )
+  more_status = if ( missing( more_status ) || is.null( more_status_arg ) ) {
     NULL
   } else {
-    as.character( substitute( more_status ) )
+    as.character( more_status_arg )
   }
 
   if ( is.null( t_death ) ) {
