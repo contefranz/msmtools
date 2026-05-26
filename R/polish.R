@@ -2,44 +2,6 @@ if ( getRversion() >= "2.15.1" ) {
   utils::globalVariables( c( ":=", ".I", ".N", "index" ) )
 }
 
-.polish_resolve_time = function( data ) {
-  if ( "augmented_int" %in% names( data ) ) {
-    return( "augmented_int" )
-  }
-  if ( "augmented_num" %in% names( data ) ) {
-    return( "augmented_num" )
-  }
-  stop( "time must be provided when data does not contain augmented_int or augmented_num" )
-}
-
-.polish_check_columns = function( data, columns ) {
-  missing_columns = setdiff( columns, names( data ) )
-  if ( length( missing_columns ) ) {
-    stop(
-      paste0(
-        "the following columns are not present in data: ",
-        paste( missing_columns, collapse = ", " )
-      )
-    )
-  }
-}
-
-.polish_pattern_values = function( data, pattern, verbosity ) {
-  values = sort( unique( data[[ pattern ]] ) )
-  if ( !length( values ) %in% 2:3 ) {
-    stop( "pattern must have 2 or 3 unique values" )
-  }
-  .msmtools_cli_info(
-    verbosity,
-    paste0( "checking ", pattern, " and defining patterns" )
-  )
-  .msmtools_cli_success(
-    verbosity,
-    paste0( "detected ", length( values ), " values in ", pattern )
-  )
-  values
-}
-
 #' Remove observations with different states occurring at the same time
 #'
 #' Remove subjects with transitions to different states occurring at the same
@@ -219,4 +181,63 @@ polish = function( data, data_key, pattern, time = NULL, check_NA = FALSE,
   }
   data.clean[]
   return( data.clean )
+}
+
+#' Resolve the default duplicate-time column for `polish()`
+#'
+#' Selects `augmented_int` when available, falls back to `augmented_num`, and
+#' errors when no default augmented time column exists.
+#'
+#' @keywords internal
+#' @noRd
+.polish_resolve_time = function( data ) {
+  if ( "augmented_int" %in% names( data ) ) {
+    return( "augmented_int" )
+  }
+  if ( "augmented_num" %in% names( data ) ) {
+    return( "augmented_num" )
+  }
+  stop( "time must be provided when data does not contain augmented_int or augmented_num" )
+}
+
+#' Check that required `polish()` columns exist
+#'
+#' Verifies that captured subject, pattern, and time columns are present before
+#' any keying or duplicate-detection work starts.
+#'
+#' @keywords internal
+#' @noRd
+.polish_check_columns = function( data, columns ) {
+  missing_columns = setdiff( columns, names( data ) )
+  if ( length( missing_columns ) ) {
+    stop(
+      paste0(
+        "the following columns are not present in data: ",
+        paste( missing_columns, collapse = ", " )
+      )
+    )
+  }
+}
+
+#' Extract and validate terminal pattern values for `polish()`
+#'
+#' Computes the unique pattern values and requires the same two- or three-value
+#' terminal outcome schema used by `augment()`.
+#'
+#' @keywords internal
+#' @noRd
+.polish_pattern_values = function( data, pattern, verbosity ) {
+  values = sort( unique( data[[ pattern ]] ) )
+  if ( !length( values ) %in% 2:3 ) {
+    stop( "pattern must have 2 or 3 unique values" )
+  }
+  .msmtools_cli_info(
+    verbosity,
+    paste0( "checking ", pattern, " and defining patterns" )
+  )
+  .msmtools_cli_success(
+    verbosity,
+    paste0( "detected ", length( values ), " values in ", pattern )
+  )
+  values
 }
