@@ -23,8 +23,8 @@ augment_hosp = function(data = test_hosp(), pattern = c("label_3", "label_2"),
 
 test_qmatrix = function() {
   qmat = matrix(data = 0, nrow = 3, ncol = 3, byrow = TRUE)
-  qmat[ 1, 1:3 ] = 1
-  qmat[ 2, 1:3 ] = 1
+  qmat[1, 1:3] = 1
+  qmat[2, 1:3] = 1
   colnames(qmat) = c("IN", "OUT", "DEAD")
   rownames(qmat) = c("IN", "OUT", "DEAD")
   qmat

@@ -1,3 +1,42 @@
+# msmtools 2.1.4
+***
+
+### BUG FIX
+
+* `augment()` now closes the post-discharge observation window of alive
+  subjects at `t_cens` instead of repeating the last `t_end`. Previously,
+  the final transition row for any subject who survived to the censoring
+  date carried the same time as the preceding row, silently truncating
+  the at-risk window. Any `msm` model fitted on the augmented data was
+  therefore biased: transition-rate estimates were systematically pulled
+  downward because every alive subject's post-discharge follow-up was
+  collapsed to zero duration. Closes
+  [#7](https://github.com/contefranz/msmtools/issues/7).
+
+  Models refit on `augment()` output produced with **msmtools 2.1.4** or
+  later will give different (and more correct) parameter estimates than
+  models fitted on output from earlier versions. The behaviour of
+  subjects who died (`pattern` values 1 or 2) is unchanged.
+
+### TESTS
+
+* The internal regression fixture
+  `tests/testthat/fixtures/augment-hosp-date.rds` has been regenerated
+  against the corrected `augment()` output.
+
+* Added regression coverage for the at-risk window of alive subjects and
+  for the unchanged time semantics of subjects who died.
+
+### CODE STYLE
+
+* Completed the data.table bracket-spacing normalisation started in the
+  2.1.3 audit. `R/augment.R`, `R/augment-helpers.R`, and the testthat
+  files now share the unspaced `dt[, col := value]` convention already
+  used by the plotting and polish sources.
+
+* `.onAttach()` is excluded from coverage reports via `# nocov` markers;
+  startup messages add nothing to test signal.
+
 # msmtools 2.1.3
 ***
 

@@ -9,8 +9,8 @@ test_that("polish removes subjects with duplicate transition times", {
   hosp_aug = augment_hosp()
   duplicate_input = data.table::copy(hosp_aug)
   rows = which(duplicate_input$subj == 1 & duplicate_input$status != "DEAD")
-  duplicate_input[ rows[ 2 ], augmented := duplicate_input[ rows[ 1 ], augmented ] ]
-  duplicate_input[ rows[ 2 ], augmented_int := duplicate_input[ rows[ 1 ], augmented_int ] ]
+  duplicate_input[rows[2], augmented := duplicate_input[rows[1], augmented]]
+  duplicate_input[rows[2], augmented_int := duplicate_input[rows[1], augmented_int]]
 
   hosp_clean = polish(duplicate_input, subj, label_3)
 
@@ -40,8 +40,8 @@ test_that("polish resolves time columns explicitly", {
  )
 
   fallback_input = data.table::copy(hosp_aug)
-  fallback_input[ , augmented_num := augmented_int ]
-  fallback_input[ , augmented_int := NULL ]
+  fallback_input[, augmented_num := augmented_int]
+  fallback_input[, augmented_int := NULL]
   fallback = polish(fallback_input, subj, label_3)
 
   expect_s3_class(fallback, "data.table")
@@ -65,7 +65,7 @@ test_that("polish validates columns and pattern schemas", {
   hosp_aug = augment_hosp()
 
   no_time = data.table::copy(hosp_aug)
-  no_time[ , augmented_int := NULL ]
+  no_time[, augmented_int := NULL]
   expect_error(
     polish(no_time, subj, label_3),
     "time must be provided"
@@ -84,14 +84,14 @@ test_that("polish validates columns and pattern schemas", {
  )
 
   one_value = data.table::copy(hosp_aug)
-  one_value[ , one_pattern := "alive" ]
+  one_value[, one_pattern := "alive"]
   expect_error(
     polish(one_value, subj, one_pattern),
     "pattern must have 2 or 3 unique values"
  )
 
   four_values = data.table::copy(hosp_aug)
-  four_values[ , four_pattern := rep(c("a", "b", "c", "d"), length.out = .N) ]
+  four_values[, four_pattern := rep(c("a", "b", "c", "d"), length.out = .N)]
   expect_error(
     polish(four_values, subj, four_pattern),
     "pattern must have 2 or 3 unique values"
@@ -101,7 +101,7 @@ test_that("polish validates columns and pattern schemas", {
 test_that("polish reports checked missing values clearly", {
   hosp_aug = augment_hosp()
   missing_time = data.table::copy(hosp_aug)
-  missing_time[ 1L, augmented_int := NA_real_ ]
+  missing_time[1L, augmented_int := NA_real_]
 
   expect_error(
     polish(missing_time, subj, label_3, check_NA = TRUE),

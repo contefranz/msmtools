@@ -1,4 +1,5 @@
 #' @importFrom utils packageVersion
+# nocov start
 .onAttach = function(libname, pkgname) {
   # Runs when attached to search() path such as by library() or require()
   if (interactive()) {
@@ -7,3 +8,4 @@
     packageStartupMessage('If you find a bug, please report it at https://github.com/contefranz/msmtools/issues')
   }
 }
+# nocov end

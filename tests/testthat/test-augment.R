@@ -38,7 +38,7 @@ test_that("augment validates required inputs and state shape", {
 
 test_that("augment validates time classes", {
   hosp_bad = test_hosp()
-  hosp_bad[ , dateOUT_num := as.numeric(dateOUT) ]
+  hosp_bad[, dateOUT_num := as.numeric(dateOUT)]
 
   expect_warning(
     expect_error(
@@ -114,9 +114,9 @@ test_that("state vector controls generated transition labels", {
   expect_true(all(hosp_aug_2$status %in% custom_state))
   expect_true(all(custom_state %in% hosp_aug_3$status))
   expect_true(all(custom_state %in% hosp_aug_2$status))
-  expect_true(all(hosp_aug_3$n_status[ hosp_aug_3$status == "ABSORBING" ] ==
+  expect_true(all(hosp_aug_3$n_status[hosp_aug_3$status == "ABSORBING"] ==
                       "ABSORBING"))
-  expect_true(all(hosp_aug_2$n_status[ hosp_aug_2$status == "ABSORBING" ] ==
+  expect_true(all(hosp_aug_2$n_status[hosp_aug_2$status == "ABSORBING"] ==
                       "ABSORBING"))
 })
 
@@ -130,7 +130,7 @@ test_that("check_NA catches missing values and passes clean data", {
  )
 
   hosp_missing = test_hosp()
-  hosp_missing[ 1, dateIN := as.Date(NA) ]
+  hosp_missing[1, dateIN := as.Date(NA)]
 
   expect_warning(
     expect_error(
@@ -203,9 +203,9 @@ test_that("Date inputs create integer augmented time", {
 
 test_that("numeric time inputs keep numeric augmented time", {
   hosp_num = test_hosp()
-  hosp_num[ , dateIN_num := as.numeric(dateIN) ]
-  hosp_num[ , dateOUT_num := as.numeric(dateOUT) ]
-  hosp_num[ , dateCENS_num := as.numeric(dateCENS) ]
+  hosp_num[, dateIN_num := as.numeric(dateIN)]
+  hosp_num[, dateOUT_num := as.numeric(dateOUT)]
+  hosp_num[, dateCENS_num := as.numeric(dateCENS)]
 
   hosp_aug = suppressWarnings(
     augment(hosp_num, subj, adm_number, label_3, t_start = dateIN_num,
@@ -219,13 +219,13 @@ test_that("numeric time inputs keep numeric augmented time", {
 
 test_that("integer and factor patterns are accepted", {
   hosp_int = test_hosp()
-  hosp_int[ , label_int := data.table::fifelse(
+  hosp_int[, label_int := data.table::fifelse(
     label_3 == "alive", 0L,
     data.table::fifelse(label_3 == "dead_in", 1L, 2L)
- ) ]
+ )]
   hosp_factor = test_hosp()
-  hosp_factor[ , label_factor := factor(label_3,
-                                         levels = c("alive", "dead_in", "dead_out")) ]
+  hosp_factor[, label_factor := factor(label_3,
+                                         levels = c("alive", "dead_in", "dead_out"))]
 
   int_aug = suppressWarnings(
     augment(hosp_int, subj, adm_number, label_int, t_start = dateIN,
@@ -243,12 +243,12 @@ test_that("integer and factor patterns are accepted", {
 test_that("difftime inputs create numeric augmented time", {
   hosp_diff = test_hosp()
   origin = min(hosp_diff$dateIN)
-  hosp_diff[ , dateIN_diff := as.difftime(as.numeric(dateIN - origin),
-                                           units = "days") ]
-  hosp_diff[ , dateOUT_diff := as.difftime(as.numeric(dateOUT - origin),
-                                            units = "days") ]
-  hosp_diff[ , dateCENS_diff := as.difftime(as.numeric(dateCENS - origin),
-                                             units = "days") ]
+  hosp_diff[, dateIN_diff := as.difftime(as.numeric(dateIN - origin),
+                                           units = "days")]
+  hosp_diff[, dateOUT_diff := as.difftime(as.numeric(dateOUT - origin),
+                                            units = "days")]
+  hosp_diff[, dateCENS_diff := as.difftime(as.numeric(dateCENS - origin),
+                                             units = "days")]
 
   hosp_aug = suppressWarnings(
     augment(hosp_diff, subj, adm_number, label_3, t_start = dateIN_diff,
@@ -282,6 +282,42 @@ test_that("explicit NULL more_status matches omitted more_status", {
   expect_identical(augment_hosp(), augment_hosp(more_status = NULL))
 })
 
+test_that("alive subjects close the at-risk window at t_cens (issue #7)", {
+  hosp_raw = data.table::as.data.table(test_hosp())
+  hosp_aug = augment_hosp()
+
+  subj2_raw = hosp_raw[subj == 2]
+  subj2_aug = hosp_aug[subj == 2]
+  expected_last_int = as.integer(max(subj2_raw$dateCENS))
+  n = nrow(subj2_aug)
+
+  expect_equal(as.integer(subj2_aug$augmented[n]), expected_last_int)
+  expect_equal(subj2_aug$augmented_int[n], expected_last_int)
+
+  last_per_subj = hosp_raw[, .SD[.N], by = subj]
+  alive_subjects = last_per_subj[label_3 == "alive", subj]
+  expect_true(length(alive_subjects) > 0L)
+  for (sid in alive_subjects) {
+    rows = hosp_aug[subj == sid]
+    m = nrow(rows)
+    expect_gt(rows$augmented_int[m], rows$augmented_int[m - 1L])
+  }
+})
+
+test_that("dead-subject augmented times close at the death/cens time", {
+  hosp_raw = data.table::as.data.table(test_hosp())
+  hosp_aug = augment_hosp()
+
+  last_per_subj = hosp_raw[, .SD[.N], by = subj]
+  dead_subjects = last_per_subj[label_3 %in% c("dead_in", "dead_out"), subj]
+  expect_true(length(dead_subjects) > 0L)
+  for (sid in dead_subjects) {
+    expected_int = as.integer(max(hosp_raw[subj == sid]$dateCENS))
+    aug_rows = hosp_aug[subj == sid]
+    expect_equal(aug_rows$augmented_int[nrow(aug_rows)], expected_int)
+  }
+})
+
 test_that("two-value pattern with explicit t_death is augmented", {
   hosp_aug = augment(test_hosp(), subj, adm_number, label_2,
                      t_start = dateIN, t_end = dateOUT,
@@ -293,7 +329,7 @@ test_that("two-value pattern with explicit t_death is augmented", {
 
 test_that("non-monotonic n_events stops augment with a helpful error", {
   bad = test_hosp()
-  bad[ , adm_number := rev(adm_number), by = subj ]
+  bad[, adm_number := rev(adm_number), by = subj]
 
   expect_error(
     suppressWarnings(
@@ -307,7 +343,7 @@ test_that("non-monotonic n_events stops augment with a helpful error", {
 
 test_that("pattern with fewer than two unique values is rejected", {
   single = test_hosp()
-  single[ , single_pattern := 0L ]
+  single[, single_pattern := 0L]
 
   expect_error(
     suppressWarnings(
@@ -320,7 +356,7 @@ test_that("pattern with fewer than two unique values is rejected", {
 
 test_that("pattern with more than three unique values is rejected", {
   many = test_hosp()
-  many[ , many_pattern := rep(c(0L, 1L, 2L, 3L), length.out = .N) ]
+  many[, many_pattern := rep(c(0L, 1L, 2L, 3L), length.out = .N)]
 
   expect_error(
     suppressWarnings(
