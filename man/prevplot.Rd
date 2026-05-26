@@ -58,6 +58,12 @@ observed counts \code{O_is} and expected counts \code{E_is} is built as
 
 The deviance \code{M} plot is returned together with the standard prevalence plot
 in the second row. This layout is fixed.
+
+When \code{M = TRUE}, the combined layout is built with \strong{patchwork}, which is
+an optional dependency of \strong{msmtools}. Install it with
+\code{install.packages("patchwork")} if it is not already available; \code{prevplot()}
+raises an informative error otherwise. The default \code{M = FALSE} path has no
+such requirement.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

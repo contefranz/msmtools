@@ -15,9 +15,9 @@ and an optional terminal outcome — clinical follow-ups, customer journeys,
 machine usage spells, employment histories, and so on. The package returns
 transition-level rows, numeric state indicators, and diagnostic plots.
 
-From version 2.1.3, **msmtools** targets a modern CRAN baseline: R 4.1 or newer
+From version 2.0.4, **msmtools** targets a modern CRAN baseline: R 4.1 or newer
 and current releases of **data.table**, **msm**, **survival**, **ggplot2**, and
-**cli**. **patchwork** is an optional dependency required only by
+**cli**. Since 2.1.3, **patchwork** is an optional dependency required only by
 `prevplot(M = TRUE)`.
 
 ### Installation
