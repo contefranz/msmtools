@@ -70,15 +70,15 @@ result if a plain \code{data.frame} is needed by downstream code.
 \examples{
 
 # loading data
-data( hosp )
+data(hosp)
 
 # augmenting longitudinal data
-hosp_aug = augment( data = hosp, data_key = subj, n_events = adm_number,
-                    pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                    t_cens = dateCENS )
+hosp_aug = augment(data = hosp, data_key = subj, n_events = adm_number,
+                   pattern = label_3, t_start = dateIN, t_end = dateOUT,
+                   t_cens = dateCENS)
 
 # cleaning targeted duplicate transitions
-hosp_aug_clean = polish( data = hosp_aug, data_key = subj, pattern = label_3 )
+hosp_aug_clean = polish(data = hosp_aug, data_key = subj, pattern = label_3)
 
 }
 \seealso{
