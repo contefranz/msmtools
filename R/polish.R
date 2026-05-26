@@ -49,7 +49,6 @@ if (getRversion() >= "2.15.1") {
 #' hosp_aug_clean = polish(data = hosp_aug, data_key = subj, pattern = label_3)
 #'
 #' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
-#' @importFrom data.table setDT setkey setkeyv rbindlist uniqueN
 #' @export
 
 polish = function(data, data_key, pattern, time = NULL, check_NA = FALSE,
@@ -77,11 +76,11 @@ polish = function(data, data_key, pattern, time = NULL, check_NA = FALSE,
     data = data.table::copy(data)
   }
   if (inherits(data, 'data.frame')) {
-    setDT(data)
+    data.table::setDT(data)
   }
   .msmtools_cli_rule(verbosity, "setting everything up")
 
-  setkey(data, NULL)
+  data.table::setkey(data, NULL)
   cols = as.character(substitute(data_key))
   if (!length(cols)) {
     cols = colnames(data)
@@ -95,7 +94,7 @@ polish = function(data, data_key, pattern, time = NULL, check_NA = FALSE,
     time = as.character(time_arg)
   }
   .polish_check_columns(data, c(cols, pattern, time))
-  setkeyv(data, cols)
+  data.table::setkeyv(data, cols)
 
   if (isTRUE(check_NA)) {
     .msmtools_cli_info(
@@ -114,13 +113,13 @@ polish = function(data, data_key, pattern, time = NULL, check_NA = FALSE,
   }
 
   data[, index := sequence(.N)]
-  n_patients = uniqueN(data[[cols[[1]]]])
+  n_patients = data.table::uniqueN(data[[cols[[1]]]])
   values = .polish_pattern_values(data, pattern, verbosity)
 
   alive = data[get(pattern) == values[1]]
   alive.last = alive[alive[, .I[.N], by = eval(cols)]$V1]
-  setkey(alive.last, index)
-  setkey(alive, index)
+  data.table::setkey(alive.last, index)
+  data.table::setkey(alive, index)
   alive.no.last = alive[!alive.last]
 
   if (length(values) == 2) {
@@ -130,12 +129,12 @@ polish = function(data, data_key, pattern, time = NULL, check_NA = FALSE,
   }
 
   l = list(alive.no.last, dead)
-  data.no.last.event = rbindlist(l)
+  data.no.last.event = data.table::rbindlist(l)
   row.duplicated = duplicated(data.no.last.event,
                               by = c(eval(cols), eval(time)))
   duplicated = data.no.last.event[row.duplicated == TRUE]
-  n_duplicated = uniqueN(duplicated[[cols[[1]]]])
-  setkeyv(duplicated, cols)
+  n_duplicated = data.table::uniqueN(duplicated[[cols[[1]]]])
+  data.table::setkeyv(duplicated, cols)
 
   if (n_duplicated == 0) {
     .msmtools_cli_success(
@@ -151,7 +150,7 @@ polish = function(data, data_key, pattern, time = NULL, check_NA = FALSE,
       )
     )
     data.clean = data[!duplicated]
-    n_patients.to.keep = uniqueN(data.clean[[cols[[1]]]])
+    n_patients.to.keep = data.table::uniqueN(data.clean[[cols[[1]]]])
     .msmtools_cli_success(
       verbosity,
       paste0(

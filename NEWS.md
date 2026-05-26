@@ -10,6 +10,9 @@
 * Replaced remaining `polish()` console output with the shared `cli` verbosity
   helpers used by `augment()`.
 
+* Qualified `polish()` calls to external **data.table** functions explicitly
+  instead of relying on roxygen imports.
+
 * Added clearer validation for `polish()` inputs, including missing columns and
   terminal outcome schemas with anything other than 2 or 3 unique values.
 
