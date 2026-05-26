@@ -111,9 +111,13 @@ test_that( "polish reports checked missing values clearly", {
 
 test_that( "polish accepts summary verbosity", {
   hosp_aug = augment_hosp()
-  hosp_clean = polish(
-    data.table::copy( hosp_aug ), subj, label_3, verbosity = "summary"
+  output = utils::capture.output(
+    hosp_clean <- polish(
+      data.table::copy( hosp_aug ), subj, label_3, verbosity = "summary"
+    ),
+    type = "message"
   )
 
+  expect_true( length( output ) > 0L )
   expect_s3_class( hosp_clean, "data.table" )
 } )
