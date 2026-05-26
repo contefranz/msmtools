@@ -35,6 +35,15 @@ returned. If \code{FALSE}, the plot is returned without printing.}
 \item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
 status messages and \code{"summary"} or \code{"progress"} for high-level messages.}
 }
+\value{
+When \code{M = FALSE}, a \code{gg/ggplot} object with observed and expected
+prevalences is returned. When \code{M = TRUE}, a \code{patchwork} object is returned
+with the prevalence plot and the deviance \code{M} plot.
+
+\code{print_plot} only controls whether the plot is printed as a side effect.
+Returned objects are unchanged: use \code{print_plot = FALSE} to create the plot
+silently.
+}
 \description{
 Plot observed and expected state prevalences from a fitted multi-state model.
 The function can also compute a rough diagnostic for where the data depart

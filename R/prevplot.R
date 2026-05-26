@@ -29,6 +29,13 @@ if (getRversion() >= "2.15.1") {
 #'
 #' The deviance `M` plot is returned together with the standard prevalence plot
 #' in the second row. This layout is fixed.
+#' @returns When `M = FALSE`, a `gg/ggplot` object with observed and expected
+#' prevalences is returned. When `M = TRUE`, a `patchwork` object is returned
+#' with the prevalence plot and the deviance `M` plot.
+#'
+#' `print_plot` only controls whether the plot is printed as a side effect.
+#' Returned objects are unchanged: use `print_plot = FALSE` to create the plot
+#' silently.
 #'
 #' @seealso [msm::plot.prevalence.msm()], [msm::msm()],
 #' [msm::prevalence.msm()]

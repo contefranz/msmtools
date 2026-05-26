@@ -93,10 +93,14 @@ status messages and \code{"summary"} or \code{"progress"} for high-level message
 }
 \value{
 When \code{out = "none"}, a \code{gg/ggplot} object is returned. If \code{out} is
-anything else, then a named list is returned. The Kaplan-Meier data can be
-accessed with \verb{$km} while the estimated survival data can be accessed with
-\verb{$fitted}. If \code{out = "all"}, the plot, the Kaplan-Meier curve, and the
-estimated curve are returned.
+anything else, a named list is returned. The list always includes the plot in
+\code{p}; it also includes \code{fitted}, \code{km}, or both, depending on \code{out}. The
+Kaplan-Meier data can be accessed with \verb{$km} while the estimated survival
+data can be accessed with \verb{$fitted}.
+
+\code{print_plot} only controls whether the plot is printed as a side effect.
+Returned objects are unchanged: use \code{print_plot = FALSE} to create the plot
+or returned data silently.
 }
 \description{
 Plot fitted survival probabilities from an \code{\link[msm:msm]{msm::msm()}} model and compare

@@ -67,11 +67,15 @@ if (getRversion() >= "2.15.1") {
 #' You can pass custom evaluation times through `times`, or let `survplot()`
 #' define them from `grid`. Larger `grid` values produce a finer grid and
 #' increase computation time.
-#' @return When `out = "none"`, a `gg/ggplot` object is returned. If `out` is
-#' anything else, then a named list is returned. The Kaplan-Meier data can be
-#' accessed with `$km` while the estimated survival data can be accessed with
-#' `$fitted`. If `out = "all"`, the plot, the Kaplan-Meier curve, and the
-#' estimated curve are returned.
+#' @returns When `out = "none"`, a `gg/ggplot` object is returned. If `out` is
+#' anything else, a named list is returned. The list always includes the plot in
+#' `p`; it also includes `fitted`, `km`, or both, depending on `out`. The
+#' Kaplan-Meier data can be accessed with `$km` while the estimated survival
+#' data can be accessed with `$fitted`.
+#'
+#' `print_plot` only controls whether the plot is printed as a side effect.
+#' Returned objects are unchanged: use `print_plot = FALSE` to create the plot
+#' or returned data silently.
 #'
 #' @examplesIf interactive()
 #' data(hosp)
