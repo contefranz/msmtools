@@ -1,6 +1,45 @@
 if ( getRversion() >= "2.15.1" ) {
   utils::globalVariables( c( ":=", ".I", ".N", "index" ) )
 }
+
+.polish_resolve_time = function( data ) {
+  if ( "augmented_int" %in% names( data ) ) {
+    return( "augmented_int" )
+  }
+  if ( "augmented_num" %in% names( data ) ) {
+    return( "augmented_num" )
+  }
+  stop( "time must be provided when data does not contain augmented_int or augmented_num" )
+}
+
+.polish_check_columns = function( data, columns ) {
+  missing_columns = setdiff( columns, names( data ) )
+  if ( length( missing_columns ) ) {
+    stop(
+      paste0(
+        "the following columns are not present in data: ",
+        paste( missing_columns, collapse = ", " )
+      )
+    )
+  }
+}
+
+.polish_pattern_values = function( data, pattern, verbosity ) {
+  values = sort( unique( data[[ pattern ]] ) )
+  if ( !length( values ) %in% 2:3 ) {
+    stop( "pattern must have 2 or 3 unique values" )
+  }
+  .msmtools_cli_info(
+    verbosity,
+    paste0( "checking ", pattern, " and defining patterns" )
+  )
+  .msmtools_cli_success(
+    verbosity,
+    paste0( "detected ", length( values ), " values in ", pattern )
+  )
+  values
+}
+
 #' Remove observations with different states occurring at the same time
 #'
 #' Remove subjects with transitions to different states occurring at the same
@@ -8,7 +47,9 @@ if ( getRversion() >= "2.15.1" ) {
 #'
 #' @inheritParams augment
 #' @param time The time variable used to identify duplicate transition times.
-#' By default it is set to `"augmented_int"`.
+#' If omitted or set to `NULL`, `polish()` uses `"augmented_int"` when it is
+#' available, then `"augmented_num"`. If neither column exists, `time` must be
+#' supplied explicitly.
 #' @param check_NA If `TRUE`, `data_key`, `pattern`, and `time` are checked for
 #' missing values. If any missing values are found, the function stops with an
 #' error. Default is `FALSE`.
@@ -49,7 +90,7 @@ if ( getRversion() >= "2.15.1" ) {
 #' @importFrom data.table setDT setkey setkeyv rbindlist uniqueN
 #' @export
 
-polish = function( data, data_key, pattern, time, check_NA = FALSE,
+polish = function( data, data_key, pattern, time = NULL, check_NA = FALSE,
                    copy = FALSE,
                    verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
 
@@ -76,66 +117,43 @@ polish = function( data, data_key, pattern, time, check_NA = FALSE,
   if ( inherits( data, 'data.frame' ) ) {
     setDT( data )
   }
-  if ( .msmtools_is_summary( verbosity ) ) {
-    cat( '-------------------------------------\n' )
-    cat( '# # # # setting everything up # # # #\n' )
-    cat( '-------------------------------------\n' )
-  }
+  .msmtools_cli_rule( verbosity, "setting everything up" )
 
   setkey( data, NULL )
   cols = as.character( substitute( data_key ) )
   if ( !length( cols ) ) {
     cols = colnames( data )
   }
-  setkeyv( data, cols )
   pattern = as.character( substitute( pattern ) )
-  if ( missing( time ) ) {
-    if ( "augmented_int" %in% names( data ) ) {
-      if ( .msmtools_is_summary( verbosity ) ) {
-        cat( "augmented_int set as time variable\n" )
-        cat( "---\n" )
-      }
-      time = 'augmented_int'
-    } else if ( "augmented_num" %in% names( data ) ) {
-      if ( .msmtools_is_summary( verbosity ) ) {
-        cat( "augmented_num set as time variable\n" )
-        cat( "---\n" )
-      }
-      time = 'augmented_num'
-    }
+  time_arg = substitute( time )
+  if ( missing( time ) || is.null( time_arg ) ) {
+    time = .polish_resolve_time( data )
+    .msmtools_cli_info( verbosity, paste0( time, " set as time variable" ) )
   } else {
-    time = as.character( substitute( time ) )
+    time = as.character( time_arg )
   }
+  .polish_check_columns( data, c( cols, pattern, time ) )
+  setkeyv( data, cols )
 
-  if ( check_NA == TRUE ) {
-    if ( .msmtools_is_summary( verbosity ) ) {
-      message( 'checking for any missing values in function arguments' )
-    }
+  if ( isTRUE( check_NA ) ) {
+    .msmtools_cli_info(
+      verbosity,
+      "checking for any missing values in function arguments"
+    )
     checks = c( cols, pattern, time )
     test = apply( data[ , checks, with = FALSE ], 2,
                   function( x ) any( sum( is.na( x ) ) > 0 ) )
     if ( any ( test ) ) {
-      if ( .msmtools_is_summary( verbosity ) ) {
-        message( 'detected missing values in the following variables:' )
-        invisible( sapply( names( test[ test == TRUE ] ),
-                           function( x ) cat( x, '\n' ) ) )
-      }
-      stop( 'Please, fix the issues and relaunch polish()' )
+      missing_values = paste( names( test[ test == TRUE ] ), collapse = ", " )
+      stop( paste0( "missing values detected in: ", missing_values ) )
     } else {
-      if ( .msmtools_is_summary( verbosity ) ) {
-        cat( 'Ok, no missing values detected\n')
-        cat( '---\n' )
-      }
+      .msmtools_cli_success( verbosity, "no missing values detected" )
     }
   }
 
   data[ , index := sequence( .N ) ]
   n_patients = uniqueN( data[[ cols[[ 1 ]] ]] )
-  values = sort( unique( data[[ pattern ]] ) )
-  if ( length( values ) < 2 ) {
-    stop( 'unit identification label must be an integer,
-          a factor or a character with at least 2 elements' )
-  }
+  values = .polish_pattern_values( data, pattern, verbosity )
 
   alive = data[ get( pattern ) == values[ 1 ] ]
   alive.last = alive[ alive[ , .I[ .N ], by = eval( cols ) ]$V1 ]
@@ -143,20 +161,9 @@ polish = function( data, data_key, pattern, time, check_NA = FALSE,
   setkey( alive, index )
   alive.no.last = alive[ !alive.last ]
 
-  if ( .msmtools_is_summary( verbosity ) ) {
-    message( 'checking ', pattern, ' and defining patterns' )
-  }
   if ( length( values ) == 2 ) {
-    if ( .msmtools_is_summary( verbosity ) ) {
-      cat( 'detected only 2 values\n' )
-      cat( '---\n' )
-    }
     dead = data[ get( pattern ) == values[ 2 ] ]
   } else if ( length( values ) == 3 ) {
-    if ( .msmtools_is_summary( verbosity ) ) {
-      cat( 'Ok, detected 3 values\n' )
-      cat( '---\n' )
-    }
     dead = data[ get( pattern ) != values[ 1 ] ]
   }
 
@@ -169,36 +176,42 @@ polish = function( data, data_key, pattern, time, check_NA = FALSE,
   setkeyv( duplicated, cols )
 
   if ( n_duplicated == 0 ) {
-    if ( .msmtools_is_summary( verbosity ) ) {
-      cat( 'Hurray! No duplicated occurrences have been found according to variable ',
-           time, "\n", sep = "" )
-    }
+    .msmtools_cli_success(
+      verbosity,
+      paste0( "no duplicated occurrences found according to ", time )
+    )
   } else {
-    if ( .msmtools_is_summary( verbosity ) ) {
-      message( 'Spotted ', n_duplicated,
-               ' patients with at least a duplicated occurrence according to variable ',
-               time )
-    }
+    .msmtools_cli_info(
+      verbosity,
+      paste0(
+        "spotted ", n_duplicated,
+        " subjects with at least one duplicated occurrence according to ", time
+      )
+    )
     data.clean = data[ !duplicated ]
     n_patients.to.keep = uniqueN( data.clean[[ cols[[ 1 ]] ]] )
-    if ( .msmtools_is_summary( verbosity ) ) {
-      cat( n_patients.to.keep, ' patients have been reained corresponding to ',
-           round( 100 * ( n_patients.to.keep / n_patients ), 2 ), '%\n', sep = '' )
-      cat( 'Duplicated patients have been successfully removed\n' )
-    }
+    .msmtools_cli_success(
+      verbosity,
+      paste0(
+        n_patients.to.keep, " subjects retained, corresponding to ",
+        round( 100 * ( n_patients.to.keep / n_patients ), 2 ), "%"
+      )
+    )
+    .msmtools_cli_success(
+      verbosity,
+      "duplicated subjects have been successfully removed"
+    )
   }
 
   data[ , index := NULL ]
   if ( n_duplicated > 0 ) {
     data.clean[ , index := NULL ]
   }
-  toc = proc.time()
-  time = toc - tic
-  if ( .msmtools_is_summary( verbosity ) ) {
-    cat( '---------------------------\n' )
-    cat( 'polish() took:', time[ 3 ], 'sec. \n', sep = ' ' )
-    cat( '---------------------------\n' )
-  }
+  elapsed = proc.time() - tic
+  .msmtools_cli_rule(
+    verbosity,
+    paste0( "polish() took: ", elapsed[ 3 ], " sec." )
+  )
 
   if ( n_duplicated == 0 ) {
     data[]
