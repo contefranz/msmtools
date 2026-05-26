@@ -247,7 +247,8 @@ augment = function(data, data_key, n_events, pattern,
     final, cols, state, "status", "n_status", verbosity
  )
   final = .augment_add_time_columns(
-    final, data, state, t_start, t_end, t_cens, t_death, t_augmented, verbosity
+    final, data, state, t_start, t_end, t_cens, t_death, t_augmented,
+    cols, pattern, values, verbosity
  )
   if (!is.null(more_status)) {
     final = .augment_add_expanded_status(

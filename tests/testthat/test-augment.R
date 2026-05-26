@@ -282,6 +282,42 @@ test_that("explicit NULL more_status matches omitted more_status", {
   expect_identical(augment_hosp(), augment_hosp(more_status = NULL))
 })
 
+test_that("alive subjects close the at-risk window at t_cens (issue #7)", {
+  hosp_raw = data.table::as.data.table(test_hosp())
+  hosp_aug = augment_hosp()
+
+  subj2_raw = hosp_raw[subj == 2]
+  subj2_aug = hosp_aug[subj == 2]
+  expected_last_int = as.integer(max(subj2_raw$dateCENS))
+  n = nrow(subj2_aug)
+
+  expect_equal(as.integer(subj2_aug$augmented[n]), expected_last_int)
+  expect_equal(subj2_aug$augmented_int[n], expected_last_int)
+
+  last_per_subj = hosp_raw[, .SD[.N], by = subj]
+  alive_subjects = last_per_subj[label_3 == "alive", subj]
+  expect_true(length(alive_subjects) > 0L)
+  for (sid in alive_subjects) {
+    rows = hosp_aug[subj == sid]
+    m = nrow(rows)
+    expect_gt(rows$augmented_int[m], rows$augmented_int[m - 1L])
+  }
+})
+
+test_that("dead-subject augmented times close at the death/cens time", {
+  hosp_raw = data.table::as.data.table(test_hosp())
+  hosp_aug = augment_hosp()
+
+  last_per_subj = hosp_raw[, .SD[.N], by = subj]
+  dead_subjects = last_per_subj[label_3 %in% c("dead_in", "dead_out"), subj]
+  expect_true(length(dead_subjects) > 0L)
+  for (sid in dead_subjects) {
+    expected_int = as.integer(max(hosp_raw[subj == sid]$dateCENS))
+    aug_rows = hosp_aug[subj == sid]
+    expect_equal(aug_rows$augmented_int[nrow(aug_rows)], expected_int)
+  }
+})
+
 test_that("two-value pattern with explicit t_death is augmented", {
   hosp_aug = augment(test_hosp(), subj, adm_number, label_2,
                      t_start = dateIN, t_end = dateOUT,

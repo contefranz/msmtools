@@ -331,6 +331,7 @@
 
 .augment_add_time_columns = function(final, data, state, t_start, t_end,
                                       t_cens, t_death, t_augmented,
+                                      cols, pattern, values,
                                       verbosity) {
   .msmtools_cli_info(
     verbosity,
@@ -338,6 +339,19 @@
  )
   final[status == state[[1]], (t_augmented) := get(t_start)]
   final[status == state[[2]], (t_augmented) := get(t_end)]
+  # The status sequence for alive subjects ends with a trailing OUT row that
+  # represents the post-discharge observation window up to t_cens. Without
+  # this override that row would inherit t_end (the last dateOUT), collapsing
+  # the censoring window to zero and biasing transition-rate estimates
+  # downward when the augmented data is fed to msm::msm(). Closes #7.
+  last_out_alive = final[
+    status == state[[2]] & get(pattern) == values[[1]],
+    .I[.N],
+    by = eval(cols[[1]])
+  ]$V1
+  if (length(last_out_alive)) {
+    final[last_out_alive, (t_augmented) := get(t_cens)]
+  }
   death_time = if (is.null(t_death)) t_cens else t_death
   final[status == state[[3]], (t_augmented) := get(death_time)]
 
