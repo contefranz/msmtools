@@ -4,7 +4,15 @@
 \alias{prevplot}
 \title{Plot observed and expected prevalences for a multi-state model}
 \usage{
-prevplot(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE)
+prevplot(
+  x,
+  prev.obj,
+  exacttimes = TRUE,
+  M = FALSE,
+  ci = FALSE,
+  print_plot = TRUE,
+  verbosity = getOption("msmtools.verbosity", "quiet")
+)
 }
 \arguments{
 \item{x}{A fitted \strong{msm} model object.}
@@ -20,6 +28,12 @@ computed (see Details). Default is \code{FALSE}.}
 
 \item{ci}{If \code{TRUE}, confidence intervals are plotted when available.
 Default is \code{FALSE}.}
+
+\item{print_plot}{If \code{TRUE} (default), the plot is printed before being
+returned. If \code{FALSE}, the plot is returned without printing.}
+
+\item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
+status messages and \code{"summary"} or \code{"progress"} for high-level messages.}
 }
 \description{
 Plot observed and expected state prevalences from a fitted multi-state model.

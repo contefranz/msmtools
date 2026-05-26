@@ -18,7 +18,9 @@ survplot(
   ci = c("none", "normal", "bootstrap"),
   interp = c("start", "midpoint"),
   B = 100L,
-  ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin")
+  ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin"),
+  print_plot = TRUE,
+  verbosity = getOption("msmtools.verbosity", "quiet")
 )
 }
 \arguments{
@@ -82,6 +84,12 @@ rough diagnostic purposes.}
 \item{ci_km}{A character vector with the type of confidence intervals to compute for the
 Kaplan-Meier curve. Specify either \code{"none"}, \code{"plain"}, \code{"log"}, \code{"log-log"},
 \code{"logit"}, or \code{"arcsin"}, as coded in \code{\link[survival:survfit]{survival::survfit()}}.}
+
+\item{print_plot}{If \code{TRUE} (default), the plot is printed before being
+returned. If \code{FALSE}, the plot is returned without printing.}
+
+\item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
+status messages and \code{"summary"} or \code{"progress"} for high-level messages.}
 }
 \value{
 When \code{out = "none"}, a \code{gg/ggplot} object is returned. If \code{out} is

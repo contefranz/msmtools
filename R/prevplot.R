@@ -1,5 +1,8 @@
 if ( getRversion() >= "2.15.1" ) {
-  utils::globalVariables( c( ":=", "obs", "hat" ) )
+  utils::globalVariables(
+    c( ":=", ".", "time", "state", "obs", "hat", "lwr", "upr", "M",
+       "Total" )
+  )
 }
 #' Plot observed and expected prevalences for a multi-state model
 #'
@@ -81,11 +84,6 @@ if ( getRversion() >= "2.15.1" ) {
 #' # and plotting them using prevplot()
 #' gof = prevplot( x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE )
 #'
-#' @importFrom data.table as.data.table setnames setcolorder melt
-#' @importFrom stats model.extract time
-#' @importFrom ggplot2 ggplot aes geom_line facet_wrap scale_y_continuous xlab ylab theme_bw ggtitle theme
-#' @importFrom scales percent
-#' @importFrom patchwork wrap_plots
 #' @export
 
 prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
@@ -106,34 +104,58 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
   state_names = colnames( x$qmodel$imatrix )
 
   # extract the prevalences from prev.obj
-  prev_obs = as.data.table(prev.obj$`Observed percentages`, keep.rownames = "time")
-  setnames( prev_obs, c(2L:ncol(prev_obs)), state_names )
-  prev_hat = as.data.table(prev.obj$`Expected percentages`$estimates, keep.rownames = "time")
+  prev_obs = data.table::as.data.table(
+    prev.obj$`Observed percentages`,
+    keep.rownames = "time"
+  )
+  data.table::setnames( prev_obs, c(2L:ncol(prev_obs)), state_names )
+  prev_hat = data.table::as.data.table(
+    prev.obj$`Expected percentages`$estimates,
+    keep.rownames = "time"
+  )
 
   # keep.rownames is a char so I cast it back to integer
   prev_obs[ , time := as.integer( time ) ]
   prev_hat[ , time := as.integer( time ) ]
   # these are all wide, but ggplot works best when passing a long format data.frame
   # I reshape them and work my way with facet_wrap() instead of looping
-  prev_obs_long = melt( prev_obs, id.vars = "time", variable.name = "state", value.name = "obs")
-  prev_hat_long = melt( prev_hat, id.vars = "time", variable.name = "state", value.name = "hat")
+  prev_obs_long = data.table::melt( prev_obs, id.vars = "time",
+                                    variable.name = "state",
+                                    value.name = "obs")
+  prev_hat_long = data.table::melt( prev_hat, id.vars = "time",
+                                    variable.name = "state",
+                                    value.name = "hat")
 
   if ( ci ) {
     .msmtools_cli_info( verbosity, "extracting confidence intervals" )
     if ( length( prev.obj$`Expected percentages` ) > 1 ) {
-      ci_lwr_hat = as.data.table(prev.obj$`Expected percentages`$ci[ , , 1L ])
-      ci_upr_hat = as.data.table(prev.obj$`Expected percentages`$ci[ , , 2L ])
-      setnames(ci_lwr_hat, names(ci_lwr_hat), state_names)
-      setnames(ci_upr_hat, names(ci_upr_hat), state_names)
+      ci_lwr_hat = data.table::as.data.table(
+        prev.obj$`Expected percentages`$ci[ , , 1L ]
+      )
+      ci_upr_hat = data.table::as.data.table(
+        prev.obj$`Expected percentages`$ci[ , , 2L ]
+      )
+      data.table::setnames(ci_lwr_hat, names(ci_lwr_hat), state_names)
+      data.table::setnames(ci_upr_hat, names(ci_upr_hat), state_names)
       # add "time" variable
       ci_lwr_hat[ , time := prev_hat[ , time ] ]
       ci_upr_hat[ , time := prev_hat[ , time ] ]
       # re-order columns cause we are cool
-      setcolorder( ci_lwr_hat, c(ncol(ci_lwr_hat), 1L:(ncol(ci_lwr_hat)-1L)) )
-      setcolorder( ci_upr_hat, c(ncol(ci_upr_hat), 1L:(ncol(ci_upr_hat)-1L)) )
+      data.table::setcolorder(
+        ci_lwr_hat, c(ncol(ci_lwr_hat), 1L:(ncol(ci_lwr_hat)-1L))
+      )
+      data.table::setcolorder(
+        ci_upr_hat, c(ncol(ci_upr_hat), 1L:(ncol(ci_upr_hat)-1L))
+      )
       # melt the guys!
-      ci_lwr_hat_long = melt( ci_lwr_hat, id.vars = "time", variable.name = "state", value.name = "lwr")
-      ci_upr_hat_long = melt( ci_upr_hat, id.vars = "time", variable.name = "state", value.name = "upr")
+      ci_lwr_hat_long = data.table::melt(
+        ci_lwr_hat, id.vars = "time", variable.name = "state",
+        value.name = "lwr"
+      )
+      ci_upr_hat_long = data.table::melt(
+        ci_upr_hat, id.vars = "time", variable.name = "state",
+        value.name = "upr"
+      )
     } else {
       stop("There are no CIs in \"prev.obj\"")
     }
@@ -158,47 +180,60 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
 
   if ( M ) {
     .msmtools_cli_info( verbosity, "computing deviance M" )
-    prev_obs_abs = as.data.table(prev.obj$Observed)
+    prev_obs_abs = data.table::as.data.table(prev.obj$Observed)
     prev_hat_abs = prev.obj$Expected
     if ( length( prev_hat_abs ) > 1L ) {
       M_gof = ( prev_obs_abs - prev_hat_abs$estimates )^2L / prev_hat_abs$estimates
     } else {
       M_gof = ( prev_obs_abs - prev_hat_abs )^2L / prev_hat_abs
     }
-    setnames( M_gof, 1L:(ncol(M_gof)-1L), state_names)
+    data.table::setnames( M_gof, 1L:(ncol(M_gof)-1L), state_names)
     M_gof[ , `:=` (time = prev_hat[ , time ], Total = NULL) ]
-    M_gof_long = melt( M_gof, id.vars = "time",  variable.name = "state", value.name = "M")
+    M_gof_long = data.table::melt( M_gof, id.vars = "time",
+                                   variable.name = "state", value.name = "M")
     to_plot = cbind( to_plot, M_gof_long[ , .(M)])
     to_plot[ , M := M / 100L ]
   }
 
   # build the plot
-  p_canvas = ggplot( to_plot ) +
-    facet_wrap(. ~ state) +
-    scale_y_continuous(labels = percent) +
-    xlab("Time") + ylab("Prevalence") +
-    theme_bw() +
-    ggtitle("Prevalence Plot") +
-    theme(legend.position = "bottom")
+  p_canvas = ggplot2::ggplot( to_plot ) +
+    ggplot2::facet_wrap(. ~ state) +
+    ggplot2::scale_y_continuous(labels = scales::percent) +
+    ggplot2::xlab("Time") + ggplot2::ylab("Prevalence") +
+    ggplot2::theme_bw() +
+    ggplot2::ggtitle("Prevalence Plot") +
+    ggplot2::theme(legend.position = "bottom")
 
   p = p_canvas +
-    geom_line(aes( x = time, y = obs, group = 1, color = "Observed" ) ) +
-    geom_line(aes( x = time, y = hat, group = 1, color = "Estimated" ) ) +
-    scale_color_manual( name = "", values = c( "Estimated" = "red", "Observed" = "darkblue") )
+    ggplot2::geom_line(
+      ggplot2::aes( x = time, y = obs, group = 1, color = "Observed" )
+    ) +
+    ggplot2::geom_line(
+      ggplot2::aes( x = time, y = hat, group = 1, color = "Estimated" )
+    ) +
+    ggplot2::scale_color_manual(
+      name = "", values = c( "Estimated" = "red", "Observed" = "darkblue")
+    )
 
   if ( ci ) {
     p = p +
-      geom_line( aes( x = time, y = lwr, group = 1, color = "Estimated" ), linetype = 3 ) +
-      geom_line( aes( x = time, y = upr, group = 1, color = "Estimated" ), linetype = 3 )
+      ggplot2::geom_line(
+        ggplot2::aes( x = time, y = lwr, group = 1, color = "Estimated" ),
+        linetype = 3
+      ) +
+      ggplot2::geom_line(
+        ggplot2::aes( x = time, y = upr, group = 1, color = "Estimated" ),
+        linetype = 3
+      )
   }
 
   if ( M ) {
     p_gof = p_canvas +
-      geom_line( aes( x = time, y = M, group = 1 ) ) +
-      ylab("Deviance M") +
-      theme_bw() +
-      ggtitle("Deviance of Markov Model")
-    p_combined = wrap_plots( p, p_gof, nrow = 2L )
+      ggplot2::geom_line( ggplot2::aes( x = time, y = M, group = 1 ) ) +
+      ggplot2::ylab("Deviance M") +
+      ggplot2::theme_bw() +
+      ggplot2::ggtitle("Deviance of Markov Model")
+    p_combined = patchwork::wrap_plots( p, p_gof, nrow = 2L )
     if ( print_plot ) {
       print( p_combined )
     }
