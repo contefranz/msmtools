@@ -256,7 +256,7 @@ augment = function(data, data_key, n_events, pattern,
   }
 
   time = proc.time() - tic
-  .msmtools_cli_rule(verbosity, paste0("augment() took: ", time[ 3 ], " sec."))
+  .msmtools_cli_rule(verbosity, paste0("augment() took: ", time[3], " sec."))
   final[]
   return(final)
 }

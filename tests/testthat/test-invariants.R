@@ -13,9 +13,9 @@ test_that("augment preserves core output structure across time classes", {
   date_aug = augment_hosp()
 
   numeric_data = test_hosp()
-  numeric_data[ , dateIN := as.numeric(dateIN) ]
-  numeric_data[ , dateOUT := as.numeric(dateOUT) ]
-  numeric_data[ , dateCENS := as.numeric(dateCENS) ]
+  numeric_data[, dateIN := as.numeric(dateIN)]
+  numeric_data[, dateOUT := as.numeric(dateOUT)]
+  numeric_data[, dateCENS := as.numeric(dateCENS)]
   numeric_aug = suppressWarnings(
     augment(numeric_data, subj, adm_number, label_3, t_start = dateIN,
              t_end = dateOUT, t_cens = dateCENS)
@@ -23,12 +23,12 @@ test_that("augment preserves core output structure across time classes", {
 
   diff_data = test_hosp()
   origin = min(diff_data$dateIN)
-  diff_data[ , dateIN := as.difftime(as.numeric(dateIN - origin),
-                                      units = "days") ]
-  diff_data[ , dateOUT := as.difftime(as.numeric(dateOUT - origin),
-                                       units = "days") ]
-  diff_data[ , dateCENS := as.difftime(as.numeric(dateCENS - origin),
-                                        units = "days") ]
+  diff_data[, dateIN := as.difftime(as.numeric(dateIN - origin),
+                                      units = "days")]
+  diff_data[, dateOUT := as.difftime(as.numeric(dateOUT - origin),
+                                       units = "days")]
+  diff_data[, dateCENS := as.difftime(as.numeric(dateCENS - origin),
+                                        units = "days")]
   diff_aug = suppressWarnings(
     augment(diff_data, subj, adm_number, label_3, t_start = dateIN,
              t_end = dateOUT, t_cens = dateCENS)
@@ -42,9 +42,9 @@ test_that("augment preserves core output structure across time classes", {
   expect_true("augmented_int" %in% names(date_aug))
   expect_false("augmented_int" %in% names(numeric_aug))
   expect_true("augmented_num" %in% names(diff_aug))
-  expect_identical(column_classes(date_aug)[ core_columns ],
+  expect_identical(column_classes(date_aug)[core_columns],
                     column_classes(readRDS(testthat::test_path(
-                      "fixtures", "augment-hosp-date.rds")))[ core_columns ])
+                      "fixtures", "augment-hosp-date.rds")))[core_columns])
 })
 
 test_that("augment expanded status columns remain stable", {
@@ -55,8 +55,8 @@ test_that("augment expanded status columns remain stable", {
   expect_false(anyNA(expanded$status_exp))
   expect_false(anyNA(expanded$status_exp_num))
   expect_false(anyNA(expanded$n_status_exp))
-  expect_true(all(expanded$status_exp[ expanded$status == "DEAD" ] == "DEAD"))
-  expect_true(all(grepl("_", expanded$status_exp[ expanded$status != "DEAD" ])))
+  expect_true(all(expanded$status_exp[expanded$status == "DEAD"] == "DEAD"))
+  expect_true(all(grepl("_", expanded$status_exp[expanded$status != "DEAD"])))
 })
 
 test_that("augment current by-reference behavior is documented by tests", {

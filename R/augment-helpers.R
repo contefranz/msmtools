@@ -26,14 +26,14 @@
 }
 
 .augment_check_time_classes = function(data, t_start, t_end, t_cens, t_death) {
-  if (!identical(class(data[[ t_start ]]), class(data[[ t_end ]]))) {
+  if (!identical(class(data[[t_start]]), class(data[[t_end]]))) {
     stop("the starting and the ending event times must be of the same class")
   }
-  if (!identical(class(data[[ t_start ]]), class(data[[ t_cens ]]))) {
+  if (!identical(class(data[[t_start]]), class(data[[t_cens]]))) {
     stop("the starting and the censoring event times must be of the same class")
   }
   if (!is.null(t_death) &&
-       !identical(class(data[[ t_cens ]]), class(data[[ t_death ]]))) {
+       !identical(class(data[[t_cens]]), class(data[[t_death]]))) {
     stop("the censoring and the death event times must be of the same class")
   }
 }
@@ -44,25 +44,25 @@
   if (!is.null(n_events)) {
     cols = c(data_key, n_events)
     if (length(n_events) != 1L || !n_events %in% names(data) ||
-         !inherits(data[[ n_events ]], "integer")) {
+         !inherits(data[[n_events]], "integer")) {
       stop("n_events must be an integer")
     }
   } else {
     cols = data_key
     setkeyv(data, c(data_key, t_start))
-    data[ , n_events := seq(.N), by = eval(data_key) ]
+    data[, n_events := seq(.N), by = eval(data_key)]
     cols = c(cols, "n_events")
   }
 
-  .msmtools_cli_info(verbosity, paste0("checking monotonicity of ", cols[[ 2 ]]))
-  ev = data[ , .(ev = all(get(cols[[ 2 ]]) == cummax(get(cols[[ 2 ]])))),
-             by = eval(cols[[ 1 ]]) ]
-  setkeyv(data, c(cols[[ 1 ]], t_start))
+  .msmtools_cli_info(verbosity, paste0("checking monotonicity of ", cols[[2]]))
+  ev = data[, .(ev = all(get(cols[[2]]) == cummax(get(cols[[2]])))),
+             by = eval(cols[[1]])]
+  setkeyv(data, c(cols[[1]], t_start))
   if (!all(ev$ev)) {
-    problem_subjects = ev[ ev == FALSE ][ , get(cols[[ 1 ]]) ]
+    problem_subjects = ev[ev == FALSE][, get(cols[[1]])]
     .msmtools_cli_info(
       verbosity,
-      paste0(cols[[ 2 ]], " is not monotonic increasing within ", cols[[ 1 ]])
+      paste0(cols[[2]], " is not monotonic increasing within ", cols[[1]])
    )
     .msmtools_cli_info(
       verbosity,
@@ -71,14 +71,14 @@
    )
     stop("Please, fix the issues and relaunch augment()")
   }
-  .msmtools_cli_success(verbosity, paste0(cols[[ 2 ]], " is monotonic"))
+  .msmtools_cli_success(verbosity, paste0(cols[[2]], " is monotonic"))
   setkeyv(data, cols)
   cols
 }
 
 .augment_check_missing_values = function(data, cols, what) {
-  missing_cols = cols[ vapply(cols, function(x) anyNA(data[[ x ]]),
-                               logical(1L)) ]
+  missing_cols = cols[vapply(cols, function(x) anyNA(data[[x]]),
+                               logical(1L))]
   if (length(missing_cols) > 0) {
     stop(
       "detected missing values in ", what, ": ",
@@ -89,7 +89,7 @@
 }
 
 .augment_pattern_values = function(data, pattern, verbosity) {
-  values = sort(unique(data[[ pattern ]]))
+  values = sort(unique(data[[pattern]]))
   .msmtools_cli_info(verbosity, paste0("checking ", pattern,
                                          " and defining patterns"))
   if (length(values) < 2) {
@@ -107,13 +107,13 @@
 }
 
 .augment_last_pattern_index = function(data, pattern, data_key, code, value) {
-  if (inherits(data[[ pattern ]], c("integer", "numeric"))) {
-    data[ get(pattern) == code, .I[ .N ], by = eval(data_key) ]$V1
-  } else if (inherits(data[[ pattern ]], "factor")) {
-    data[ as.integer(get(pattern)) - 1 == code,
-          .I[ .N ], by = eval(data_key) ]$V1
-  } else if (inherits(data[[ pattern ]], "character")) {
-    data[ get(pattern) == value, .I[ .N ], by = eval(data_key) ]$V1
+  if (inherits(data[[pattern]], c("integer", "numeric"))) {
+    data[get(pattern) == code, .I[.N], by = eval(data_key)]$V1
+  } else if (inherits(data[[pattern]], "factor")) {
+    data[as.integer(get(pattern)) - 1 == code,
+          .I[.N], by = eval(data_key)]$V1
+  } else if (inherits(data[[pattern]], "character")) {
+    data[get(pattern) == value, .I[.N], by = eval(data_key)]$V1
   } else {
     stop("pattern must be an integer, a factor or a character")
   }
@@ -121,23 +121,23 @@
 
 .augment_pattern_matches = function(data, pattern, values, cols, t_end,
                                      t_cens, t_death) {
-  data_key = cols[[ 1 ]]
+  data_key = cols[[1]]
   if (length(values) == 2) {
     match1 = data[
-      .augment_last_pattern_index(data, pattern, data_key, 0, values[ 1 ])
-    ]
+      .augment_last_pattern_index(data, pattern, data_key, 0, values[1])
+   ]
     match3 = data[
-      .augment_last_pattern_index(data, pattern, data_key, 1, values[ 2 ])
-    ]
+      .augment_last_pattern_index(data, pattern, data_key, 1, values[2])
+   ]
     death_time = if (is.null(t_death)) t_cens else t_death
-    match3 = match3[ get(t_end) != get(death_time) ]
+    match3 = match3[get(t_end) != get(death_time)]
   } else {
     match1 = data[
-      .augment_last_pattern_index(data, pattern, data_key, 0, values[ 1 ])
-    ]
+      .augment_last_pattern_index(data, pattern, data_key, 0, values[1])
+   ]
     match3 = data[
-      .augment_last_pattern_index(data, pattern, data_key, 2, values[ 3 ])
-    ]
+      .augment_last_pattern_index(data, pattern, data_key, 2, values[3])
+   ]
   }
   list(match1 = match1, match3 = match3)
 }
@@ -155,43 +155,43 @@
   .msmtools_cli_info(verbosity, "defining dimensions")
   if (length(values) == 2) {
     if (is.null(t_death)) {
-      t1 = data[ , .(.N,
+      t1 = data[, .(.N,
                       t_end = max(get(t_end)),
-                      t_cens = max(get(t_cens))), by = eval(cols[[ 1 ]]) ]
+                      t_cens = max(get(t_cens))), by = eval(cols[[1]])]
     } else {
-      t1 = data[ , .(.N,
+      t1 = data[, .(.N,
                       t_end = max(get(t_end)),
-                      t_death = max(get(t_death))), by = eval(cols[[ 1 ]]) ]
+                      t_death = max(get(t_death))), by = eval(cols[[1]])]
     }
   } else {
-    t1 = data[ , .N, by = eval(cols[[ 1 ]]) ]
+    t1 = data[, .N, by = eval(cols[[1]])]
   }
-  setkeyv(t1, cols[[ 1 ]])
-  t2 = unique(data[ , .(get(cols[[ 1 ]]), get(pattern)) ])
-  setnames(t2, c(cols[[ 1 ]], "V2"))
-  setkeyv(t2, cols[[ 1 ]])
-  maker = t1[ t2 ]
-  setkeyv(data, cols[[ 1 ]])
+  setkeyv(t1, cols[[1]])
+  t2 = unique(data[, .(get(cols[[1]]), get(pattern))])
+  setnames(t2, c(cols[[1]], "V2"))
+  setkeyv(t2, cols[[1]])
+  maker = t1[t2]
+  setkeyv(data, cols[[1]])
   .msmtools_cli_success(verbosity, "dimensions computed")
   maker
 }
 
 .augment_status_sequence = function(n, kind, state) {
   if (identical(kind, "alive")) {
-    return(c(rep(c(state[[ 1 ]], state[[ 2 ]]), n), state[[ 2 ]]))
+    return(c(rep(c(state[[1]], state[[2]]), n), state[[2]]))
   }
   if (identical(kind, "dead_in")) {
-    return(c(rep(c(state[[ 1 ]], state[[ 2 ]]), n - 1L),
-               state[[ 1 ]], state[[ 3 ]]))
+    return(c(rep(c(state[[1]], state[[2]]), n - 1L),
+               state[[1]], state[[3]]))
   }
-  c(rep(c(state[[ 1 ]], state[[ 2 ]]), n), state[[ 3 ]])
+  c(rep(c(state[[1]], state[[2]]), n), state[[3]])
 }
 
 .augment_build_status_list = function(n, kind, state, verbosity, name) {
   out = vector(mode = "list", length(n))
   progress = .msmtools_cli_progress(verbosity, name, length(n))
   for (i in seq_along(n)) {
-    out[[ i ]] = .augment_status_sequence(n[[ i ]], kind, state)
+    out[[i]] = .augment_status_sequence(n[[i]], kind, state)
     .msmtools_cli_progress_update(progress, i, length(n))
   }
   .msmtools_cli_progress_done(progress)
@@ -200,23 +200,23 @@
 
 .augment_add_status_two_value = function(final, maker, cols, pattern, values,
                                           state, t_death, verbosity) {
-  a = maker[ V2 == values[ 1 ] ]
+  a = maker[V2 == values[1]]
   if (is.null(t_death)) {
-    din  = maker[ V2 == values[ 2 ] & t_end == t_cens ]
-    dout = maker[ V2 == values[ 2 ] & t_end != t_cens ]
+    din  = maker[V2 == values[2] & t_end == t_cens]
+    dout = maker[V2 == values[2] & t_end != t_cens]
   } else {
-    din  = maker[ V2 == values[ 2 ] & t_end == t_death ]
-    dout = maker[ V2 == values[ 2 ] & t_end != t_death ]
+    din  = maker[V2 == values[2] & t_end == t_death]
+    dout = maker[V2 == values[2] & t_end != t_death]
   }
 
-  temp1 = din[ , .SD, .SDcols = cols[[ 1 ]] ]
-  temp2 = dout[ , .SD, .SDcols = cols[[ 1 ]] ]
-  setkeyv(temp1, cols[[ 1 ]])
-  setkeyv(temp2, cols[[ 1 ]])
-  setkeyv(final, cols[[ 1 ]])
-  din_long  = final[ temp1 ]
-  dout_long = final[ temp2 ]
-  a_long = final[ get(pattern) == values[ 1 ] ]
+  temp1 = din[, .SD, .SDcols = cols[[1]]]
+  temp2 = dout[, .SD, .SDcols = cols[[1]]]
+  setkeyv(temp1, cols[[1]])
+  setkeyv(temp2, cols[[1]])
+  setkeyv(final, cols[[1]])
+  din_long  = final[temp1]
+  dout_long = final[temp2]
+  a_long = final[get(pattern) == values[1]]
 
   .msmtools_cli_info(verbosity, "processing alive units")
   flag_a = unlist(
@@ -236,9 +236,9 @@
     recursive = FALSE
  )
 
-  a_long[ , status := flag_a ]
-  din_long[ , status := flag_din ]
-  dout_long[ , status := flag_dout ]
+  a_long[, status := flag_a]
+  din_long[, status := flag_din]
+  dout_long[, status := flag_dout]
   final = rbindlist(list(a_long, din_long, dout_long))
   setkeyv(final, cols)
   final
@@ -249,17 +249,17 @@
   flag_temp = vector(mode = "list", nrow(maker))
   progress = .msmtools_cli_progress(verbosity, "status patterns", nrow(maker))
   for (i in seq_along(maker$N)) {
-    if (maker$V2[ i ] == values[ 1 ]) {
-      flag_temp[[ i ]] = .augment_status_sequence(maker$N[ i ], "alive", state)
-    } else if (maker$V2[ i ] == values[ 2 ]) {
-      flag_temp[[ i ]] = .augment_status_sequence(maker$N[ i ], "dead_in", state)
-    } else if (maker$V2[ i ] == values[ 3 ]) {
-      flag_temp[[ i ]] = .augment_status_sequence(maker$N[ i ], "dead_out", state)
+    if (maker$V2[i] == values[1]) {
+      flag_temp[[i]] = .augment_status_sequence(maker$N[i], "alive", state)
+    } else if (maker$V2[i] == values[2]) {
+      flag_temp[[i]] = .augment_status_sequence(maker$N[i], "dead_in", state)
+    } else if (maker$V2[i] == values[3]) {
+      flag_temp[[i]] = .augment_status_sequence(maker$N[i], "dead_out", state)
     }
     .msmtools_cli_progress_update(progress, i, length(maker$N))
   }
   .msmtools_cli_progress_done(progress)
-  final[ , status := unlist(flag_temp, recursive = FALSE) ]
+  final[, status := unlist(flag_temp, recursive = FALSE)]
   final
 }
 
@@ -283,11 +283,11 @@
 .augment_add_numeric_status = function(final, status_col, status_num_col,
                                         verbosity) {
   .msmtools_cli_info(verbosity, paste0("adding numeric ", status_col, " flag"))
-  lev = unique(final[[ status_col ]])
+  lev = unique(final[[status_col]])
   for (i in seq_along(lev)) {
-    final[ get(status_col) == lev[ i ], (status_num_col) := i ]
+    final[get(status_col) == lev[i], (status_num_col) := i]
   }
-  if (anyNA(final[[ status_num_col ]])) {
+  if (anyNA(final[[status_num_col]])) {
     stop(paste0("numeric ", status_col, " has not been built correctly"))
   }
   .msmtools_cli_success(
@@ -300,11 +300,11 @@
 .augment_add_sequential_status = function(final, cols, state, status_col,
                                            n_status_col, verbosity) {
   .msmtools_cli_info(verbosity, paste0("adding sequential ", status_col, " flag"))
-  final[ get(status_col) != state[[ 3 ]],
-         (n_status_col) := paste(get(cols[[ 2 ]]), " ",
-                                    get(status_col), sep = "") ]
-  final[ get(status_col) == state[[ 3 ]], (n_status_col) := state[[ 3 ]] ]
-  if (anyNA(final[[ n_status_col ]])) {
+  final[get(status_col) != state[[3]],
+         (n_status_col) := paste(get(cols[[2]]), " ",
+                                    get(status_col), sep = "")]
+  final[get(status_col) == state[[3]], (n_status_col) := state[[3]]]
+  if (anyNA(final[[n_status_col]])) {
     stop(paste0("sequential ", status_col, " flag has not been built correctly"))
   }
   .msmtools_cli_success(
@@ -336,31 +336,31 @@
     verbosity,
     paste0("adding variable ", t_augmented, " as new time variable")
  )
-  final[ status == state[[ 1 ]], (t_augmented) := get(t_start) ]
-  final[ status == state[[ 2 ]], (t_augmented) := get(t_end) ]
+  final[status == state[[1]], (t_augmented) := get(t_start)]
+  final[status == state[[2]], (t_augmented) := get(t_end)]
   death_time = if (is.null(t_death)) t_cens else t_death
-  final[ status == state[[ 3 ]], (t_augmented) := get(death_time) ]
+  final[status == state[[3]], (t_augmented) := get(death_time)]
 
-  if (inherits(data[[ t_start ]], "Date")) {
+  if (inherits(data[[t_start]], "Date")) {
     int_col = paste0(t_augmented, "_int")
-    final[ , (int_col) := as.integer(get(t_augmented)) ]
+    final[, (int_col) := as.integer(get(t_augmented))]
     final = .augment_set_time_order(final, data, t_start, t_augmented, "_int")
     .msmtools_cli_success(
       verbosity,
       paste0("variables ", t_augmented, " and ", int_col,
               " successfully added and repositioned")
    )
-  } else if (inherits(data[[ t_start ]], "difftime")) {
+  } else if (inherits(data[[t_start]], "difftime")) {
     num_col = paste0(t_augmented, "_num")
-    final[ , (num_col) := as.numeric(get(t_augmented)) ]
+    final[, (num_col) := as.numeric(get(t_augmented))]
     final = .augment_set_time_order(final, data, t_start, t_augmented, "_num")
     .msmtools_cli_success(
       verbosity,
       paste0("variables ", t_augmented, " and ", num_col,
               " successfully added and repositioned")
    )
-  } else if (inherits(data[[ t_start ]], "integer") ||
-              inherits(data[[ t_start ]], "numeric")) {
+  } else if (inherits(data[[t_start]], "integer") ||
+              inherits(data[[t_start]], "numeric")) {
     final = .augment_set_time_order(final, data, t_start, t_augmented, NULL)
     .msmtools_cli_success(
       verbosity,
@@ -377,11 +377,11 @@
     paste0("detected a more complex status given by variable ", more_status)
  )
   .msmtools_cli_info(verbosity, "adding expanded status flag")
-  values = unique(data[[ more_status ]])
-  final[ status == state[[ 3 ]], status_exp := state[[ 3 ]] ]
+  values = unique(data[[more_status]])
+  final[status == state[[3]], status_exp := state[[3]]]
   for (i in seq_along(values)) {
-    final[ status != state[[ 3 ]] & get(more_status) == values[ i ],
-           status_exp := paste(values[ i ], "_", status, sep = "") ]
+    final[status != state[[3]] & get(more_status) == values[i],
+           status_exp := paste(values[i], "_", status, sep = "")]
   }
   if (anyNA(final$status_exp)) {
     stop("expanded status flag has not been built correctly")
