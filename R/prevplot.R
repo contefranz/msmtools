@@ -16,6 +16,8 @@ if ( getRversion() >= "2.15.1" ) {
 #' computed (see Details). Default is `FALSE`.
 #' @param ci If `TRUE`, confidence intervals are plotted when available.
 #' Default is `FALSE`.
+#' @param print_plot If `TRUE` (default), the plot is printed before being
+#' returned. If `FALSE`, the plot is returned without printing.
 #' @details When `M = TRUE`, a rough indicator of the deviance from the
 #' Markov model is computed according to Titman and Sharples (2008).
 #' A comparison at a given time `t_i` of a patient `k` in the state `s` between
@@ -84,7 +86,8 @@ if ( getRversion() >= "2.15.1" ) {
 #' @importFrom patchwork wrap_plots
 #' @export
 
-prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE ) {
+prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
+                     print_plot = TRUE ) {
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
@@ -196,10 +199,14 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE ) {
       theme_bw() +
       ggtitle("Deviance of Markov Model")
     p_combined = wrap_plots( p, p_gof, nrow = 2L )
-    print( p_combined )
+    if ( print_plot ) {
+      print( p_combined )
+    }
     return( p_combined )
   } else {
-    print( p )
+    if ( print_plot ) {
+      print( p )
+    }
     return( p )
   }
 }

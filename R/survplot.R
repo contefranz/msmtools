@@ -55,6 +55,8 @@ if ( getRversion() >= "2.15.1" ) {
 #' @param ci_km A character vector with the type of confidence intervals to compute for the
 #' Kaplan-Meier curve. Specify either `"none"`, `"plain"`, `"log"`, `"log-log"`,
 #' `"logit"`, or `"arcsin"`, as coded in [survival::survfit()].
+#' @param print_plot If `TRUE` (default), the plot is printed before being
+#' returned. If `FALSE`, the plot is returned without printing.
 #' @details The function wraps [msm::plot.survfit.msm()] and adds support for
 #' exact-time plots by resetting the time scale to follow-up time. It can return
 #' the fitted survival and Kaplan-Meier data by setting `out = "all"`.
@@ -124,7 +126,8 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      out = c( "none", "fitted", "km", "all" ),
                      ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
                      B = 100L,
-                     ci_km = c( "none", "plain", "log", "log-log", "logit", "arcsin") ) {
+                     ci_km = c( "none", "plain", "log", "log-log", "logit", "arcsin"),
+                     print_plot = TRUE ) {
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
@@ -277,7 +280,9 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
     theme_bw() +
     theme(legend.position = "bottom") +
     ggtitle( paste0("Estimation for transition ", states[from], " - ", states[to] ) )
-  print(p)
+  if ( print_plot ) {
+    print(p)
+  }
 
   if ( out == "none" ) {
     return(p)
