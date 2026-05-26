@@ -1,8 +1,8 @@
-if ( getRversion() >= "2.15.1" ) {
-  utils::globalVariables( c( "status", "status_num", "n_status",
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c("status", "status_num", "n_status",
                              "status_exp", "status_exp_num", "n_status_exp",
                              ":=", ".", ".I", ".N", ".SD", "N", "V2",
-                             "t_end", "t_cens", "t_death" ) )
+                             "t_end", "t_cens", "t_death"))
 }
 #' Build augmented transition data
 #'
@@ -124,23 +124,23 @@ if ( getRversion() >= "2.15.1" ) {
 #'
 #' @examples
 #' # loading data
-#' data( hosp )
+#' data(hosp)
 #'
 #' # augmenting hosp
-#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+#' hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
 #'                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-#'                           t_cens = dateCENS )
+#'                           t_cens = dateCENS)
 #'
 #' # augmenting hosp by passing more information regarding transitions
 #' # with argument more_status
-#' hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
+#' hosp_augmented_more = augment(data = hosp, data_key = subj, n_events = adm_number,
 #'                                pattern = label_3, t_start = dateIN, t_end = dateOUT,
-#'                                t_cens = dateCENS, more_status = rehab_it )
+#'                                t_cens = dateCENS, more_status = rehab_it)
 #'
 #' # requesting progress output
-#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+#' hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
 #'                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-#'                           t_cens = dateCENS, verbosity = "summary" )
+#'                           t_cens = dateCENS, verbosity = "summary")
 #'
 #' @references Grossetti, F., Ieva, F., and Paganoni, A.M. (2018).
 #' A multi-state approach to patients affected by chronic heart failure.
@@ -160,103 +160,103 @@ if ( getRversion() >= "2.15.1" ) {
 #' @importFrom data.table setDT setkey setkeyv rbindlist uniqueN setcolorder setnames
 #' @export
 
-augment = function( data, data_key, n_events, pattern,
-                    state = c( "IN", "OUT", "DEAD" ),
+augment = function(data, data_key, n_events, pattern,
+                    state = c("IN", "OUT", "DEAD"),
                     t_start, t_end, t_cens, t_death, t_augmented,
                     more_status = NULL, check_NA = FALSE, copy = FALSE,
-                    verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
+                    verbosity = getOption("msmtools.verbosity", "quiet")) {
 
   tic = proc.time()
-  verbosity = .msmtools_verbosity( verbosity )
-  .msmtools_validate_flag( copy, "copy" )
-  .msmtools_validate_flag( check_NA, "check_NA" )
-  .msmtools_cli_rule( verbosity, "setting everything up" )
+  verbosity = .msmtools_verbosity(verbosity)
+  .msmtools_validate_flag(copy, "copy")
+  .msmtools_validate_flag(check_NA, "check_NA")
+  .msmtools_cli_rule(verbosity, "setting everything up")
 
   .augment_validate_inputs(
     data = data,
     state = state,
-    missing_data = missing( data ),
-    missing_data_key = missing( data_key ),
-    missing_pattern = missing( pattern ),
-    missing_t_start = missing( t_start ),
-    missing_t_end = missing( t_end ),
-    missing_t_cens = missing( t_cens )
-  )
+    missing_data = missing(data),
+    missing_data_key = missing(data_key),
+    missing_pattern = missing(pattern),
+    missing_t_start = missing(t_start),
+    missing_t_end = missing(t_end),
+    missing_t_cens = missing(t_cens)
+ )
 
-  if ( copy ) {
-    data = data.table::copy( data )
+  if (copy) {
+    data = data.table::copy(data)
   }
-  if ( inherits( data, "data.frame" ) ) {
-    setDT( data )
+  if (inherits(data, "data.frame")) {
+    setDT(data)
   }
 
-  data_key = as.character( substitute( data_key ) )
-  pattern = as.character( substitute( pattern ) )
-  t_start = as.character( substitute( t_start ) )
-  t_end = as.character( substitute( t_end ) )
-  t_cens = as.character( substitute( t_cens ) )
-  n_events = if ( missing( n_events ) ) NULL else as.character( substitute( n_events ) )
-  t_death = if ( missing( t_death ) ) NULL else as.character( substitute( t_death ) )
-  t_augmented = if ( missing( t_augmented ) ) {
+  data_key = as.character(substitute(data_key))
+  pattern = as.character(substitute(pattern))
+  t_start = as.character(substitute(t_start))
+  t_end = as.character(substitute(t_end))
+  t_cens = as.character(substitute(t_cens))
+  n_events = if (missing(n_events)) NULL else as.character(substitute(n_events))
+  t_death = if (missing(t_death)) NULL else as.character(substitute(t_death))
+  t_augmented = if (missing(t_augmented)) {
     "augmented"
   } else {
-    as.character( substitute( t_augmented ) )
+    as.character(substitute(t_augmented))
   }
-  more_status_arg = substitute( more_status )
-  more_status = if ( missing( more_status ) || is.null( more_status_arg ) ) {
+  more_status_arg = substitute(more_status)
+  more_status = if (missing(more_status) || is.null(more_status_arg)) {
     NULL
   } else {
-    as.character( more_status_arg )
+    as.character(more_status_arg)
   }
 
-  if ( is.null( t_death ) ) {
-    warning( "no t_death has been passed. Assuming that ", t_cens,
-             " contains both censoring and death times" )
+  if (is.null(t_death)) {
+    warning("no t_death has been passed. Assuming that ", t_cens,
+             " contains both censoring and death times")
   }
 
-  .augment_check_time_classes( data, t_start, t_end, t_cens, t_death )
-  cols = .augment_prepare_events( data, data_key, n_events, t_start, verbosity )
+  .augment_check_time_classes(data, t_start, t_end, t_cens, t_death)
+  cols = .augment_prepare_events(data, data_key, n_events, t_start, verbosity)
 
-  if ( isTRUE( check_NA ) ) {
-    .msmtools_cli_info( verbosity, "checking for missing values" )
+  if (isTRUE(check_NA)) {
+    .msmtools_cli_info(verbosity, "checking for missing values")
     .augment_check_missing_values(
       data,
-      c( cols, pattern, t_start, t_end ),
+      c(cols, pattern, t_start, t_end),
       "function arguments"
-    )
-    .msmtools_cli_success( verbosity, "no missing values detected" )
+   )
+    .msmtools_cli_success(verbosity, "no missing values detected")
   }
 
-  if ( !is.null( more_status ) ) {
-    .augment_check_missing_values( data, more_status, more_status )
+  if (!is.null(more_status)) {
+    .augment_check_missing_values(data, more_status, more_status)
   }
 
-  values = .augment_pattern_values( data, pattern, verbosity )
+  values = .augment_pattern_values(data, pattern, verbosity)
   matches = .augment_pattern_matches(
     data, pattern, values, cols, t_end, t_cens, t_death
-  )
-  final = .augment_bind_rows( data, matches, cols, verbosity )
+ )
+  final = .augment_bind_rows(data, matches, cols, verbosity)
   maker = .augment_make_dimensions(
     data, cols, pattern, values, t_end, t_cens, t_death, verbosity
-  )
+ )
   final = .augment_add_status(
     final, maker, cols, pattern, values, state, t_death, verbosity
-  )
-  final = .augment_add_numeric_status( final, "status", "status_num", verbosity )
+ )
+  final = .augment_add_numeric_status(final, "status", "status_num", verbosity)
   final = .augment_add_sequential_status(
     final, cols, state, "status", "n_status", verbosity
-  )
+ )
   final = .augment_add_time_columns(
     final, data, state, t_start, t_end, t_cens, t_death, t_augmented, verbosity
-  )
-  if ( !is.null( more_status ) ) {
+ )
+  if (!is.null(more_status)) {
     final = .augment_add_expanded_status(
       final, data, more_status, cols, state, verbosity
-    )
+   )
   }
 
   time = proc.time() - tic
-  .msmtools_cli_rule( verbosity, paste0( "augment() took: ", time[ 3 ], " sec." ) )
+  .msmtools_cli_rule(verbosity, paste0("augment() took: ", time[ 3 ], " sec."))
   final[]
-  return( final )
+  return(final)
 }

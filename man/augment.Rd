@@ -158,23 +158,23 @@ result if a plain \code{data.frame} is needed by downstream code.
 }
 \examples{
 # loading data
-data( hosp )
+data(hosp)
 
 # augmenting hosp
-hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS )
+                          t_cens = dateCENS)
 
 # augmenting hosp by passing more information regarding transitions
 # with argument more_status
-hosp_augmented_more = augment( data = hosp, data_key = subj, n_events = adm_number,
+hosp_augmented_more = augment(data = hosp, data_key = subj, n_events = adm_number,
                                pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                               t_cens = dateCENS, more_status = rehab_it )
+                               t_cens = dateCENS, more_status = rehab_it)
 
 # requesting progress output
-hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS, verbosity = "summary" )
+                          t_cens = dateCENS, verbosity = "summary")
 
 }
 \references{

@@ -3,6 +3,12 @@
 This is a local developer baseline, not a public performance guarantee.
 The script is excluded from package builds and must be run manually.
 
+> **Note**: this baseline was captured against the 2.0.9 dependency set.
+> Since msmtools 2.1.3, `scales` has been removed entirely and `patchwork`
+> demoted to Suggests (required only by `prevplot(M = TRUE)`). The figures
+> below are still meaningful for `augment()` and `polish()`, which are the
+> only functions exercised by this baseline.
+
 - Generated: 2026-05-25 09:51:57 CEST
 - R version: R version 4.5.1 (2025-06-13)
 - Platform: aarch64-apple-darwin24.4.0

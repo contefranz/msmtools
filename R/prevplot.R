@@ -29,6 +29,12 @@ if (getRversion() >= "2.15.1") {
 #'
 #' The deviance `M` plot is returned together with the standard prevalence plot
 #' in the second row. This layout is fixed.
+#'
+#' When `M = TRUE`, the combined layout is built with **patchwork**, which is
+#' an optional dependency of **msmtools**. Install it with
+#' `install.packages("patchwork")` if it is not already available; `prevplot()`
+#' raises an informative error otherwise. The default `M = FALSE` path has no
+#' such requirement.
 #' @returns When `M = FALSE`, a `gg/ggplot` object with observed and expected
 #' prevalences is returned. When `M = TRUE`, a `patchwork` object is returned
 #' with the prevalence plot and the deviance `M` plot.
@@ -188,7 +194,7 @@ prevplot = function(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
   p_canvas = ggplot2::ggplot(to_plot) +
     ggplot2::facet_wrap(. ~ state) +
     ggplot2::scale_y_continuous(
-      labels = function(x) paste0(formatC(x * 100, format = "f", digits = 0), "%")
+      labels = function(x) paste0(formatC(x * 100, format = "f", digits = 1), "%")
     ) +
     ggplot2::xlab("Time") + ggplot2::ylab("Prevalence") +
     ggplot2::theme_bw() +
