@@ -23,7 +23,7 @@ if (getRversion() >= "2.15.1") {
 #' status messages and `"summary"` or `"progress"` for high-level messages.
 #' @details When `M = TRUE`, a rough indicator of the deviance from the
 #' Markov model is computed according to Titman and Sharples (2008).
-#' A comparison at a given time `t_i` of a patient `k` in the state `s` between
+#' A comparison at a given time `t_i` of a subject `k` in the state `s` between
 #' observed counts `O_is` and expected counts `E_is` is built as
 #' `M_is = (O_is - E_is)^2 / E_is`.
 #'
@@ -154,12 +154,12 @@ prevplot = function(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
     # bind all data together
     to_plot = cbind(prev_obs_long, prev_hat_long[, .(hat)],
                      ci_lwr_hat_long[, .(lwr)], ci_upr_hat_long[, .(upr)])
-    # instead of going crazy after scales::percent, I just rescale the vectors here
+    # rescale to [0,1] so the y-axis labeller can format as percent
     to_plot[, `:=`(obs = obs / 100L, hat = hat / 100L, lwr = lwr / 100L, upr = upr / 100L)]
   } else {
     # bind all data together
     to_plot = cbind(prev_obs_long, prev_hat_long[, .(hat)])
-    # instead of going crazy after scales::percent, I just rescale the vectors here
+    # rescale to [0,1] so the y-axis labeller can format as percent
     to_plot[, `:=`(obs = obs / 100L, hat = hat / 100L)]
   }
   # this works for exact times of transitions
@@ -187,7 +187,9 @@ prevplot = function(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
   # build the plot
   p_canvas = ggplot2::ggplot(to_plot) +
     ggplot2::facet_wrap(. ~ state) +
-    ggplot2::scale_y_continuous(labels = scales::percent) +
+    ggplot2::scale_y_continuous(
+      labels = function(x) paste0(formatC(x * 100, format = "f", digits = 0), "%")
+    ) +
     ggplot2::xlab("Time") + ggplot2::ylab("Prevalence") +
     ggplot2::theme_bw() +
     ggplot2::ggtitle("Prevalence Plot") +
@@ -212,6 +214,11 @@ prevplot = function(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
       ggplot2::ylab("Deviance M") +
       ggplot2::theme_bw() +
       ggplot2::ggtitle("Deviance of Markov Model")
+    if (!requireNamespace("patchwork", quietly = TRUE)) {
+      stop("`M = TRUE` requires the 'patchwork' package. ",
+           "Install it with install.packages(\"patchwork\").",
+           call. = FALSE)
+    }
     p_combined = patchwork::wrap_plots(p, p_gof, nrow = 2L)
     if (print_plot) {
       print(p_combined)

@@ -52,7 +52,7 @@ from the estimated Markov model.
 \details{
 When \code{M = TRUE}, a rough indicator of the deviance from the
 Markov model is computed according to Titman and Sharples (2008).
-A comparison at a given time \code{t_i} of a patient \code{k} in the state \code{s} between
+A comparison at a given time \code{t_i} of a subject \code{k} in the state \code{s} between
 observed counts \code{O_is} and expected counts \code{E_is} is built as
 \code{M_is = (O_is - E_is)^2 / E_is}.
 

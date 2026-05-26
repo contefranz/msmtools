@@ -12,3 +12,7 @@
 ^cobertura\.xml$
 ^dev$
 ^\.claude$
+^\.claude-plan-mode$
+^plans$
+^.*\.tar\.gz$
+^.*\.pdf$

@@ -143,9 +143,9 @@ infers whether death maps to the absorbing state inside or outside the
 transition window.
 
 \code{more_status} lets \code{augment()} represent transitions beyond the defaults in
-\code{state}. Standard admissions that add no extra information should use \code{"df"}
-for "default" (see Examples, or run \code{?hosp} and inspect \code{rehab_it}). More
-complex transitions should use concise, self-explanatory labels.
+\code{state}. Standard observations that add no extra information should use
+\code{"df"} for "default" (see Examples, or run \code{?hosp} and inspect \code{rehab_it}).
+More complex transitions should use concise, self-explanatory labels.
 
 By default, \code{augment()} follows \strong{data.table} by-reference semantics to avoid
 unnecessary copies of large longitudinal datasets. This means the input may
