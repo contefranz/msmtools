@@ -11,3 +11,4 @@
 ^coverage\.xml$
 ^cobertura\.xml$
 ^dev$
+^\.claude$
