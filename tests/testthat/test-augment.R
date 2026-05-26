@@ -281,3 +281,52 @@ test_that("more_status creates expanded status columns", {
 test_that("explicit NULL more_status matches omitted more_status", {
   expect_identical(augment_hosp(), augment_hosp(more_status = NULL))
 })
+
+test_that("two-value pattern with explicit t_death is augmented", {
+  hosp_aug = augment(test_hosp(), subj, adm_number, label_2,
+                     t_start = dateIN, t_end = dateOUT,
+                     t_cens = dateCENS, t_death = dateCENS)
+
+  expect_s3_class(hosp_aug, "data.table")
+  expect_true("status" %in% names(hosp_aug))
+})
+
+test_that("non-monotonic n_events stops augment with a helpful error", {
+  bad = test_hosp()
+  bad[ , adm_number := rev(adm_number), by = subj ]
+
+  expect_error(
+    suppressWarnings(
+      augment(bad, subj, adm_number, label_3, t_start = dateIN,
+               t_end = dateOUT, t_cens = dateCENS,
+               verbosity = "summary")
+   ),
+    "fix the issues and relaunch"
+ )
+})
+
+test_that("pattern with fewer than two unique values is rejected", {
+  single = test_hosp()
+  single[ , single_pattern := 0L ]
+
+  expect_error(
+    suppressWarnings(
+      augment(single, subj, adm_number, single_pattern, t_start = dateIN,
+               t_end = dateOUT, t_cens = dateCENS)
+   ),
+    "at least 2 elements"
+ )
+})
+
+test_that("pattern with more than three unique values is rejected", {
+  many = test_hosp()
+  many[ , many_pattern := rep(c(0L, 1L, 2L, 3L), length.out = .N) ]
+
+  expect_error(
+    suppressWarnings(
+      augment(many, subj, adm_number, many_pattern, t_start = dateIN,
+               t_end = dateOUT, t_cens = dateCENS)
+   ),
+    "2 or 3 unique values"
+ )
+})

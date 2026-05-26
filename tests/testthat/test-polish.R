@@ -109,6 +109,33 @@ test_that("polish reports checked missing values clearly", {
  )
 })
 
+test_that("polish errors on missing mandatory arguments", {
+  hosp_aug = augment_hosp()
+
+  expect_error(polish(), "dataset of class")
+  expect_error(polish("not a data.frame"), "dataset of class")
+  expect_error(polish(hosp_aug), "variable of keying")
+  expect_error(polish(hosp_aug, subj), "pattern must be provided")
+})
+
+test_that("polish handles a two-value pattern schema", {
+  hosp_aug = augment_hosp(pattern = "label_2")
+  cleaned = polish(data.table::copy(hosp_aug), subj, label_2)
+
+  expect_s3_class(cleaned, "data.table")
+})
+
+test_that("polish reports check_NA success when there are no missing values", {
+  hosp_aug = augment_hosp()
+  output = utils::capture.output(
+    polish(data.table::copy(hosp_aug), subj, label_3,
+           check_NA = TRUE, verbosity = "summary"),
+    type = "message"
+ )
+
+  expect_true(any(grepl("no missing values", output)))
+})
+
 test_that("polish accepts summary verbosity", {
   hosp_aug = augment_hosp()
   output = utils::capture.output(
