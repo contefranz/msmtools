@@ -18,6 +18,8 @@ if ( getRversion() >= "2.15.1" ) {
 #' Default is `FALSE`.
 #' @param print_plot If `TRUE` (default), the plot is printed before being
 #' returned. If `FALSE`, the plot is returned without printing.
+#' @param verbosity Controls informational output. Use `"quiet"` to suppress
+#' status messages and `"summary"` or `"progress"` for high-level messages.
 #' @details When `M = TRUE`, a rough indicator of the deviance from the
 #' Markov model is computed according to Titman and Sharples (2008).
 #' A comparison at a given time `t_i` of a patient `k` in the state `s` between
@@ -87,21 +89,19 @@ if ( getRversion() >= "2.15.1" ) {
 #' @export
 
 prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
-                     print_plot = TRUE ) {
+                     print_plot = TRUE,
+                     verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
+
+  verbosity = .msmtools_verbosity( verbosity )
+  .msmtools_validate_flag( exacttimes, "exacttimes" )
+  .msmtools_validate_flag( M, "M" )
+  .msmtools_validate_flag( ci, "ci" )
+  .msmtools_validate_flag( print_plot, "print_plot" )
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
   if ( !inherits( prev.obj, "list" ) )
     stop( "prev.obj must be a list computed by \"prevalence.msm\"" )
-  if ( !is.logical(exacttimes) ) {
-    stop( "exacttimes must be either TRUE or FALSE")
-  }
-  if ( !is.logical(M) ) {
-    stop( "M must be either TRUE or FALSE")
-  }
-  if ( !is.logical(ci) ) {
-    stop( "ci must be either TRUE or FALSE")
-  }
 
   state_names = colnames( x$qmodel$imatrix )
 
@@ -119,7 +119,7 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
   prev_hat_long = melt( prev_hat, id.vars = "time", variable.name = "state", value.name = "hat")
 
   if ( ci ) {
-    cat("Extracting confidence intervals\n")
+    .msmtools_cli_info( verbosity, "extracting confidence intervals" )
     if ( length( prev.obj$`Expected percentages` ) > 1 ) {
       ci_lwr_hat = as.data.table(prev.obj$`Expected percentages`$ci[ , , 1L ])
       ci_upr_hat = as.data.table(prev.obj$`Expected percentages`$ci[ , , 2L ])
@@ -157,7 +157,7 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
   }
 
   if ( M ) {
-    cat("Computing Deviance M\n")
+    .msmtools_cli_info( verbosity, "computing deviance M" )
     prev_obs_abs = as.data.table(prev.obj$Observed)
     prev_hat_abs = prev.obj$Expected
     if ( length( prev_hat_abs ) > 1L ) {

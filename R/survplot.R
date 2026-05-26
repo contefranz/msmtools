@@ -57,6 +57,8 @@ if ( getRversion() >= "2.15.1" ) {
 #' `"logit"`, or `"arcsin"`, as coded in [survival::survfit()].
 #' @param print_plot If `TRUE` (default), the plot is printed before being
 #' returned. If `FALSE`, the plot is returned without printing.
+#' @param verbosity Controls informational output. Use `"quiet"` to suppress
+#' status messages and `"summary"` or `"progress"` for high-level messages.
 #' @details The function wraps [msm::plot.survfit.msm()] and adds support for
 #' exact-time plots by resetting the time scale to follow-up time. It can return
 #' the fitted survival and Kaplan-Meier data by setting `out = "all"`.
@@ -127,31 +129,33 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
                      B = 100L,
                      ci_km = c( "none", "plain", "log", "log-log", "logit", "arcsin"),
-                     print_plot = TRUE ) {
+                     print_plot = TRUE,
+                     verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
+
+  verbosity = .msmtools_verbosity( verbosity )
+  .msmtools_validate_flag( exacttimes, "exacttimes" )
+  .msmtools_validate_flag( km, "km" )
+  .msmtools_validate_flag( print_plot, "print_plot" )
+  .msmtools_validate_positive_scalar( from, "from" )
+  .msmtools_validate_positive_scalar( grid, "grid" )
+  .msmtools_validate_positive_scalar( B, "B" )
+  if ( !missing( times ) ) {
+    .msmtools_validate_plot_times( times )
+  }
 
   if ( !inherits( x, "msm" ) )
     stop( "x must be a msm model" )
-  if ( !is.numeric( from ) )
-    stop( 'from must be numeric' )
   if ( is.null( to ) ) {
     to = max( absorbing.msm( x ) )
   } else {
-    if ( !is.numeric( to ) )
-      stop( "to must be numeric" )
+    .msmtools_validate_positive_scalar( to, "to" )
     if ( !( to %in% absorbing.msm( x ) ) )
       stop( "to must be an absorbing state" )
-  }
-  if ( !is.logical(exacttimes) ) {
-    stop( "exacttimes must be either TRUE or FALSE")
-  }
-  if ( !is.logical(km) ) {
-    stop( "km must be either TRUE or FALSE")
   }
   if ( is.null( range ) )
     rg = range( model.extract( x$data$mf, "time" ) )
   else {
-    if ( !is.numeric( range ) || length( range ) != 2 )
-      stop( "range must be a numeric vector of two elements" )
+    .msmtools_validate_plot_range( range )
     rg = range
   }
 
@@ -179,10 +183,13 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
   }
 
   # For each given t in times, extract the transition probabilities
-  if (ci == "none") {
-    cat("Extracting transition probabilities\n")
+  if ( ci == "none" ) {
+    .msmtools_cli_info( verbosity, "extracting transition probabilities" )
   } else {
-    cat("Extracting transition probabilities and computing confidence intervals\n")
+    .msmtools_cli_info(
+      verbosity,
+      "extracting transition probabilities and computing confidence intervals"
+    )
   }
 
   surv_probabilities = data.table(rowid = seq_along( times ) )
