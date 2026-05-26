@@ -27,6 +27,27 @@ test_that( "polish returns a data.table", {
   expect_s3_class( as.data.frame( hosp_clean ), "data.frame" )
 } )
 
+test_that( "polish resolves time columns explicitly", {
+  hosp_aug = augment_hosp()
+
+  expect_identical(
+    polish( data.table::copy( hosp_aug ), subj, label_3 ),
+    polish( data.table::copy( hosp_aug ), subj, label_3, time = NULL )
+  )
+  expect_identical(
+    polish( data.table::copy( hosp_aug ), subj, label_3 ),
+    polish( data.table::copy( hosp_aug ), subj, label_3, time = augmented_int )
+  )
+
+  fallback_input = data.table::copy( hosp_aug )
+  fallback_input[ , augmented_num := augmented_int ]
+  fallback_input[ , augmented_int := NULL ]
+  fallback = polish( fallback_input, subj, label_3 )
+
+  expect_s3_class( fallback, "data.table" )
+  expect_true( "augmented_num" %in% names( fallback ) )
+} )
+
 test_that( "polish validates logical flags", {
   hosp_aug = augment_hosp()
 
@@ -38,4 +59,65 @@ test_that( "polish validates logical flags", {
     polish( data.table::copy( hosp_aug ), subj, label_3, check_NA = NA ),
     "check_NA must be either TRUE or FALSE"
   )
+} )
+
+test_that( "polish validates columns and pattern schemas", {
+  hosp_aug = augment_hosp()
+
+  no_time = data.table::copy( hosp_aug )
+  no_time[ , augmented_int := NULL ]
+  expect_error(
+    polish( no_time, subj, label_3 ),
+    "time must be provided"
+  )
+  expect_error(
+    polish( data.table::copy( hosp_aug ), missing_subject, label_3 ),
+    "not present in data: missing_subject"
+  )
+  expect_error(
+    polish( data.table::copy( hosp_aug ), subj, missing_pattern ),
+    "not present in data: missing_pattern"
+  )
+  expect_error(
+    polish( data.table::copy( hosp_aug ), subj, label_3, time = missing_time ),
+    "not present in data: missing_time"
+  )
+
+  one_value = data.table::copy( hosp_aug )
+  one_value[ , one_pattern := "alive" ]
+  expect_error(
+    polish( one_value, subj, one_pattern ),
+    "pattern must have 2 or 3 unique values"
+  )
+
+  four_values = data.table::copy( hosp_aug )
+  four_values[ , four_pattern := rep( c( "a", "b", "c", "d" ), length.out = .N ) ]
+  expect_error(
+    polish( four_values, subj, four_pattern ),
+    "pattern must have 2 or 3 unique values"
+  )
+} )
+
+test_that( "polish reports checked missing values clearly", {
+  hosp_aug = augment_hosp()
+  missing_time = data.table::copy( hosp_aug )
+  missing_time[ 1L, augmented_int := NA_real_ ]
+
+  expect_error(
+    polish( missing_time, subj, label_3, check_NA = TRUE ),
+    "missing values detected in: augmented_int"
+  )
+} )
+
+test_that( "polish accepts summary verbosity", {
+  hosp_aug = augment_hosp()
+  output = utils::capture.output(
+    hosp_clean <- polish(
+      data.table::copy( hosp_aug ), subj, label_3, verbosity = "summary"
+    ),
+    type = "message"
+  )
+
+  expect_true( length( output ) > 0L )
+  expect_s3_class( hosp_clean, "data.table" )
 } )
