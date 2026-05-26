@@ -86,9 +86,9 @@ if ( getRversion() >= "2.15.1" ) {
 #' transition window.
 #'
 #' `more_status` lets `augment()` represent transitions beyond the defaults in
-#' `state`. Standard admissions that add no extra information should use `"df"`
-#' for "default" (see Examples, or run `?hosp` and inspect `rehab_it`). More
-#' complex transitions should use concise, self-explanatory labels.
+#' `state`. Standard observations that add no extra information should use
+#' `"df"` for "default" (see Examples, or run `?hosp` and inspect `rehab_it`).
+#' More complex transitions should use concise, self-explanatory labels.
 #'
 #' By default, `augment()` follows **data.table** by-reference semantics to avoid
 #' unnecessary copies of large longitudinal datasets. This means the input may

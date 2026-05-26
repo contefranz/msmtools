@@ -1,3 +1,35 @@
+# msmtools 2.1.3
+***
+
+### DEPENDENCIES
+
+* `patchwork` moved from `Imports` to `Suggests`. It is only required by
+  `prevplot(M = TRUE)`, which now issues an informative error when the package
+  is not installed.
+
+* `scales` removed entirely. The single percent formatter used by `prevplot()`
+  is now an inline labeller, eliminating a hard runtime dependency.
+
+### DOCUMENTATION
+
+* Generalised the package framing to longitudinal observational data of any
+  domain; the bundled hospital dataset remains the worked example but is no
+  longer presented as the only use case.
+
+* Minor wording tweaks in `augment()` and `prevplot()` Rd to drop
+  clinical-specific terminology where it did not add precision.
+
+### TESTS
+
+* Added a conditional regression test for `prevplot(M = TRUE)` guarded by
+  `testthat::skip_if_not_installed("patchwork")`, so the suite remains green on
+  CRAN's `--no-suggests` runs.
+
+### BUILD
+
+* Extended `.Rbuildignore` to exclude generated tarballs, PDFs, and any local
+  planning scratch directories.
+
 # msmtools 2.1.2
 ***
 

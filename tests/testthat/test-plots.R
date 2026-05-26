@@ -37,6 +37,23 @@ test_that( "prevplot returns a ggplot object", {
   expect_s3_class( out, "ggplot" )
 } )
 
+test_that( "prevplot with M = TRUE returns a patchwork when available", {
+  testthat::skip_if_not_installed( "patchwork" )
+  msm_fit = test_msm_fit()
+  hosp_aug = attr( msm_fit, "msmtools_data" )
+  prev = msm::prevalence.msm(
+    msm_fit, covariates = "mean", ci = "normal",
+    times = seq( min( hosp_aug$augmented_int ), max( hosp_aug$augmented_int ),
+                 length.out = 4 )
+  )
+
+  out = suppressMessages(
+    prevplot( msm_fit, prev, ci = TRUE, M = TRUE, print_plot = FALSE )
+  )
+
+  expect_s3_class( out, "patchwork" )
+} )
+
 test_that( "prevplot can return without printing", {
   msm_fit = test_msm_fit()
   hosp_aug = attr( msm_fit, "msmtools_data" )

@@ -2,21 +2,23 @@
 
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![R-CMD-check](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/contefranz/msmtools/branch/main/graph/badge.svg?token=wDcJP6mRRY)](https://codecov.io/gh/contefranz/msmtools)
-[![release](https://img.shields.io/badge/dev.%20version-2.1.2-blue)](https://github.com/contefranz/msmtools)
+[![codecov](https://codecov.io/gh/contefranz/msmtools/branch/main/graph/badge.svg?token=wDcJP6mRRY)](https://app.codecov.io/gh/contefranz/msmtools)
+[![release](https://img.shields.io/badge/dev.%20version-2.1.3-blue)](https://github.com/contefranz/msmtools)
 [![CRAN Status Badge](https://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 [![license](https://img.shields.io/badge/license-GPL--3-blue.svg)](https://en.wikipedia.org/wiki/GNU_General_Public_License)
 
 
-**msmtools** restructures longitudinal data into augmented transition data for
-multi-state models fitted with **msm**. It focuses on workflows where each
-subject has repeated observations with exact start and end times, and the
-analyst needs transition-level rows, numeric state indicators, and diagnostic
-plots.
+**msmtools** restructures longitudinal observational data into augmented
+transition data for multi-state models fitted with **msm**. It works for any
+domain where subjects accumulate repeated observations with start and end times
+and an optional terminal outcome — clinical follow-ups, customer journeys,
+machine usage spells, employment histories, and so on. The package returns
+transition-level rows, numeric state indicators, and diagnostic plots.
 
-From version 2.0.4, **msmtools** targets a modern CRAN baseline: R 4.1 or newer
-and current releases of **data.table**, **msm**, **survival**, **ggplot2**,
-**patchwork**, **scales**, and **cli**.
+From version 2.1.3, **msmtools** targets a modern CRAN baseline: R 4.1 or newer
+and current releases of **data.table**, **msm**, **survival**, **ggplot2**, and
+**cli**. **patchwork** is an optional dependency required only by
+`prevplot(M = TRUE)`.
 
 ### Installation
 

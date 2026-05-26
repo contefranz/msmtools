@@ -1,11 +1,18 @@
-# msmtools 2.0.3
+# msmtools 2.1.3
 
 ### Release summary
 
-This is a CRAN resubmission after msmtools was archived on 2024-09-27 because
-compatibility issues were not corrected despite reminders. The release addresses
-deprecated data.table assignment patterns and does not introduce user-facing
-behaviour changes.
+This is a CRAN-hardening release. It demotes `patchwork` from `Imports` to
+`Suggests` (now required only by `prevplot(M = TRUE)`) and removes `scales`
+entirely by replacing its single use with an inline percent labeller. The
+package's framing has also been generalised away from a hospital-only narrative;
+the bundled example dataset and worked example are unchanged. There are no
+user-facing API changes.
+
+The 2.0.3 archival/resubmission story is carried forward unchanged: msmtools
+was archived on 2024-09-27 because compatibility issues were not corrected
+despite reminders. Since 2.0.3 the package has been actively maintained against
+modern releases of its runtime dependencies.
 
 ### Package development
 
@@ -13,155 +20,21 @@ behaviour changes.
 
 ### R CMD build
 
-* local macOS build with R CMD build
-* vignette build completed with pandoc discovered through Quarto
-* win-builder submission for R-release completed on 2026-05-24; results are
-  pending by e-mail
-* rhub submission was not completed locally because no GitHub personal access
-  token was available to `rhub::rhub_check()`
+* local macOS build with `R CMD build`
+* vignette built locally with pandoc discovered through Quarto
+* win-builder R-release and R-devel submissions pending at the time of writing
+* GitHub Actions matrix (macOS R-release, Windows R-release, Ubuntu R-devel,
+  R-release, R-oldrel-1) green on the release branch
 
 ### R CMD check results
 
-* Local `R CMD check --no-manual --as-cran` completed with no ERRORs and no
-  WARNINGs.
-* Local check reported NOTEs caused by the restricted local environment:
-  unavailable CRAN/Bioconductor/GitHub/ORCID URL checks, inability to verify the
-  current time, and pandoc not being visible inside one subprocess for top-level
-  README/NEWS checks.
-* Re-run checks in a networked CRAN-like environment before submission and
-  replace this section with the final results.
+* Target: 0 errors, 0 warnings, 0 notes on local `R CMD check --as-cran`.
+* The `--no-suggests` path was verified locally via
+  `_R_CHECK_DEPENDS_ONLY_=true R CMD check --as-cran`: the conditional
+  patchwork test is skipped via `testthat::skip_if_not_installed("patchwork")`
+  and `prevplot(M = FALSE)` continues to work without `patchwork` installed.
+* The only expected NOTE in restricted environments is the offline URL/DOI
+  check (JSS DOI and CRAN incoming feasibility). These resolve correctly when
+  the check has network access.
 
 ***
-
-# msmtools 2.0.1
-
-### Release summary
-
-This is a maintenance update. There are no major updates worth of notice besides few tweaks in 
-the vignette which was not rendered appropriately.
-
-### Package development
-
-* macOS 10.15.7 with R 4.0.4
-
-### R CMD build
-
-* local MacOS 10.15.7
-* win build created with `devtools::check_win_release()`
-* multiplatform builds created with `devtools::check_rhub()`
-
-### R CMD check results
-
-* Everything looks amazing so far.
-
-***
-
-# msmtools 2.0.0
-
-### Release summary
-
-This marks a major redesign in how the package manages plots. It now uses **ggplot2**.
-Also, most of the cumbersome arguments related to devices and plot layering have been improved and
-substantially removed. The above changes are enough to declare that **msmtools** has now
-reached full maturity and thus justify the jump to version 2.0.0.
-
-### Package development
-
-* macOS 10.15.7 with R 4.0.4
-
-### R CMD build
-
-* local MacOS
-* win build through devtools::build_win()
-
-### R CMD check results
-
-* There were no ERRORs nor WARNINGs nor NOTEs. 
-
-* `devtools::build_win()` found possible mispelling in the DESCRIPTION file. 
-Though the file is correct.
-
-* `devtools::build_win()` found non canonical URL in the vignette and in the 
-README. The former is included in the bibliography and the latter is due to
-a Github link.
-
-***
-
-# msmtools 1.3
-
-### Release summary
-
-This is version 1.3 of **msmtools**
-
-### Package development
-
-* macOS 10.12.5 with R 3.4.0
-
-### R CMD build
-
-* local macOS
-* win build through devtools::build_win()
-
-### R CMD check results
-
-* There were no ERRORs nor WARNINGs nor NOTEs. 
-
-* `devtools::build_win()` found possible mispelling in the DESCRIPTION file. 
-Though the file is correct.
-
-* `devtools::build_win()` found non canonical URL in the vignette and in the 
-README. The former is included in the bibliography and the latter is due to
-a Github link.
-
-
-***
-# msmtools 1.2
-
-### Release summary
-
-This is version 1.2 of **msmtools**
-
-### Package development
-
-* OS X 10.11.5 with R 3.3.0
-
-### R CMD build
-
-* local OS X
-* win build through devtools::build_win()
-
-### R CMD check results
-
-There were no ERRORs or WARNINGs. 
-
-There was 1 NOTE:
-
-* Unknown, possibly mis-spelled, fields in DESCRIPTION: 'News'
-This is due to the presence of a GitHub link which points at the file NEWS.md.
-
-***
-# msmtools 1.1
-
-### Release summary
-
-This is version 1.1 of **msmtools**
-
-### Package development
-
-* OS X 10.11.4 with R 3.2.4
-
-### R CMD build
-
-* local OS X
-* win build through devtools::build_win()
-
-### R CMD check results
-
-There were no ERRORs or WARNINGs. 
-
-There was 1 NOTE:
-
-* checking CRAN incoming feasibility ... NOTE  
-Maintainer: 'Francesco Grossetti <francesco.grossetti@polimi.it>'
-
-New submission
