@@ -4,7 +4,15 @@
 \alias{prevplot}
 \title{Plot observed and expected prevalences for a multi-state model}
 \usage{
-prevplot(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE)
+prevplot(
+  x,
+  prev.obj,
+  exacttimes = TRUE,
+  M = FALSE,
+  ci = FALSE,
+  print_plot = TRUE,
+  verbosity = getOption("msmtools.verbosity", "quiet")
+)
 }
 \arguments{
 \item{x}{A fitted \strong{msm} model object.}
@@ -20,6 +28,21 @@ computed (see Details). Default is \code{FALSE}.}
 
 \item{ci}{If \code{TRUE}, confidence intervals are plotted when available.
 Default is \code{FALSE}.}
+
+\item{print_plot}{If \code{TRUE} (default), the plot is printed before being
+returned. If \code{FALSE}, the plot is returned without printing.}
+
+\item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
+status messages and \code{"summary"} or \code{"progress"} for high-level messages.}
+}
+\value{
+When \code{M = FALSE}, a \code{gg/ggplot} object with observed and expected
+prevalences is returned. When \code{M = TRUE}, a \code{patchwork} object is returned
+with the prevalence plot and the deviance \code{M} plot.
+
+\code{print_plot} only controls whether the plot is printed as a side effect.
+Returned objects are unchanged: use \code{print_plot = FALSE} to create the plot
+silently.
 }
 \description{
 Plot observed and expected state prevalences from a fitted multi-state model.
@@ -38,40 +61,40 @@ in the second row. This layout is fixed.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
-data( hosp )
+data(hosp)
 
 # augmenting the data
-hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS )
+                          t_cens = dateCENS)
 
 # let's define the initial transition matrix for our model
-Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
-Qmat[ 1, 1:3 ] = 1
-Qmat[ 2, 1:3 ] = 1
-colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+Qmat = matrix(data = 0, nrow = 3, ncol = 3, byrow = TRUE)
+Qmat[1, 1:3] = 1
+Qmat[2, 1:3] = 1
+colnames(Qmat) = c('IN', 'OUT', 'DEAD')
+rownames(Qmat) = c('IN', 'OUT', 'DEAD')
 
 # fitting the model using
 # gender and age as covariates
-library( msm )
-msm_model = msm( status_num ~ augmented_int, subject = subj,
+library(msm)
+msm_model = msm(status_num ~ augmented_int, subject = subj,
                  data = hosp_augmented, covariates = ~ gender + age,
                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat,
-                 method = 'BFGS', control = list( fnscale = 6e+05, trace = 0,
-                 REPORT = 1, maxit = 10000 ) )
+                 method = 'BFGS', control = list(fnscale = 6e+05, trace = 0,
+                 REPORT = 1, maxit = 10000))
 
 # defining the times at which compute the prevalences
-t_min = min( hosp_augmented$augmented_int )
-t_max = max( hosp_augmented$augmented_int )
+t_min = min(hosp_augmented$augmented_int)
+t_max = max(hosp_augmented$augmented_int)
 steps = 100L
 
 # computing prevalences
-prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
-                       times = seq( t_min, t_max, steps ) )
+prev = prevalence.msm(msm_model, covariates = 'mean', ci = 'normal',
+                       times = seq(t_min, t_max, steps))
 
 # and plotting them using prevplot()
-gof = prevplot( x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE )
+gof = prevplot(x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \references{

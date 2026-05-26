@@ -1,3 +1,30 @@
+# msmtools 2.1.2
+***
+
+### CHANGES
+
+* Added `print_plot` to `survplot()` and `prevplot()`. The default
+  `print_plot = TRUE` preserves the previous interactive behavior, while
+  `print_plot = FALSE` returns plot objects without printing them.
+
+* Added `verbosity` to `survplot()` and `prevplot()` and replaced direct console
+  output with the shared `cli` verbosity helpers.
+
+* Added clearer argument validation for plotting flags, grid sizes, bootstrap
+  sizes, time ranges, custom times, and state selectors.
+
+* Qualified plotting calls to external package functions explicitly instead of
+  relying on roxygen imports.
+
+### DOCUMENTATION
+
+* Documented plotting print controls and verbosity in function help and README.
+
+### TESTS
+
+* Added regression coverage for silent plotting returns, summary verbosity, and
+  invalid plotting arguments.
+
 # msmtools 2.1.1
 ***
 

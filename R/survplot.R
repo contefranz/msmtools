@@ -1,6 +1,7 @@
-if ( getRversion() >= "2.15.1" ) {
-  utils::globalVariables( c( "state", "status", "subject", "time_exact", ".",
-                             ":=", "rowid", "surv", "lwr", "upr") )
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c("state", "status", "subject", "time",
+                             "time_exact", "anystate", "km", ".",
+                             ":=", "rowid", "surv", "lwr", "upr"))
 }
 #' Plot fitted survival and Kaplan-Meier curves from a multi-state model
 #'
@@ -55,6 +56,10 @@ if ( getRversion() >= "2.15.1" ) {
 #' @param ci_km A character vector with the type of confidence intervals to compute for the
 #' Kaplan-Meier curve. Specify either `"none"`, `"plain"`, `"log"`, `"log-log"`,
 #' `"logit"`, or `"arcsin"`, as coded in [survival::survfit()].
+#' @param print_plot If `TRUE` (default), the plot is printed before being
+#' returned. If `FALSE`, the plot is returned without printing.
+#' @param verbosity Controls informational output. Use `"quiet"` to suppress
+#' status messages and `"summary"` or `"progress"` for high-level messages.
 #' @details The function wraps [msm::plot.survfit.msm()] and adds support for
 #' exact-time plots by resetting the time scale to follow-up time. It can return
 #' the fitted survival and Kaplan-Meier data by setting `out = "all"`.
@@ -62,42 +67,46 @@ if ( getRversion() >= "2.15.1" ) {
 #' You can pass custom evaluation times through `times`, or let `survplot()`
 #' define them from `grid`. Larger `grid` values produce a finer grid and
 #' increase computation time.
-#' @return When `out = "none"`, a `gg/ggplot` object is returned. If `out` is
-#' anything else, then a named list is returned. The Kaplan-Meier data can be
-#' accessed with `$km` while the estimated survival data can be accessed with
-#' `$fitted`. If `out = "all"`, the plot, the Kaplan-Meier curve, and the
-#' estimated curve are returned.
+#' @returns When `out = "none"`, a `gg/ggplot` object is returned. If `out` is
+#' anything else, a named list is returned. The list always includes the plot in
+#' `p`; it also includes `fitted`, `km`, or both, depending on `out`. The
+#' Kaplan-Meier data can be accessed with `$km` while the estimated survival
+#' data can be accessed with `$fitted`.
+#'
+#' `print_plot` only controls whether the plot is printed as a side effect.
+#' Returned objects are unchanged: use `print_plot = FALSE` to create the plot
+#' or returned data silently.
 #'
 #' @examplesIf interactive()
-#' data( hosp )
+#' data(hosp)
 #'
 #' # augmenting the data
-#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+#' hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
 #'                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-#'                           t_cens = dateCENS )
+#'                           t_cens = dateCENS)
 #'
 #' # let's define the initial transition matrix for our model
-#' Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
-#' Qmat[ 1, 1:3 ] = 1
-#' Qmat[ 2, 1:3 ] = 1
-#' colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-#' rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+#' Qmat = matrix(data = 0, nrow = 3, ncol = 3, byrow = TRUE)
+#' Qmat[1, 1:3] = 1
+#' Qmat[2, 1:3] = 1
+#' colnames(Qmat) = c('IN', 'OUT', 'DEAD')
+#' rownames(Qmat) = c('IN', 'OUT', 'DEAD')
 #'
 #' # fitting the model using
 #' # gender and age as covariates
-#' library( msm )
-#' msm_model = msm( status_num ~ augmented_int, subject = subj,
+#' library(msm)
+#' msm_model = msm(status_num ~ augmented_int, subject = subj,
 #'                  data = hosp_augmented, covariates = ~ gender + age,
 #'                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat,
-#'                  method = 'BFGS', control = list( fnscale = 6e+05, trace = 0,
-#'                  REPORT = 1, maxit = 10000 ) )
+#'                  method = 'BFGS', control = list(fnscale = 6e+05, trace = 0,
+#'                  REPORT = 1, maxit = 10000))
 #'
 #' # plotting the fitted and empirical survival from state = 1
-#' theplot = survplot( x = msm_model, km = TRUE )
+#' theplot = survplot(x = msm_model, km = TRUE)
 #'
 #' # plotting the fitted and empirical survival from state = 2 and
 #' # returning both the fitted and the empirical curve
-#' out_all = survplot( msm_model, from = 2, km = TRUE, out = "all" )
+#' out_all = survplot(msm_model, from = 2, km = TRUE, out = "all")
 #'
 #' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for
 #' multi-state models, *Statistical Methods in Medical Research*, 19, 621-651.
@@ -111,65 +120,62 @@ if ( getRversion() >= "2.15.1" ) {
 #' @seealso [msm::plot.survfit.msm()], [msm::msm()],
 #' [msm::pmatrix.msm()], [data.table::setDF()]
 #' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
-#' @importFrom data.table data.table set setcolorder setnames setorder
-#' @importFrom ggplot2 ggplot aes scale_y_continuous scale_color_manual geom_line theme xlab ylab theme_bw ggtitle
-#' @importFrom msm absorbing.msm
-#' @importFrom msm pmatrix.msm
-#' @importFrom survival Surv
-#' @importFrom survival survfit
 #' @export
 
-survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
+survplot = function(x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      exacttimes = TRUE, times, grid = 100L, km = FALSE,
-                     out = c( "none", "fitted", "km", "all" ),
-                     ci = c( "none", "normal", "bootstrap" ), interp = c( "start", "midpoint" ),
+                     out = c("none", "fitted", "km", "all"),
+                     ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
                      B = 100L,
-                     ci_km = c( "none", "plain", "log", "log-log", "logit", "arcsin") ) {
+                     ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin"),
+                     print_plot = TRUE,
+                     verbosity = getOption("msmtools.verbosity", "quiet")) {
 
-  if ( !inherits( x, "msm" ) )
-    stop( "x must be a msm model" )
-  if ( !is.numeric( from ) )
-    stop( 'from must be numeric' )
-  if ( is.null( to ) ) {
-    to = max( absorbing.msm( x ) )
+  verbosity = .msmtools_verbosity(verbosity)
+  .msmtools_validate_flag(exacttimes, "exacttimes")
+  .msmtools_validate_flag(km, "km")
+  .msmtools_validate_flag(print_plot, "print_plot")
+  .msmtools_validate_positive_scalar(from, "from")
+  .msmtools_validate_positive_scalar(grid, "grid")
+  .msmtools_validate_positive_scalar(B, "B")
+  if (!missing(times)) {
+    .msmtools_validate_plot_times(times)
+  }
+
+  if (!inherits(x, "msm"))
+    stop("x must be a msm model")
+  if (is.null(to)) {
+    to = max(msm::absorbing.msm(x))
   } else {
-    if ( !is.numeric( to ) )
-      stop( "to must be numeric" )
-    if ( !( to %in% absorbing.msm( x ) ) )
-      stop( "to must be an absorbing state" )
+    .msmtools_validate_positive_scalar(to, "to")
+    if (!(to %in% msm::absorbing.msm(x)))
+      stop("to must be an absorbing state")
   }
-  if ( !is.logical(exacttimes) ) {
-    stop( "exacttimes must be either TRUE or FALSE")
-  }
-  if ( !is.logical(km) ) {
-    stop( "km must be either TRUE or FALSE")
-  }
-  if ( is.null( range ) )
-    rg = range( model.extract( x$data$mf, "time" ) )
+  if (is.null(range))
+    rg = range(stats::model.extract(x$data$mf, "time"))
   else {
-    if ( !is.numeric( range ) || length( range ) != 2 )
-      stop( "range must be a numeric vector of two elements" )
+    .msmtools_validate_plot_range(range)
     rg = range
   }
 
   # matching arguments
-  interp = match.arg( interp )
-  ci = match.arg( ci )
-  ci_km = match.arg( ci_km )
-  out = match.arg( out )
-  states = rownames( x$qmodel$imatrix )
+  interp = match.arg(interp)
+  ci = match.arg(ci)
+  ci_km = match.arg(ci_km)
+  out = match.arg(out)
+  states = rownames(x$qmodel$imatrix)
 
-  if ( exacttimes ) {
-    if ( missing( times ) ) {
-      timediff = ( rg[ 2L ] - rg[ 1L ] ) / grid
-      times = seq( 1L, diff( rg ), timediff )
+  if (exacttimes) {
+    if (missing(times)) {
+      timediff = (rg[2L] - rg[1L]) / grid
+      times = seq(1L, diff(rg), timediff)
     } else {
       times = times
     }
   } else {
-    if ( missing( times ) ) {
-      timediff = ( rg[ 2L ] - rg[ 1L ] ) / grid
-      times = seq( rg[ 1L ], rg[ 2L ], timediff )
+    if (missing(times)) {
+      timediff = (rg[2L] - rg[1L]) / grid
+      times = seq(rg[1L], rg[2L], timediff)
     } else {
       times = times
     }
@@ -177,121 +183,147 @@ survplot = function( x, from = 1, to = NULL, range = NULL, covariates = "mean",
 
   # For each given t in times, extract the transition probabilities
   if (ci == "none") {
-    cat("Extracting transition probabilities\n")
+    .msmtools_cli_info(verbosity, "extracting transition probabilities")
   } else {
-    cat("Extracting transition probabilities and computing confidence intervals\n")
+    .msmtools_cli_info(verbosity,
+      "extracting transition probabilities and computing confidence intervals")
   }
 
-  surv_probabilities = data.table(rowid = seq_along( times ) )
-  for ( t in seq_along( times ) ) {
+  surv_probabilities = data.table::data.table(rowid = seq_along(times))
+  for (t in seq_along(times)) {
     # Extract the transition prob matrix and compute CI if ci != "none"
     # I use the parlance set() for fast and efficient assignment
-    P = pmatrix.msm( x, times[ t ], t1 = times[ 1L ], covariates = covariates, ci = ci, B = B )
-    if ( ci != "none" ) {
-      set( x = surv_probabilities, i = t,
-           j = c( "time", "surv", "lwr", "upr" ),
-           value = list( times[ t ], 1L - P$estimates[ from, to ],
-                         P$L[ from, to ], P$U[ from, to ] ) )
+    P = msm::pmatrix.msm(x, times[t], t1 = times[1L],
+                          covariates = covariates, ci = ci, B = B)
+    if (ci != "none") {
+      data.table::set(x = surv_probabilities, i = t,
+                       j = c("time", "surv", "lwr", "upr"),
+                       value = list(times[t],
+                                     1L - P$estimates[from, to],
+                                     P$L[from, to], P$U[from, to]))
     } else {
-      set( x = surv_probabilities, i = t,
-           j = c( "time", "surv" ),
-           value = list( times[ t ], 1L - P[ from, to ] ) )
+      data.table::set(x = surv_probabilities, i = t,
+                       j = c("time", "surv"),
+                       value = list(times[t], 1L - P[from, to]))
     }
   }
-  surv_probabilities[ , rowid := NULL ]
+  surv_probabilities[, rowid := NULL]
 
-  if ( km ) {
+  if (km) {
     # extract the necessary data to be used with survfit()
-    dat = as.data.table( x$data$mf[ , c( "(subject)", "(time)", "(state)" ) ] )
-    setnames( dat, c( 'subject', 'time', 'state' ) )
-    absind = which( dat$state == to )
-    if ( any( dat[ state == to ] ) ) {
-      if ( interp == 'start' ) {
-        mintime = dat[ absind, min( time ), by = subject ]
-      } else if ( interp == 'midpoint' ) {
-        mintime = 0.5 * ( dat[ absind, .( time ), by = subject ] +
-                            dat[ absind - 1, .( time ), by = subject ] )
+    dat = data.table::as.data.table(x$data$mf[, c("(subject)", "(time)", "(state)")])
+    data.table::setnames(dat, c('subject', 'time', 'state'))
+    absind = which(dat$state == to)
+    if (any(dat[state == to])) {
+      if (interp == 'start') {
+        mintime = dat[absind, min(time), by = subject]
+      } else if (interp == 'midpoint') {
+        mintime = 0.5 * (dat[absind, .(time), by = subject] +
+                            dat[absind - 1, .(time), by = subject])
       } else {
-        mintime = dat[ , max( time ), by = subject ]
+        mintime = dat[, max(time), by = subject]
       }
-      wide = data.table( time = mintime,
-                         anystate = as.numeric( any( dat[ state == to, .( state ) ] ) )
-      )
-      setnames( wide, c( 'subject', 'time', 'anystate' ) )
+      wide = data.table::data.table(time = mintime,
+        anystate = as.numeric(any(dat[state == to, .(state)])))
+      data.table::setnames(wide, c('subject', 'time', 'anystate'))
     }
     # this computes the KM curve
-    if ( exacttimes ) {
-      wide[ , time_exact := time - min( time ) ]
-      p_km = survfit( Surv( wide$time_exact, wide$anystate ) ~ 1, conf.type = ci_km )
+    if (exacttimes) {
+      wide[, time_exact := time - min(time)]
+      p_km = survival::survfit(survival::Surv(wide$time_exact, wide$anystate) ~ 1,
+        conf.type = ci_km)
     } else {
-      p_km = survfit( Surv( wide$time, wide$anystate ) ~ 1, conf.type = ci_km )
+      p_km = survival::survfit(survival::Surv(wide$time, wide$anystate) ~ 1,
+        conf.type = ci_km)
     }
-    setorder(wide, time)
-    if ( ci_km != "none" ) {
-      out_km = data.table( wide, km = p_km$surv, lwr = p_km$lower, upr = p_km$upper )
+    data.table::setorder(wide, time)
+    if (ci_km != "none") {
+      out_km = data.table::data.table(wide, km = p_km$surv, lwr = p_km$lower, upr = p_km$upper)
     } else {
-      out_km = data.table( wide, km = p_km$surv )
+      out_km = data.table::data.table(wide, km = p_km$surv)
     }
-    setcolorder( out_km, c(1L, 2L, 4L, 3L, 5L) )
+    data.table::setcolorder(out_km, c(1L, 2L, 4L, 3L, 5L))
   }
   # build the plot
   # ggplot integration
-  if ( ci != "none") {
-    p = ggplot( data = surv_probabilities, aes( x = time, y = surv, color = "Fitted" ) ) +
-      scale_y_continuous( limits = c( 0, 1 ), breaks = seq( 0, 1, by = .25 ) ) +
-      xlab("Time") + ylab("Survival Probability")
-    p = p + geom_line()
+  if (ci != "none") {
+    p = ggplot2::ggplot(data = surv_probabilities,
+      ggplot2::aes(x = time, y = surv, color = "Fitted")) +
+      ggplot2::scale_y_continuous(limits = c(0, 1),
+                                   breaks = seq(0, 1, by = .25)) +
+      ggplot2::xlab("Time") + ggplot2::ylab("Survival Probability")
+    p = p + ggplot2::geom_line()
     p = p +
-      geom_line(aes(x = time, y = 1 - lwr, color = "Fitted"), linetype = 4) +
-      geom_line(aes(x = time, y = 1 - upr, color = "Fitted"), linetype = 4)
+      ggplot2::geom_line(ggplot2::aes(x = time, y = 1 - lwr,
+                                        color = "Fitted"), linetype = 4) +
+      ggplot2::geom_line(ggplot2::aes(x = time, y = 1 - upr,
+                                        color = "Fitted"), linetype = 4)
   } else {
-    p = ggplot( data = surv_probabilities, aes( x = time, y = surv, color = "Fitted" ) ) +
-      scale_y_continuous( limits = c ( 0, 1 ), breaks = seq( 0, 1, by = .25 ) ) +
-      xlab("Time") + ylab("Survival Probability")
-    p = p + geom_line()
+    p = ggplot2::ggplot(data = surv_probabilities,
+      ggplot2::aes(x = time, y = surv, color = "Fitted")) +
+      ggplot2::scale_y_continuous(limits = c(0, 1),
+                                   breaks = seq(0, 1, by = .25)) +
+      ggplot2::xlab("Time") + ggplot2::ylab("Survival Probability")
+    p = p + ggplot2::geom_line()
   }
-  if ( km ) {
-    if ( exacttimes ) {
+  if (km) {
+    if (exacttimes) {
       p = p +
-        geom_line( data = out_km, aes( x = time_exact, y = km, color = "KM" ), linetype = 5 ) +
-        xlab("Exact Time")
-      if ( ci_km !="none") {
+        ggplot2::geom_line(data = out_km,
+                             ggplot2::aes(x = time_exact, y = km,
+                                            color = "KM"), linetype = 5) +
+        ggplot2::xlab("Exact Time")
+      if (ci_km != "none") {
         p = p +
-          geom_line( data = out_km, aes( x = time_exact, y = lwr, color = "KM" ), linetype = 3 ) +
-          geom_line( data = out_km, aes( x = time_exact, y = upr, color = "KM" ), linetype = 3 )
+          ggplot2::geom_line(data = out_km,
+                               ggplot2::aes(x = time_exact, y = lwr,
+                                              color = "KM"), linetype = 3) +
+          ggplot2::geom_line(data = out_km,
+                               ggplot2::aes(x = time_exact, y = upr,
+                                              color = "KM"), linetype = 3)
       }
     } else {
       p = p +
-        geom_line( data = out_km, aes( x = time, y = km, color = "KM" ), linetype = 5 ) +
-        xlab("Absolute Time")
-      if ( ci_km !="none") {
+        ggplot2::geom_line(data = out_km,
+                             ggplot2::aes(x = time, y = km, color = "KM"),
+                             linetype = 5) +
+        ggplot2::xlab("Absolute Time")
+      if (ci_km != "none") {
         p = p +
-          geom_line( data = out_km, aes( x = time, y = lwr, color = "KM" ), linetype = 3 ) +
-          geom_line( data = out_km, aes( x = time, y = upr, color = "KM" ), linetype = 3 )
+          ggplot2::geom_line(data = out_km,
+                               ggplot2::aes(x = time, y = lwr,
+                                              color = "KM"), linetype = 3) +
+          ggplot2::geom_line(data = out_km,
+                               ggplot2::aes(x = time, y = upr,
+                                              color = "KM"), linetype = 3)
       }
     }
   }
   # render the plot
   p = p +
-    scale_color_manual( name = "", values = c( "Fitted" = "red", "KM" = "darkblue") ) +
-    theme_bw() +
-    theme(legend.position = "bottom") +
-    ggtitle( paste0("Estimation for transition ", states[from], " - ", states[to] ) )
-  print(p)
+    ggplot2::scale_color_manual(name = "",
+                                 values = c("Fitted" = "red",
+                                             "KM" = "darkblue")) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(legend.position = "bottom") +
+    ggplot2::ggtitle(paste0("Estimation for transition ", states[from], " - ", states[to]))
+  if (print_plot) {
+    print(p)
+  }
 
-  if ( out == "none" ) {
+  if (out == "none") {
     return(p)
-  } else if ( out == "fitted" ) {
-    return( list( p = p, fitted = surv_probabilities[] ) )
-  } else if ( out == "km" ) {
-    if ( isFALSE( km ) ) {
-      stop( "Set km = TRUE when \"out\" is either \"km\" or \"all\"")
+  } else if (out == "fitted") {
+    return(list(p = p, fitted = surv_probabilities[]))
+  } else if (out == "km") {
+    if (isFALSE(km)) {
+      stop("Set km = TRUE when \"out\" is either \"km\" or \"all\"")
     }
-    return( list( p = p, km = out_km[] ) )
+    return(list(p = p, km = out_km[]))
   } else {
-    if ( isFALSE( km ) ) {
-      stop( "Set km = TRUE when \"out\" is either \"km\" or \"all\"")
+    if (isFALSE(km)) {
+      stop("Set km = TRUE when \"out\" is either \"km\" or \"all\"")
     }
-    return( list( p = p, fitted = surv_probabilities[], km = out_km[] ) )
+    return(list(p = p, fitted = surv_probabilities[], km = out_km[]))
   }
 }

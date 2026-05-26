@@ -18,7 +18,9 @@ survplot(
   ci = c("none", "normal", "bootstrap"),
   interp = c("start", "midpoint"),
   B = 100L,
-  ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin")
+  ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin"),
+  print_plot = TRUE,
+  verbosity = getOption("msmtools.verbosity", "quiet")
 )
 }
 \arguments{
@@ -82,13 +84,23 @@ rough diagnostic purposes.}
 \item{ci_km}{A character vector with the type of confidence intervals to compute for the
 Kaplan-Meier curve. Specify either \code{"none"}, \code{"plain"}, \code{"log"}, \code{"log-log"},
 \code{"logit"}, or \code{"arcsin"}, as coded in \code{\link[survival:survfit]{survival::survfit()}}.}
+
+\item{print_plot}{If \code{TRUE} (default), the plot is printed before being
+returned. If \code{FALSE}, the plot is returned without printing.}
+
+\item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
+status messages and \code{"summary"} or \code{"progress"} for high-level messages.}
 }
 \value{
 When \code{out = "none"}, a \code{gg/ggplot} object is returned. If \code{out} is
-anything else, then a named list is returned. The Kaplan-Meier data can be
-accessed with \verb{$km} while the estimated survival data can be accessed with
-\verb{$fitted}. If \code{out = "all"}, the plot, the Kaplan-Meier curve, and the
-estimated curve are returned.
+anything else, a named list is returned. The list always includes the plot in
+\code{p}; it also includes \code{fitted}, \code{km}, or both, depending on \code{out}. The
+Kaplan-Meier data can be accessed with \verb{$km} while the estimated survival
+data can be accessed with \verb{$fitted}.
+
+\code{print_plot} only controls whether the plot is printed as a side effect.
+Returned objects are unchanged: use \code{print_plot = FALSE} to create the plot
+or returned data silently.
 }
 \description{
 Plot fitted survival probabilities from an \code{\link[msm:msm]{msm::msm()}} model and compare
@@ -106,35 +118,35 @@ increase computation time.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
-data( hosp )
+data(hosp)
 
 # augmenting the data
-hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS )
+                          t_cens = dateCENS)
 
 # let's define the initial transition matrix for our model
-Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
-Qmat[ 1, 1:3 ] = 1
-Qmat[ 2, 1:3 ] = 1
-colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+Qmat = matrix(data = 0, nrow = 3, ncol = 3, byrow = TRUE)
+Qmat[1, 1:3] = 1
+Qmat[2, 1:3] = 1
+colnames(Qmat) = c('IN', 'OUT', 'DEAD')
+rownames(Qmat) = c('IN', 'OUT', 'DEAD')
 
 # fitting the model using
 # gender and age as covariates
-library( msm )
-msm_model = msm( status_num ~ augmented_int, subject = subj,
+library(msm)
+msm_model = msm(status_num ~ augmented_int, subject = subj,
                  data = hosp_augmented, covariates = ~ gender + age,
                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat,
-                 method = 'BFGS', control = list( fnscale = 6e+05, trace = 0,
-                 REPORT = 1, maxit = 10000 ) )
+                 method = 'BFGS', control = list(fnscale = 6e+05, trace = 0,
+                 REPORT = 1, maxit = 10000))
 
 # plotting the fitted and empirical survival from state = 1
-theplot = survplot( x = msm_model, km = TRUE )
+theplot = survplot(x = msm_model, km = TRUE)
 
 # plotting the fitted and empirical survival from state = 2 and
 # returning both the fitted and the empirical curve
-out_all = survplot( msm_model, from = 2, km = TRUE, out = "all" )
+out_all = survplot(msm_model, from = 2, km = TRUE, out = "all")
 \dontshow{\}) # examplesIf}
 }
 \references{
