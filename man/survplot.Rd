@@ -114,35 +114,35 @@ increase computation time.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
-data( hosp )
+data(hosp)
 
 # augmenting the data
-hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-                          t_cens = dateCENS )
+                          t_cens = dateCENS)
 
 # let's define the initial transition matrix for our model
-Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
-Qmat[ 1, 1:3 ] = 1
-Qmat[ 2, 1:3 ] = 1
-colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+Qmat = matrix(data = 0, nrow = 3, ncol = 3, byrow = TRUE)
+Qmat[1, 1:3] = 1
+Qmat[2, 1:3] = 1
+colnames(Qmat) = c('IN', 'OUT', 'DEAD')
+rownames(Qmat) = c('IN', 'OUT', 'DEAD')
 
 # fitting the model using
 # gender and age as covariates
-library( msm )
-msm_model = msm( status_num ~ augmented_int, subject = subj,
+library(msm)
+msm_model = msm(status_num ~ augmented_int, subject = subj,
                  data = hosp_augmented, covariates = ~ gender + age,
                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat,
-                 method = 'BFGS', control = list( fnscale = 6e+05, trace = 0,
-                 REPORT = 1, maxit = 10000 ) )
+                 method = 'BFGS', control = list(fnscale = 6e+05, trace = 0,
+                 REPORT = 1, maxit = 10000))
 
 # plotting the fitted and empirical survival from state = 1
-theplot = survplot( x = msm_model, km = TRUE )
+theplot = survplot(x = msm_model, km = TRUE)
 
 # plotting the fitted and empirical survival from state = 2 and
 # returning both the fitted and the empirical curve
-out_all = survplot( msm_model, from = 2, km = TRUE, out = "all" )
+out_all = survplot(msm_model, from = 2, km = TRUE, out = "all")
 \dontshow{\}) # examplesIf}
 }
 \references{

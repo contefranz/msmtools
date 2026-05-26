@@ -1,8 +1,6 @@
-if ( getRversion() >= "2.15.1" ) {
-  utils::globalVariables(
-    c( ":=", ".", "time", "state", "obs", "hat", "lwr", "upr", "M",
-       "Total" )
-  )
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c(":=", ".", "time", "state", "obs", "hat", "lwr", "upr", "M",
+       "Total"))
 }
 #' Plot observed and expected prevalences for a multi-state model
 #'
@@ -49,154 +47,138 @@ if ( getRversion() >= "2.15.1" ) {
 #' <https://www.jstatsoft.org/v38/i08/>.
 #' @author Francesco Grossetti <francesco.grossetti@unibocconi.it>.
 #' @examplesIf interactive()
-#' data( hosp )
+#' data(hosp)
 #'
 #' # augmenting the data
-#' hosp_augmented = augment( data = hosp, data_key = subj, n_events = adm_number,
+#' hosp_augmented = augment(data = hosp, data_key = subj, n_events = adm_number,
 #'                           pattern = label_3, t_start = dateIN, t_end = dateOUT,
-#'                           t_cens = dateCENS )
+#'                           t_cens = dateCENS)
 #'
 #' # let's define the initial transition matrix for our model
-#' Qmat = matrix( data = 0, nrow = 3, ncol = 3, byrow = TRUE )
-#' Qmat[ 1, 1:3 ] = 1
-#' Qmat[ 2, 1:3 ] = 1
-#' colnames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
-#' rownames( Qmat ) = c( 'IN', 'OUT', 'DEAD' )
+#' Qmat = matrix(data = 0, nrow = 3, ncol = 3, byrow = TRUE)
+#' Qmat[1, 1:3] = 1
+#' Qmat[2, 1:3] = 1
+#' colnames(Qmat) = c('IN', 'OUT', 'DEAD')
+#' rownames(Qmat) = c('IN', 'OUT', 'DEAD')
 #'
 #' # fitting the model using
 #' # gender and age as covariates
-#' library( msm )
-#' msm_model = msm( status_num ~ augmented_int, subject = subj,
+#' library(msm)
+#' msm_model = msm(status_num ~ augmented_int, subject = subj,
 #'                  data = hosp_augmented, covariates = ~ gender + age,
 #'                  exacttimes = TRUE, gen.inits = TRUE, qmatrix = Qmat,
-#'                  method = 'BFGS', control = list( fnscale = 6e+05, trace = 0,
-#'                  REPORT = 1, maxit = 10000 ) )
+#'                  method = 'BFGS', control = list(fnscale = 6e+05, trace = 0,
+#'                  REPORT = 1, maxit = 10000))
 #'
 #' # defining the times at which compute the prevalences
-#' t_min = min( hosp_augmented$augmented_int )
-#' t_max = max( hosp_augmented$augmented_int )
+#' t_min = min(hosp_augmented$augmented_int)
+#' t_max = max(hosp_augmented$augmented_int)
 #' steps = 100L
 #'
 #' # computing prevalences
-#' prev = prevalence.msm( msm_model, covariates = 'mean', ci = 'normal',
-#'                        times = seq( t_min, t_max, steps ) )
+#' prev = prevalence.msm(msm_model, covariates = 'mean', ci = 'normal',
+#'                        times = seq(t_min, t_max, steps))
 #'
 #' # and plotting them using prevplot()
-#' gof = prevplot( x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE )
+#' gof = prevplot(x = msm_model, prev.obj = prev, ci = TRUE, M = TRUE)
 #'
 #' @export
 
-prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
+prevplot = function(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
                      print_plot = TRUE,
-                     verbosity = getOption( "msmtools.verbosity", "quiet" ) ) {
+                     verbosity = getOption("msmtools.verbosity", "quiet")) {
 
-  verbosity = .msmtools_verbosity( verbosity )
-  .msmtools_validate_flag( exacttimes, "exacttimes" )
-  .msmtools_validate_flag( M, "M" )
-  .msmtools_validate_flag( ci, "ci" )
-  .msmtools_validate_flag( print_plot, "print_plot" )
+  verbosity = .msmtools_verbosity(verbosity)
+  .msmtools_validate_flag(exacttimes, "exacttimes")
+  .msmtools_validate_flag(M, "M")
+  .msmtools_validate_flag(ci, "ci")
+  .msmtools_validate_flag(print_plot, "print_plot")
 
-  if ( !inherits( x, "msm" ) )
-    stop( "x must be a msm model" )
-  if ( !inherits( prev.obj, "list" ) )
-    stop( "prev.obj must be a list computed by \"prevalence.msm\"" )
+  if (!inherits(x, "msm"))
+    stop("x must be a msm model")
+  if (!inherits(prev.obj, "list"))
+    stop("prev.obj must be a list computed by \"prevalence.msm\"")
 
-  state_names = colnames( x$qmodel$imatrix )
+  state_names = colnames(x$qmodel$imatrix)
 
   # extract the prevalences from prev.obj
-  prev_obs = data.table::as.data.table(
-    prev.obj$`Observed percentages`,
-    keep.rownames = "time"
-  )
-  data.table::setnames( prev_obs, c(2L:ncol(prev_obs)), state_names )
-  prev_hat = data.table::as.data.table(
-    prev.obj$`Expected percentages`$estimates,
-    keep.rownames = "time"
-  )
+  prev_obs = data.table::as.data.table(prev.obj$`Observed percentages`,
+    keep.rownames = "time")
+  data.table::setnames(prev_obs, c(2L:ncol(prev_obs)), state_names)
+  prev_hat = data.table::as.data.table(prev.obj$`Expected percentages`$estimates,
+    keep.rownames = "time")
 
   # keep.rownames is a char so I cast it back to integer
-  prev_obs[ , time := as.integer( time ) ]
-  prev_hat[ , time := as.integer( time ) ]
+  prev_obs[, time := as.integer(time)]
+  prev_hat[, time := as.integer(time)]
   # these are all wide, but ggplot works best when passing a long format data.frame
   # I reshape them and work my way with facet_wrap() instead of looping
-  prev_obs_long = data.table::melt( prev_obs, id.vars = "time",
+  prev_obs_long = data.table::melt(prev_obs, id.vars = "time",
                                     variable.name = "state",
                                     value.name = "obs")
-  prev_hat_long = data.table::melt( prev_hat, id.vars = "time",
+  prev_hat_long = data.table::melt(prev_hat, id.vars = "time",
                                     variable.name = "state",
                                     value.name = "hat")
 
-  if ( ci ) {
-    .msmtools_cli_info( verbosity, "extracting confidence intervals" )
-    if ( length( prev.obj$`Expected percentages` ) > 1 ) {
-      ci_lwr_hat = data.table::as.data.table(
-        prev.obj$`Expected percentages`$ci[ , , 1L ]
-      )
-      ci_upr_hat = data.table::as.data.table(
-        prev.obj$`Expected percentages`$ci[ , , 2L ]
-      )
+  if (ci) {
+    .msmtools_cli_info(verbosity, "extracting confidence intervals")
+    if (length(prev.obj$`Expected percentages`) > 1) {
+      ci_lwr_hat = data.table::as.data.table(prev.obj$`Expected percentages`$ci[, , 1L])
+      ci_upr_hat = data.table::as.data.table(prev.obj$`Expected percentages`$ci[, , 2L])
       data.table::setnames(ci_lwr_hat, names(ci_lwr_hat), state_names)
       data.table::setnames(ci_upr_hat, names(ci_upr_hat), state_names)
       # add "time" variable
-      ci_lwr_hat[ , time := prev_hat[ , time ] ]
-      ci_upr_hat[ , time := prev_hat[ , time ] ]
+      ci_lwr_hat[, time := prev_hat[, time]]
+      ci_upr_hat[, time := prev_hat[, time]]
       # re-order columns cause we are cool
-      data.table::setcolorder(
-        ci_lwr_hat, c(ncol(ci_lwr_hat), 1L:(ncol(ci_lwr_hat)-1L))
-      )
-      data.table::setcolorder(
-        ci_upr_hat, c(ncol(ci_upr_hat), 1L:(ncol(ci_upr_hat)-1L))
-      )
+      data.table::setcolorder(ci_lwr_hat, c(ncol(ci_lwr_hat), 1L:(ncol(ci_lwr_hat)-1L)))
+      data.table::setcolorder(ci_upr_hat, c(ncol(ci_upr_hat), 1L:(ncol(ci_upr_hat)-1L)))
       # melt the guys!
-      ci_lwr_hat_long = data.table::melt(
-        ci_lwr_hat, id.vars = "time", variable.name = "state",
-        value.name = "lwr"
-      )
-      ci_upr_hat_long = data.table::melt(
-        ci_upr_hat, id.vars = "time", variable.name = "state",
-        value.name = "upr"
-      )
+      ci_lwr_hat_long = data.table::melt(ci_lwr_hat, id.vars = "time", variable.name = "state",
+        value.name = "lwr")
+      ci_upr_hat_long = data.table::melt(ci_upr_hat, id.vars = "time", variable.name = "state",
+        value.name = "upr")
     } else {
       stop("There are no CIs in \"prev.obj\"")
     }
   }
 
-  if ( ci ) {
+  if (ci) {
     # bind all data together
-    to_plot = cbind( prev_obs_long, prev_hat_long[ , .( hat ) ],
-                     ci_lwr_hat_long[ , .(lwr) ], ci_upr_hat_long[ , .(upr) ] )
+    to_plot = cbind(prev_obs_long, prev_hat_long[, .(hat)],
+                     ci_lwr_hat_long[, .(lwr)], ci_upr_hat_long[, .(upr)])
     # instead of going crazy after scales::percent, I just rescale the vectors here
-    to_plot[ , `:=` ( obs = obs / 100L, hat = hat / 100L, lwr = lwr / 100L, upr = upr / 100L ) ]
+    to_plot[, `:=`(obs = obs / 100L, hat = hat / 100L, lwr = lwr / 100L, upr = upr / 100L)]
   } else {
     # bind all data together
-    to_plot = cbind( prev_obs_long, prev_hat_long[ , .( hat ) ] )
+    to_plot = cbind(prev_obs_long, prev_hat_long[, .(hat)])
     # instead of going crazy after scales::percent, I just rescale the vectors here
-    to_plot[ , `:=` ( obs = obs / 100L, hat = hat / 100L ) ]
+    to_plot[, `:=`(obs = obs / 100L, hat = hat / 100L)]
   }
   # this works for exact times of transitions
-  if ( exacttimes ) {
-    to_plot[ , time := time - min(time) ]
+  if (exacttimes) {
+    to_plot[, time := time - min(time)]
   }
 
-  if ( M ) {
-    .msmtools_cli_info( verbosity, "computing deviance M" )
+  if (M) {
+    .msmtools_cli_info(verbosity, "computing deviance M")
     prev_obs_abs = data.table::as.data.table(prev.obj$Observed)
     prev_hat_abs = prev.obj$Expected
-    if ( length( prev_hat_abs ) > 1L ) {
-      M_gof = ( prev_obs_abs - prev_hat_abs$estimates )^2L / prev_hat_abs$estimates
+    if (length(prev_hat_abs) > 1L) {
+      M_gof = (prev_obs_abs - prev_hat_abs$estimates)^2L / prev_hat_abs$estimates
     } else {
-      M_gof = ( prev_obs_abs - prev_hat_abs )^2L / prev_hat_abs
+      M_gof = (prev_obs_abs - prev_hat_abs)^2L / prev_hat_abs
     }
-    data.table::setnames( M_gof, 1L:(ncol(M_gof)-1L), state_names)
-    M_gof[ , `:=` (time = prev_hat[ , time ], Total = NULL) ]
-    M_gof_long = data.table::melt( M_gof, id.vars = "time",
+    data.table::setnames(M_gof, 1L:(ncol(M_gof)-1L), state_names)
+    M_gof[, `:=`(time = prev_hat[, time], Total = NULL)]
+    M_gof_long = data.table::melt(M_gof, id.vars = "time",
                                    variable.name = "state", value.name = "M")
-    to_plot = cbind( to_plot, M_gof_long[ , .(M)])
-    to_plot[ , M := M / 100L ]
+    to_plot = cbind(to_plot, M_gof_long[, .(M)])
+    to_plot[, M := M / 100L]
   }
 
   # build the plot
-  p_canvas = ggplot2::ggplot( to_plot ) +
+  p_canvas = ggplot2::ggplot(to_plot) +
     ggplot2::facet_wrap(. ~ state) +
     ggplot2::scale_y_continuous(labels = scales::percent) +
     ggplot2::xlab("Time") + ggplot2::ylab("Prevalence") +
@@ -205,43 +187,33 @@ prevplot = function( x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
     ggplot2::theme(legend.position = "bottom")
 
   p = p_canvas +
-    ggplot2::geom_line(
-      ggplot2::aes( x = time, y = obs, group = 1, color = "Observed" )
-    ) +
-    ggplot2::geom_line(
-      ggplot2::aes( x = time, y = hat, group = 1, color = "Estimated" )
-    ) +
-    ggplot2::scale_color_manual(
-      name = "", values = c( "Estimated" = "red", "Observed" = "darkblue")
-    )
+    ggplot2::geom_line(ggplot2::aes(x = time, y = obs, group = 1, color = "Observed")) +
+    ggplot2::geom_line(ggplot2::aes(x = time, y = hat, group = 1, color = "Estimated")) +
+    ggplot2::scale_color_manual(name = "", values = c("Estimated" = "red", "Observed" = "darkblue"))
 
-  if ( ci ) {
+  if (ci) {
     p = p +
-      ggplot2::geom_line(
-        ggplot2::aes( x = time, y = lwr, group = 1, color = "Estimated" ),
-        linetype = 3
-      ) +
-      ggplot2::geom_line(
-        ggplot2::aes( x = time, y = upr, group = 1, color = "Estimated" ),
-        linetype = 3
-      )
+      ggplot2::geom_line(ggplot2::aes(x = time, y = lwr, group = 1, color = "Estimated"),
+        linetype = 3) +
+      ggplot2::geom_line(ggplot2::aes(x = time, y = upr, group = 1, color = "Estimated"),
+        linetype = 3)
   }
 
-  if ( M ) {
+  if (M) {
     p_gof = p_canvas +
-      ggplot2::geom_line( ggplot2::aes( x = time, y = M, group = 1 ) ) +
+      ggplot2::geom_line(ggplot2::aes(x = time, y = M, group = 1)) +
       ggplot2::ylab("Deviance M") +
       ggplot2::theme_bw() +
       ggplot2::ggtitle("Deviance of Markov Model")
-    p_combined = patchwork::wrap_plots( p, p_gof, nrow = 2L )
-    if ( print_plot ) {
-      print( p_combined )
+    p_combined = patchwork::wrap_plots(p, p_gof, nrow = 2L)
+    if (print_plot) {
+      print(p_combined)
     }
-    return( p_combined )
+    return(p_combined)
   } else {
-    if ( print_plot ) {
-      print( p )
+    if (print_plot) {
+      print(p)
     }
-    return( p )
+    return(p)
   }
 }
