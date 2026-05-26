@@ -3,7 +3,7 @@
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![R-CMD-check](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/contefranz/msmtools/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/contefranz/msmtools/branch/main/graph/badge.svg?token=wDcJP6mRRY)](https://codecov.io/gh/contefranz/msmtools)
-[![release](https://img.shields.io/badge/dev.%20version-2.1.0-blue)](https://github.com/contefranz/msmtools)
+[![release](https://img.shields.io/badge/dev.%20version-2.1.1-blue)](https://github.com/contefranz/msmtools)
 [![CRAN Status Badge](https://www.r-pkg.org/badges/version/msmtools)](https://cran.r-project.org/package=msmtools)
 [![license](https://img.shields.io/badge/license-GPL--3-blue.svg)](https://en.wikipedia.org/wiki/GNU_General_Public_License)
 
@@ -73,6 +73,10 @@ unchanged.
 
 
 #### Duplicate Transition Cleanup
+
+`polish()` uses `augmented_int` as the duplicate-time column by default. Set
+`time = NULL` for the same auto-detection behavior, or pass another time column
+explicitly.
 
 ```r
 hosp_clean <- polish(

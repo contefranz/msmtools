@@ -8,7 +8,7 @@ polish(
   data,
   data_key,
   pattern,
-  time,
+  time = NULL,
   check_NA = FALSE,
   copy = FALSE,
   verbosity = getOption("msmtools.verbosity", "quiet")
@@ -31,7 +31,9 @@ When 3 values are detected, they must be: 0 = "alive",
 (see Details).}
 
 \item{time}{The time variable used to identify duplicate transition times.
-By default it is set to \code{"augmented_int"}.}
+If omitted or set to \code{NULL}, \code{polish()} uses \code{"augmented_int"} when it is
+available, then \code{"augmented_num"}. If neither column exists, \code{time} must be
+supplied explicitly.}
 
 \item{check_NA}{If \code{TRUE}, \code{data_key}, \code{pattern}, and \code{time} are checked for
 missing values. If any missing values are found, the function stops with an

@@ -1,3 +1,27 @@
+# msmtools 2.1.1
+***
+
+### CHANGES
+
+* Made `polish()` time-column handling explicit. Omitting `time` or setting
+  `time = NULL` now auto-detects `augmented_int`, then `augmented_num`; calls
+  error clearly when neither column is available.
+
+* Replaced remaining `polish()` console output with the shared `cli` verbosity
+  helpers used by `augment()`.
+
+* Added clearer validation for `polish()` inputs, including missing columns and
+  terminal outcome schemas with anything other than 2 or 3 unique values.
+
+### DOCUMENTATION
+
+* Documented the `polish()` time-column auto-detection behavior.
+
+### TESTS
+
+* Added regression coverage for `polish()` time resolution, missing columns,
+  invalid pattern schemas, missing-value checks, and summary verbosity.
+
 # msmtools 2.1.0
 ***
 
