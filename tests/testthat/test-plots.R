@@ -251,6 +251,35 @@ test_that("prevplot prints the combined layout when print_plot = TRUE", {
   expect_s3_class(out, "patchwork")
 })
 
+test_that("prevplot attaches the prevalence data table on both branches", {
+  msm_fit = test_msm_fit()
+  hosp_aug = attr(msm_fit, "msmtools_data")
+  prev = msm::prevalence.msm(
+    msm_fit, covariates = "mean", ci = "normal",
+    times = seq(min(hosp_aug$augmented_int), max(hosp_aug$augmented_int),
+                length.out = 4)
+ )
+
+  p_basic = suppressMessages(
+    prevplot(msm_fit, prev, ci = FALSE, M = FALSE, print_plot = FALSE)
+ )
+  expect_s3_class(p_basic$prevalence, "data.table")
+  expect_true(all(c("time", "state", "obs", "hat") %in% names(p_basic$prevalence)))
+
+  p_ci = suppressMessages(
+    prevplot(msm_fit, prev, ci = TRUE, M = FALSE, print_plot = FALSE)
+ )
+  expect_s3_class(p_ci$prevalence, "data.table")
+  expect_true(all(c("lwr", "upr") %in% names(p_ci$prevalence)))
+
+  testthat::skip_if_not_installed("patchwork")
+  p_m = suppressMessages(
+    prevplot(msm_fit, prev, ci = TRUE, M = TRUE, print_plot = FALSE)
+ )
+  expect_s3_class(p_m$prevalence, "data.table")
+  expect_true("M" %in% names(p_m$prevalence))
+})
+
 test_that("prevplot errors on invalid input classes", {
   msm_fit = test_msm_fit()
   hosp_aug = attr(msm_fit, "msmtools_data")

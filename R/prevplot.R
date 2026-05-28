@@ -39,6 +39,16 @@ if (getRversion() >= "2.15.1") {
 #' prevalences is returned. When `M = TRUE`, a `patchwork` object is returned
 #' with the prevalence plot and the deviance `M` plot.
 #'
+#' The returned object also carries a `$prevalence` field with the
+#' long-format `data.table` used to build the plot. It always includes
+#' `time`, `state`, `obs`, and `hat`; it also includes `lwr` and `upr`
+#' when `ci = TRUE`, and `M` when `M = TRUE`. Access it directly:
+#'
+#' ```
+#' p <- prevplot(model, prev_obj)
+#' p$prevalence
+#' ```
+#'
 #' `print_plot` only controls whether the plot is printed as a side effect.
 #' Returned objects are unchanged: use `print_plot = FALSE` to create the plot
 #' silently.
@@ -226,11 +236,13 @@ prevplot = function(x, prev.obj, exacttimes = TRUE, M = FALSE, ci = FALSE,
            call. = FALSE)
     }
     p_combined = patchwork::wrap_plots(p, p_gof, nrow = 2L)
+    p_combined$prevalence = to_plot[]
     if (print_plot) {
       print(p_combined)
     }
     return(p_combined)
   } else {
+    p$prevalence = to_plot[]
     if (print_plot) {
       print(p)
     }
