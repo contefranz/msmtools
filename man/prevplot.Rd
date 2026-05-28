@@ -40,6 +40,15 @@ When \code{M = FALSE}, a \code{gg/ggplot} object with observed and expected
 prevalences is returned. When \code{M = TRUE}, a \code{patchwork} object is returned
 with the prevalence plot and the deviance \code{M} plot.
 
+The returned object also carries a \verb{$prevalence} field with the
+long-format \code{data.table} used to build the plot. It always includes
+\code{time}, \code{state}, \code{obs}, and \code{hat}; it also includes \code{lwr} and \code{upr}
+when \code{ci = TRUE}, and \code{M} when \code{M = TRUE}. Access it directly:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{p <- prevplot(model, prev_obj)
+p$prevalence
+}\if{html}{\out{</div>}}
+
 \code{print_plot} only controls whether the plot is printed as a side effect.
 Returned objects are unchanged: use \code{print_plot = FALSE} to create the plot
 silently.

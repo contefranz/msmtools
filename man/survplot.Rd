@@ -14,13 +14,13 @@ survplot(
   times,
   grid = 100L,
   km = FALSE,
-  out = c("none", "fitted", "km", "all"),
   ci = c("none", "normal", "bootstrap"),
   interp = c("start", "midpoint"),
   B = 100L,
   ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin"),
   print_plot = TRUE,
-  verbosity = getOption("msmtools.verbosity", "quiet")
+  verbosity = getOption("msmtools.verbosity", "quiet"),
+  ...
 )
 }
 \arguments{
@@ -59,11 +59,6 @@ Defaults to 100 points.}
 
 \item{km}{If \code{TRUE}, the Kaplan-Meier curve is plotted. Default is \code{FALSE}.}
 
-\item{out}{A character vector specifying what the function returns. Accepted
-values are \code{"none"} (default) to return just the plot, \code{"fitted"} to return
-the fitted survival curve only, \code{"km"} to return the Kaplan-Meier curve only,
-and \code{"all"} to return all of them.}
-
 \item{ci}{A character vector with the type of confidence intervals to compute for the fitted
 survival curve. Specify either \code{"none"} (default), for no confidence intervals,
 \code{"normal"} or \code{"bootstrap"}, for confidence intervals computed with the respective
@@ -90,13 +85,30 @@ returned. If \code{FALSE}, the plot is returned without printing.}
 
 \item{verbosity}{Controls informational output. Use \code{"quiet"} to suppress
 status messages and \code{"summary"} or \code{"progress"} for high-level messages.}
+
+\item{...}{Reserved for the migration trampoline. Passing the legacy
+\code{out} argument here raises an informative error pointing to the new
+\verb{$fitted} / \verb{$km} access pattern. The trampoline will be removed in
+v2.3.0.}
 }
 \value{
-When \code{out = "none"}, a \code{gg/ggplot} object is returned. If \code{out} is
-anything else, a named list is returned. The list always includes the plot in
-\code{p}; it also includes \code{fitted}, \code{km}, or both, depending on \code{out}. The
-Kaplan-Meier data can be accessed with \verb{$km} while the estimated survival
-data can be accessed with \verb{$fitted}.
+A \code{gg/ggplot} object. The fitted and (when \code{km = TRUE})
+Kaplan-Meier data tables are attached to the returned plot as named
+fields:
+\itemize{
+\item \verb{$fitted} — a \code{data.table} with columns \code{time}, \code{surv}, and (when
+\code{ci} is not \code{"none"}) \code{lwr} / \code{upr}. Always present.
+\item \verb{$km} — a \code{data.table} with the Kaplan-Meier curve, exposed only when
+\code{km = TRUE}.
+}
+
+Access the data through the standard \code{$} operator:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{p <- survplot(model, km = TRUE)
+p           # prints the plot
+p$fitted    # fitted survival data
+p$km        # Kaplan-Meier data
+}\if{html}{\out{</div>}}
 
 \code{print_plot} only controls whether the plot is printed as a side effect.
 Returned objects are unchanged: use \code{print_plot = FALSE} to create the plot
@@ -109,8 +121,9 @@ to build each curve.
 }
 \details{
 The function wraps \code{\link[msm:plot.survfit.msm]{msm::plot.survfit.msm()}} and adds support for
-exact-time plots by resetting the time scale to follow-up time. It can return
-the fitted survival and Kaplan-Meier data by setting \code{out = "all"}.
+exact-time plots by resetting the time scale to follow-up time. It returns
+a \code{gg/ggplot} object so the plot composes directly with \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}},
+\code{\link[ggplot2:theme]{ggplot2::theme()}}, and other ggplot operations.
 
 You can pass custom evaluation times through \code{times}, or let \code{survplot()}
 define them from \code{grid}. Larger \code{grid} values produce a finer grid and
@@ -144,9 +157,9 @@ msm_model = msm(status_num ~ augmented_int, subject = subj,
 # plotting the fitted and empirical survival from state = 1
 theplot = survplot(x = msm_model, km = TRUE)
 
-# plotting the fitted and empirical survival from state = 2 and
-# returning both the fitted and the empirical curve
-out_all = survplot(msm_model, from = 2, km = TRUE, out = "all")
+# the fitted and Kaplan-Meier data tables are attached to the plot
+head(theplot$fitted)
+head(theplot$km)
 \dontshow{\}) # examplesIf}
 }
 \references{

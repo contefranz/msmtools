@@ -135,15 +135,16 @@ msm_model <- msm(
 ```
 
 ```{r survival-plot, fig.width = 7, fig.height = 4}
-surv_out <- survplot(msm_model, km = TRUE, out = "all", grid = 10)
-surv_out$p
+surv_p <- survplot(msm_model, km = TRUE, grid = 10)
+surv_p
 ```
 
-The fitted and Kaplan-Meier data used by the plot are also returned.
+The fitted and Kaplan-Meier data tables are attached to the plot as
+named fields, accessible with the standard `$` operator:
 
 ```{r survival-data}
-surv_out$fitted[1:6]
-surv_out$km[1:6]
+surv_p$fitted[1:6]
+surv_p$km[1:6]
 ```
 
 # Prevalence Plot
@@ -163,7 +164,15 @@ prev <- prevalence.msm(
   )
 )
 
-prevplot(msm_model, prev, ci = TRUE, M = FALSE)
+prev_p <- prevplot(msm_model, prev, ci = TRUE, M = FALSE)
+prev_p
+```
+
+The long-format prevalence data used to build the plot is attached as
+`$prevalence`:
+
+```{r prevalence-data}
+prev_p$prevalence[1:6]
 ```
 
 # Notes

@@ -1,26 +1,21 @@
-test_that("survplot returns fitted and Kaplan-Meier data", {
+test_that("survplot returns a ggplot decorated with fitted and KM data", {
   msm_fit = test_msm_fit()
-  out = suppressMessages(
-    survplot(msm_fit, km = TRUE, out = "all", grid = 5)
- )
+  p = suppressMessages(survplot(msm_fit, km = TRUE, grid = 5))
 
-  expect_named(out, c("p", "fitted", "km"))
-  expect_s3_class(out$p, "ggplot")
-  expect_s3_class(out$fitted, "data.table")
-  expect_s3_class(out$km, "data.table")
+  expect_s3_class(p, "ggplot")
+  expect_s3_class(p$fitted, "data.table")
+  expect_s3_class(p$km, "data.table")
 })
 
 test_that("survplot can return without printing", {
   msm_fit = test_msm_fit()
   utils::capture.output(
-    out <- survplot(msm_fit, km = TRUE, out = "all", grid = 5,
-                     print_plot = FALSE)
+    p <- survplot(msm_fit, km = TRUE, grid = 5, print_plot = FALSE)
  )
 
-  expect_named(out, c("p", "fitted", "km"))
-  expect_s3_class(out$p, "ggplot")
-  expect_s3_class(out$fitted, "data.table")
-  expect_s3_class(out$km, "data.table")
+  expect_s3_class(p, "ggplot")
+  expect_s3_class(p$fitted, "data.table")
+  expect_s3_class(p$km, "data.table")
 })
 
 test_that("prevplot returns a ggplot object", {
@@ -87,37 +82,36 @@ test_that("plot verbosity controls messages", {
 
 test_that("survplot with ci = 'normal' returns survival curves with bounds", {
   msm_fit = test_msm_fit()
-  out = suppressMessages(
+  p = suppressMessages(
     survplot(msm_fit, km = TRUE, ci = "normal", ci_km = "log",
-             out = "all", grid = 5, B = 2L, print_plot = FALSE)
+             grid = 5, B = 2L, print_plot = FALSE)
  )
 
-  expect_named(out, c("p", "fitted", "km"))
-  expect_s3_class(out$p, "ggplot")
-  expect_true(all(c("lwr", "upr") %in% names(out$fitted)))
-  expect_true(all(c("lwr", "upr") %in% names(out$km)))
+  expect_s3_class(p, "ggplot")
+  expect_true(all(c("lwr", "upr") %in% names(p$fitted)))
+  expect_true(all(c("lwr", "upr") %in% names(p$km)))
 })
 
 test_that("survplot honours exacttimes = FALSE", {
   msm_fit = test_msm_fit()
-  out = suppressMessages(
+  p = suppressMessages(
     survplot(msm_fit, km = TRUE, exacttimes = FALSE, ci_km = "log",
-             out = "all", grid = 5, print_plot = FALSE)
+             grid = 5, print_plot = FALSE)
  )
 
-  expect_s3_class(out$p, "ggplot")
-  expect_false("time_exact" %in% names(out$km))
+  expect_s3_class(p, "ggplot")
+  expect_false("time_exact" %in% names(p$km))
 })
 
 test_that("survplot honours interp = 'midpoint'", {
   msm_fit = test_msm_fit()
-  out = suppressMessages(
-    survplot(msm_fit, km = TRUE, interp = "midpoint", out = "all",
+  p = suppressMessages(
+    survplot(msm_fit, km = TRUE, interp = "midpoint",
              grid = 5, print_plot = FALSE)
  )
 
-  expect_s3_class(out$p, "ggplot")
-  expect_s3_class(out$km, "data.table")
+  expect_s3_class(p, "ggplot")
+  expect_s3_class(p$km, "data.table")
 })
 
 test_that("survplot supports custom range and times", {
@@ -141,17 +135,27 @@ test_that("survplot supports custom range and times", {
   expect_s3_class(out_times_inexact, "ggplot")
 })
 
-test_that("survplot out = 'fitted' / 'km' return shaped lists", {
+test_that("survplot attaches $fitted always and $km only when km = TRUE", {
   msm_fit = test_msm_fit()
-  out_fitted = suppressMessages(
-    survplot(msm_fit, out = "fitted", grid = 5, print_plot = FALSE)
+  p_no_km = suppressMessages(
+    survplot(msm_fit, grid = 5, print_plot = FALSE)
  )
-  out_km = suppressMessages(
-    survplot(msm_fit, km = TRUE, out = "km", grid = 5, print_plot = FALSE)
+  p_km = suppressMessages(
+    survplot(msm_fit, km = TRUE, grid = 5, print_plot = FALSE)
  )
 
-  expect_named(out_fitted, c("p", "fitted"))
-  expect_named(out_km, c("p", "km"))
+  expect_s3_class(p_no_km$fitted, "data.table")
+  expect_null(p_no_km$km)
+  expect_s3_class(p_km$fitted, "data.table")
+  expect_s3_class(p_km$km, "data.table")
+})
+
+test_that("survplot's $fitted survives print()", {
+  msm_fit = test_msm_fit()
+  p = suppressMessages(survplot(msm_fit, km = TRUE, grid = 5, print_plot = FALSE))
+  out = utils::capture.output(print(p))
+  expect_s3_class(p$fitted, "data.table")
+  expect_s3_class(p$km, "data.table")
 })
 
 test_that("survplot errors on invalid inputs", {
@@ -165,13 +169,18 @@ test_that("survplot errors on invalid inputs", {
     survplot(msm_fit, to = 1, print_plot = FALSE),
     "to must be an absorbing state"
  )
+})
+
+test_that("survplot rejects the removed `out` argument with a helpful error", {
+  msm_fit = test_msm_fit()
+
   expect_error(
-    survplot(msm_fit, km = FALSE, out = "km", grid = 5, print_plot = FALSE),
-    "km = TRUE"
+    survplot(msm_fit, out = "all", grid = 5, print_plot = FALSE),
+    "removed in msmtools 2\\.2\\.0"
  )
   expect_error(
-    survplot(msm_fit, km = FALSE, out = "all", grid = 5, print_plot = FALSE),
-    "km = TRUE"
+    survplot(msm_fit, out = "fitted", grid = 5, print_plot = FALSE),
+    "p\\$fitted"
  )
 })
 
@@ -249,6 +258,35 @@ test_that("prevplot prints the combined layout when print_plot = TRUE", {
  )
 
   expect_s3_class(out, "patchwork")
+})
+
+test_that("prevplot attaches the prevalence data table on both branches", {
+  msm_fit = test_msm_fit()
+  hosp_aug = attr(msm_fit, "msmtools_data")
+  prev = msm::prevalence.msm(
+    msm_fit, covariates = "mean", ci = "normal",
+    times = seq(min(hosp_aug$augmented_int), max(hosp_aug$augmented_int),
+                length.out = 4)
+ )
+
+  p_basic = suppressMessages(
+    prevplot(msm_fit, prev, ci = FALSE, M = FALSE, print_plot = FALSE)
+ )
+  expect_s3_class(p_basic$prevalence, "data.table")
+  expect_true(all(c("time", "state", "obs", "hat") %in% names(p_basic$prevalence)))
+
+  p_ci = suppressMessages(
+    prevplot(msm_fit, prev, ci = TRUE, M = FALSE, print_plot = FALSE)
+ )
+  expect_s3_class(p_ci$prevalence, "data.table")
+  expect_true(all(c("lwr", "upr") %in% names(p_ci$prevalence)))
+
+  testthat::skip_if_not_installed("patchwork")
+  p_m = suppressMessages(
+    prevplot(msm_fit, prev, ci = TRUE, M = TRUE, print_plot = FALSE)
+ )
+  expect_s3_class(p_m$prevalence, "data.table")
+  expect_true("M" %in% names(p_m$prevalence))
 })
 
 test_that("prevplot errors on invalid input classes", {

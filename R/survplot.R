@@ -35,10 +35,6 @@ if (getRversion() >= "2.15.1") {
 #' fitted survival curve (see Details). If `times` is passed, `grid` is ignored.
 #' Defaults to 100 points.
 #' @param km If `TRUE`, the Kaplan-Meier curve is plotted. Default is `FALSE`.
-#' @param out A character vector specifying what the function returns. Accepted
-#' values are `"none"` (default) to return just the plot, `"fitted"` to return
-#' the fitted survival curve only, `"km"` to return the Kaplan-Meier curve only,
-#' and `"all"` to return all of them.
 #' @param ci A character vector with the type of confidence intervals to compute for the fitted
 #' survival curve. Specify either `"none"` (default), for no confidence intervals,
 #' `"normal"` or `"bootstrap"`, for confidence intervals computed with the respective
@@ -60,18 +56,35 @@ if (getRversion() >= "2.15.1") {
 #' returned. If `FALSE`, the plot is returned without printing.
 #' @param verbosity Controls informational output. Use `"quiet"` to suppress
 #' status messages and `"summary"` or `"progress"` for high-level messages.
+#' @param ... Reserved for the migration trampoline. Passing the legacy
+#' `out` argument here raises an informative error pointing to the new
+#' `$fitted` / `$km` access pattern. The trampoline will be removed in
+#' v2.3.0.
 #' @details The function wraps [msm::plot.survfit.msm()] and adds support for
-#' exact-time plots by resetting the time scale to follow-up time. It can return
-#' the fitted survival and Kaplan-Meier data by setting `out = "all"`.
+#' exact-time plots by resetting the time scale to follow-up time. It returns
+#' a `gg/ggplot` object so the plot composes directly with [ggplot2::ggsave()],
+#' [ggplot2::theme()], and other ggplot operations.
 #'
 #' You can pass custom evaluation times through `times`, or let `survplot()`
 #' define them from `grid`. Larger `grid` values produce a finer grid and
 #' increase computation time.
-#' @returns When `out = "none"`, a `gg/ggplot` object is returned. If `out` is
-#' anything else, a named list is returned. The list always includes the plot in
-#' `p`; it also includes `fitted`, `km`, or both, depending on `out`. The
-#' Kaplan-Meier data can be accessed with `$km` while the estimated survival
-#' data can be accessed with `$fitted`.
+#' @returns A `gg/ggplot` object. The fitted and (when `km = TRUE`)
+#' Kaplan-Meier data tables are attached to the returned plot as named
+#' fields:
+#'
+#' * `$fitted` — a `data.table` with columns `time`, `surv`, and (when
+#'   `ci` is not `"none"`) `lwr` / `upr`. Always present.
+#' * `$km` — a `data.table` with the Kaplan-Meier curve, exposed only when
+#'   `km = TRUE`.
+#'
+#' Access the data through the standard `$` operator:
+#'
+#' ```
+#' p <- survplot(model, km = TRUE)
+#' p           # prints the plot
+#' p$fitted    # fitted survival data
+#' p$km        # Kaplan-Meier data
+#' ```
 #'
 #' `print_plot` only controls whether the plot is printed as a side effect.
 #' Returned objects are unchanged: use `print_plot = FALSE` to create the plot
@@ -104,9 +117,9 @@ if (getRversion() >= "2.15.1") {
 #' # plotting the fitted and empirical survival from state = 1
 #' theplot = survplot(x = msm_model, km = TRUE)
 #'
-#' # plotting the fitted and empirical survival from state = 2 and
-#' # returning both the fitted and the empirical curve
-#' out_all = survplot(msm_model, from = 2, km = TRUE, out = "all")
+#' # the fitted and Kaplan-Meier data tables are attached to the plot
+#' head(theplot$fitted)
+#' head(theplot$km)
 #'
 #' @references Titman, A. and Sharples, L.D. (2010). Model diagnostics for
 #' multi-state models, *Statistical Methods in Medical Research*, 19, 621-651.
@@ -124,12 +137,22 @@ if (getRversion() >= "2.15.1") {
 
 survplot = function(x, from = 1, to = NULL, range = NULL, covariates = "mean",
                      exacttimes = TRUE, times, grid = 100L, km = FALSE,
-                     out = c("none", "fitted", "km", "all"),
                      ci = c("none", "normal", "bootstrap"), interp = c("start", "midpoint"),
                      B = 100L,
                      ci_km = c("none", "plain", "log", "log-log", "logit", "arcsin"),
                      print_plot = TRUE,
-                     verbosity = getOption("msmtools.verbosity", "quiet")) {
+                     verbosity = getOption("msmtools.verbosity", "quiet"),
+                     ...) {
+
+  dots = list(...)
+  if ("out" %in% names(dots)) {
+    stop("`out` was removed in msmtools 2.2.0. ",
+         "survplot() now always returns a gg/ggplot with the fitted and ",
+         "Kaplan-Meier data tables attached as named fields. Use ",
+         "p$fitted and (when km = TRUE) p$km instead. ",
+         "This trampoline will be removed in v2.3.0.",
+         call. = FALSE)
+  }
 
   verbosity = .msmtools_verbosity(verbosity)
   .msmtools_validate_flag(exacttimes, "exacttimes")
@@ -162,7 +185,6 @@ survplot = function(x, from = 1, to = NULL, range = NULL, covariates = "mean",
   interp = match.arg(interp)
   ci = match.arg(ci)
   ci_km = match.arg(ci_km)
-  out = match.arg(out)
   states = rownames(x$qmodel$imatrix)
 
   if (exacttimes) {
@@ -307,23 +329,12 @@ survplot = function(x, from = 1, to = NULL, range = NULL, covariates = "mean",
     ggplot2::theme_bw() +
     ggplot2::theme(legend.position = "bottom") +
     ggplot2::ggtitle(paste0("Estimation for transition ", states[from], " - ", states[to]))
+  p$fitted = surv_probabilities[]
+  if (km) {
+    p$km = out_km[]
+  }
   if (print_plot) {
     print(p)
   }
-
-  if (out == "none") {
-    return(p)
-  } else if (out == "fitted") {
-    return(list(p = p, fitted = surv_probabilities[]))
-  } else if (out == "km") {
-    if (isFALSE(km)) {
-      stop("Set km = TRUE when \"out\" is either \"km\" or \"all\"")
-    }
-    return(list(p = p, km = out_km[]))
-  } else {
-    if (isFALSE(km)) {
-      stop("Set km = TRUE when \"out\" is either \"km\" or \"all\"")
-    }
-    return(list(p = p, fitted = surv_probabilities[], km = out_km[]))
-  }
+  return(p)
 }
