@@ -1,3 +1,58 @@
+# msmtools 2.2.0
+***
+
+### BREAKING CHANGES
+
+* `survplot()` no longer accepts the `out` argument and now always
+  returns a `gg/ggplot` object. The fitted survival curve and the
+  Kaplan-Meier curve are exposed as named fields on the returned plot
+  for parity with `prevplot()`:
+
+  ```r
+  p <- survplot(model, km = TRUE)
+  p           # prints the plot
+  p$fitted    # data.table — survival probabilities
+  p$km        # data.table — Kaplan-Meier curve
+  ```
+
+  Closes [#4](https://github.com/contefranz/msmtools/issues/4).
+
+  Code that previously did `out <- survplot(..., out = "all")` and then
+  unwrapped through `out$p`, `out$fitted`, `out$km` should drop the
+  `out` argument and access the data tables directly on the plot. The
+  return type collapsing from a wrapper list to a ggplot means that
+  ggplot operations now compose without unwrapping: `p + theme_bw()`,
+  `ggsave("plot.pdf", p)`, and `patchwork`-style combinations all work
+  on the returned plot directly.
+
+  Calls passing `out = ...` raise a clear migration error pointing to
+  the new pattern. The trampoline that catches the legacy argument
+  will itself be removed in v2.3.0.
+
+### NEW
+
+* `prevplot()` exposes the long-format prevalence data used to build
+  the plot via `p$prevalence`, so both plotting functions now expose
+  their data through the same `$` idiom. The field is populated on
+  both the `M = FALSE` (`ggplot`) and `M = TRUE` (`patchwork`) return
+  paths.
+
+### TESTS
+
+* Replaced the test suite for `survplot()` `out = ...` shapes with
+  attribute-field assertions on the returned plot, plus a regression
+  test for the legacy-argument trampoline.
+* Added a regression test asserting `prevplot()` populates
+  `$prevalence` on the `M = FALSE`, `ci = TRUE`, and `M = TRUE` paths.
+
+### DOCUMENTATION
+
+* Rewrote the `survplot()` roxygen `@returns` and `@details` sections
+  around the new contract. The vignette and worked examples in
+  `man/survplot.Rd` now demonstrate the `$fitted` / `$km` access
+  pattern.
+* Documented the `$prevalence` field on `prevplot()`'s `@returns`.
+
 # msmtools 2.1.4
 ***
 

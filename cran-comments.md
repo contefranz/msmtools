@@ -1,20 +1,26 @@
-# msmtools 2.1.4
+# msmtools 2.2.0
 
 ### Release summary
 
-This release fixes a correctness bug in `augment()`. For subjects who
-survived to the study censoring date, the final transition row inherited
-the time of the previous row (last `t_end`) instead of `t_cens`. As a
-result, the post-discharge observation window was collapsed to zero
-duration and any `msm` model fitted on the augmented data systematically
-under-estimated transition rates. The fix routes the trailing OUT row
-through `t_cens`, which is what the package documentation and reporter
-[#7](https://github.com/contefranz/msmtools/issues/7) expected.
+This release closes a long-standing API asymmetry between `survplot()`
+and `prevplot()` (GitHub issue #4). The `out` argument has been removed
+from `survplot()`; the function now always returns a `gg/ggplot` object,
+with the fitted survival and Kaplan-Meier data tables exposed as named
+fields on the returned plot (`p$fitted`, `p$km`). `prevplot()` gains
+the equivalent `p$prevalence` field. Both functions now compose
+directly with the ggplot ecosystem — `ggsave()`, `+`, and `patchwork`
+work on the returned plot without an unwrap step.
 
-Behaviour for subjects who died is unchanged. There are no other
-user-facing API changes. The internal regression fixture has been
-regenerated against the corrected output; the bracket-spacing style
-sweep started in 2.1.3 is also completed in this release.
+This is an intentional breaking change. Calls that previously used
+`out = "all"` (or any other `out` value) now raise a clear migration
+error pointing to the `$fitted` / `$km` access pattern. The trampoline
+that catches the legacy argument will itself be removed in v2.3.0.
+
+The version bump is to 2.2.0 rather than 3.0.0. msmtools has a narrow
+plotting API and a small user base; documenting the breaking change
+prominently in NEWS and providing the migration trampoline are
+sufficient to keep the upgrade path smooth without inflating the major
+version.
 
 ### Package development
 
@@ -38,7 +44,7 @@ sweep started in 2.1.3 is also completed in this release.
   and `prevplot(M = FALSE)` continues to work without `patchwork`
   installed.
 * The only expected NOTE in restricted environments is the offline
-  URL/DOI check (JSS DOI and CRAN incoming feasibility). These resolve
-  correctly when the check has network access.
+  URL/DOI check. These resolve correctly when the check has network
+  access.
 
 ***
