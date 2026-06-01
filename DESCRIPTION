@@ -1,8 +1,8 @@
 Package: msmtools
 Type: Package
 Title: Building Augmented Data to Run Multi-State Models with 'msm' Package
-Version: 2.2.0
-Date: 2026-05-28
+Version: 2.2.1
+Date: 2026-06-01
 Authors@R: person("Francesco", "Grossetti",
     email = "francesco.grossetti@unibocconi.it",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5130-7745"))
@@ -10,7 +10,8 @@ Description: A fast and general method for restructuring classical longitudinal
     observational data into augmented transition data suitable for multi-state
     modeling with the 'msm' package. Works with any longitudinal data where
     subjects accumulate repeated observations with start and end times and an
-    optional terminal outcome.
+    optional terminal outcome. Methods are described in Grossetti, Ieva and
+    Paganoni (2018) <doi:10.1007/s10729-017-9400-z>.
 URL: https://github.com/contefranz/msmtools
 BugReports: https://github.com/contefranz/msmtools/issues
 License: GPL-3

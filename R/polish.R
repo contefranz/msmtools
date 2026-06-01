@@ -33,6 +33,12 @@ if (getRversion() >= "2.15.1") {
 #' The function always returns a `data.table`. Use [as.data.frame()] on the
 #' result if a plain `data.frame` is needed by downstream code.
 #'
+#' @return A `data.table` with the same columns as the input `data`. Subjects
+#' whose pattern transitions occur at the same `time` on different states are
+#' removed in full (every row sharing the same `data_key`); rows from
+#' unaffected subjects are kept as-is. When no duplicated transitions are
+#' found, the input `data` is returned unchanged.
+#'
 #' @seealso [augment()]
 #'
 #' @examples

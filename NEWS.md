@@ -1,3 +1,18 @@
+# msmtools 2.2.1
+***
+
+### DOCUMENTATION
+
+* Added a `\value{}` section to `polish()` via a new `@return` roxygen
+  block, addressing CRAN feedback that `man/polish.Rd` was missing the
+  `\value` tag.
+* Added the method citation to the `DESCRIPTION` Description field in
+  the `authors (year) <doi:...>` form required by CRAN: Grossetti,
+  Ieva and Paganoni (2018) <doi:10.1007/s10729-017-9400-z>. The same
+  reference was already documented under `@references` in `augment()`.
+
+***
+
 # msmtools 2.2.0
 ***
 

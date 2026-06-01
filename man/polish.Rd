@@ -49,6 +49,13 @@ status messages, \code{"summary"} for high-level phase messages and timing, and
 \code{"progress"} for phase messages plus progress bars in long status-building
 loops. The default is \code{getOption("msmtools.verbosity", "quiet")}.}
 }
+\value{
+A \code{data.table} with the same columns as the input \code{data}. Subjects
+whose pattern transitions occur at the same \code{time} on different states are
+removed in full (every row sharing the same \code{data_key}); rows from
+unaffected subjects are kept as-is. When no duplicated transitions are
+found, the input \code{data} is returned unchanged.
+}
 \description{
 Remove subjects with transitions to different states occurring at the same
 exact time in an augmented dataset produced by \code{augment()}.

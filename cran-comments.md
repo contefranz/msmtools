@@ -1,4 +1,4 @@
-# msmtools 2.2.0
+# msmtools 2.2.1
 
 ### Resubmission after archival
 
@@ -82,6 +82,27 @@ be removed in v2.3.0. The version bump is to 2.2.0 rather than 3.0.0:
 msmtools has a narrow plotting API and a small user base, and the
 prominent NEWS entry plus the migration trampoline are sufficient to
 keep the upgrade path smooth without inflating the major version.
+
+### Resubmission 2.2.1
+
+This is a documentation-only patch in response to Benjamin Altmann's
+feedback on the 2.2.0 submission. Two items were flagged:
+
+* `man/polish.Rd` was missing a `\value{}` tag. `R/polish.R` now
+  carries an `@return` roxygen block, and `man/polish.Rd` was
+  regenerated through `roxygen2::roxygenise()`. The other exported
+  Rd files (`augment.Rd`, `prevplot.Rd`, `survplot.Rd`) already
+  document `\value{}`; `hosp.Rd` is a dataset Rd and
+  `msmtools-package.Rd` is the package-level Rd.
+* The DESCRIPTION's Description field did not cite the underlying
+  method. Grossetti, Ieva and Paganoni (2018)
+  <doi:10.1007/s10729-017-9400-z> was added in the
+  `authors (year) <doi:...>` form required by the CRAN cookbook. The
+  same DOI is already cited under `@references` in `augment()`.
+
+No source-code behaviour changed between 2.2.0 and 2.2.1; the prior
+archival cause (data.table NSE in `augment()` and `polish()`) remains
+fixed since 2.0.2 as described above.
 
 ### Package development environment
 
