@@ -1,0 +1,34 @@
+url: https://contefranz.github.io/msmtools
+
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, news]
+    right: [github]
+
+home:
+  title: msmtools
+  description: >
+    Building augmented data to run multi-state models with the msm package.
+  sidebar: false
+
+news:
+  cran_dates: false
+
+reference:
+  - title: Data Preprocessing
+    contents:
+      - augment
+      - polish
+  - title: Diagnostic Plots
+    contents:
+      - survplot
+      - prevplot
+  - title: Data
+    contents:
+      - hosp
+  - title: Package
+    contents:
+      - msmtools-package
