@@ -19,6 +19,7 @@ The package exposes four public functions: \code{augment()}, \code{polish()},
 Useful links:
 \itemize{
   \item \url{https://github.com/contefranz/msmtools}
+  \item \url{https://contefranz.github.io/msmtools/}
   \item Report bugs at \url{https://github.com/contefranz/msmtools/issues}
 }
 
