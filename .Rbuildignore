@@ -16,3 +16,6 @@
 ^plans$
 ^.*\.tar\.gz$
 ^.*\.pdf$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
