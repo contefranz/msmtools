@@ -12,7 +12,7 @@ Description: A fast and general method for restructuring classical longitudinal
     subjects accumulate repeated observations with start and end times and an
     optional terminal outcome. Methods are described in Grossetti, Ieva and
     Paganoni (2018) <doi:10.1007/s10729-017-9400-z>.
-URL: https://github.com/contefranz/msmtools, https://contefranz.github.io/msmtools/
+URL: https://contefranz.github.io/msmtools/, https://github.com/contefranz/msmtools
 BugReports: https://github.com/contefranz/msmtools/issues
 License: GPL-3
 LazyData: TRUE
