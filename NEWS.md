@@ -3,6 +3,9 @@
 
 ### DOCUMENTATION
 
+* The package now has a documentation website built with `pkgdown` and
+  published via GitHub Pages at
+  <https://contefranz.github.io/msmtools/>.
 * Added a `\value{}` section to `polish()` via a new `@return` roxygen
   block, addressing CRAN feedback that `man/polish.Rd` was missing the
   `\value` tag.
